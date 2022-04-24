@@ -345,7 +345,7 @@ static void frame(void) {
   sg_apply_pipeline(state.pip);
   sg_apply_bindings(&state.bind);
 
-  float palette[48] = {};
+  float palette[48] = { 0 };
   const cel8_range pal = cel8_query_pal();
 
   i = 0;

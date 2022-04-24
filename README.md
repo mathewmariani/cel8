@@ -1,5 +1,14 @@
 # cel8 
-A *tiny* framework for grid-based games in lua.
+A *\*tiny\** framework for grid-based games in lua.
+
+## Building
+To build cel8, look inside the `projects/` folder. In there you’ll find projects for Visual Studio, XCode and tools like make.
+
+ - **Windows** Use `projects/vs2017/cel8.sln`.
+ - **Mac** Use `projects/xcode/cel8.xcworkspace inside`.
+ - **Linux** Use `projects/make`.
+
+The cel8 executable will be generated into the `build/` folder.
 
 ## Documentation
 

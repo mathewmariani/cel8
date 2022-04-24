@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="embed">
+      <UniqueIdentifier>{A21E600F-0E33-88C0-D7B4-2B20438884F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{3C8C880B-A895-887C-3111-9F7C9D19947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\lua">
+      <UniqueIdentifier>{EDEA4779-59CA-C614-62E2-51EBCE402D76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\sokol">
+      <UniqueIdentifier>{B3F469EB-1F5F-1E62-689D-CF07D446FCB6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\cel8.h" />
+    <ClInclude Include="..\..\src\embed\boot.lua.h">
+      <Filter>embed</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\embed\font.h">
+      <Filter>embed</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\embed\fragment.fs.h">
+      <Filter>embed</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\embed\palette.h">
+      <Filter>embed</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\embed\vertex.vs.h">
+      <Filter>embed</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lapi.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lauxlib.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lcode.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lctype.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\ldebug.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\ldo.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lfunc.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lgc.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\llex.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\llimits.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lmem.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lobject.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lopcodes.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lparser.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lstate.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lstring.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\ltable.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\ltm.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lua.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\luaconf.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lualib.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lundump.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lvm.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\lua\lzio.h">
+      <Filter>lib\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\sokol\sokol_app.h">
+      <Filter>lib\sokol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\sokol\sokol_gfx.h">
+      <Filter>lib\sokol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\sokol\sokol_gl.h">
+      <Filter>lib\sokol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lib\sokol\sokol_glue.h">
+      <Filter>lib\sokol</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\lib\cel8-sokol.c">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lapi.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lauxlib.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lbaselib.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lbitlib.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lcode.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lcorolib.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lctype.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\ldblib.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\ldebug.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\ldo.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\ldump.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lfunc.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lgc.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\linit.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\liolib.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\llex.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lmathlib.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lmem.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\loadlib.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lobject.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lopcodes.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\loslib.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lparser.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lstate.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lstring.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lstrlib.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\ltable.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\ltablib.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\ltm.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lundump.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lvm.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\lua\lzio.c">
+      <Filter>lib\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib\sokol\sokol.c">
+      <Filter>lib\sokol</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

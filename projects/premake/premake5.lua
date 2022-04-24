@@ -43,9 +43,9 @@ project "cel8"
   kind "ConsoleApp"
   language "C"
   cdialect "C99"
-  targetdir "../../bin"
-  basedir "../../bin"
-  debugdir "../../bin"
+  targetdir "../../build"
+  basedir "../../build"
+  debugdir "../../build"
 
   -- cel8:
   files {

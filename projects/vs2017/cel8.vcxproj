@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug 64bit|x64">
+      <Configuration>Debug 64bit</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug 64bit|Win32">
+      <Configuration>Debug 64bit</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug 32bit|x64">
+      <Configuration>Debug 32bit</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug 32bit|Win32">
+      <Configuration>Debug 32bit</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release 64bit|x64">
+      <Configuration>Release 64bit</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release 64bit|Win32">
+      <Configuration>Release 64bit</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release 32bit|x64">
+      <Configuration>Release 32bit</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release 32bit|Win32">
+      <Configuration>Release 32bit</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D114957C-BD4B-960D-6638-7C10524E120F}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>cel8</RootNamespace>
+    <LatestTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</LatestTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 64bit|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 32bit|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 64bit|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 32bit|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug 64bit|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug 32bit|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release 64bit|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release 32bit|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 64bit|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\build\</OutDir>
+    <IntDir>obj\64bit\Debug\</IntDir>
+    <TargetName>cel8_d</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 32bit|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\build\</OutDir>
+    <IntDir>obj\32bit\Debug\</IntDir>
+    <TargetName>cel8_d</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 64bit|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\build\</OutDir>
+    <IntDir>obj\64bit\Release\</IntDir>
+    <TargetName>cel8</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 32bit|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\build\</OutDir>
+    <IntDir>obj\32bit\Release\</IntDir>
+    <TargetName>cel8</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 64bit|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>OpenGL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug 32bit|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>OpenGL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 64bit|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>nDEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>OpenGL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 32bit|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>nDEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>OpenGL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\cel8.h" />
+    <ClInclude Include="..\..\src\embed\boot.lua.h" />
+    <ClInclude Include="..\..\src\embed\font.h" />
+    <ClInclude Include="..\..\src\embed\fragment.fs.h" />
+    <ClInclude Include="..\..\src\embed\palette.h" />
+    <ClInclude Include="..\..\src\embed\vertex.vs.h" />
+    <ClInclude Include="..\..\src\lib\lua\lapi.h" />
+    <ClInclude Include="..\..\src\lib\lua\lauxlib.h" />
+    <ClInclude Include="..\..\src\lib\lua\lcode.h" />
+    <ClInclude Include="..\..\src\lib\lua\lctype.h" />
+    <ClInclude Include="..\..\src\lib\lua\ldebug.h" />
+    <ClInclude Include="..\..\src\lib\lua\ldo.h" />
+    <ClInclude Include="..\..\src\lib\lua\lfunc.h" />
+    <ClInclude Include="..\..\src\lib\lua\lgc.h" />
+    <ClInclude Include="..\..\src\lib\lua\llex.h" />
+    <ClInclude Include="..\..\src\lib\lua\llimits.h" />
+    <ClInclude Include="..\..\src\lib\lua\lmem.h" />
+    <ClInclude Include="..\..\src\lib\lua\lobject.h" />
+    <ClInclude Include="..\..\src\lib\lua\lopcodes.h" />
+    <ClInclude Include="..\..\src\lib\lua\lparser.h" />
+    <ClInclude Include="..\..\src\lib\lua\lstate.h" />
+    <ClInclude Include="..\..\src\lib\lua\lstring.h" />
+    <ClInclude Include="..\..\src\lib\lua\ltable.h" />
+    <ClInclude Include="..\..\src\lib\lua\ltm.h" />
+    <ClInclude Include="..\..\src\lib\lua\lua.h" />
+    <ClInclude Include="..\..\src\lib\lua\luaconf.h" />
+    <ClInclude Include="..\..\src\lib\lua\lualib.h" />
+    <ClInclude Include="..\..\src\lib\lua\lundump.h" />
+    <ClInclude Include="..\..\src\lib\lua\lvm.h" />
+    <ClInclude Include="..\..\src\lib\lua\lzio.h" />
+    <ClInclude Include="..\..\src\lib\sokol\sokol_app.h" />
+    <ClInclude Include="..\..\src\lib\sokol\sokol_gfx.h" />
+    <ClInclude Include="..\..\src\lib\sokol\sokol_gl.h" />
+    <ClInclude Include="..\..\src\lib\sokol\sokol_glue.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\lib\cel8-sokol.c" />
+    <ClCompile Include="..\..\src\lib\lua\lapi.c" />
+    <ClCompile Include="..\..\src\lib\lua\lauxlib.c" />
+    <ClCompile Include="..\..\src\lib\lua\lbaselib.c" />
+    <ClCompile Include="..\..\src\lib\lua\lbitlib.c" />
+    <ClCompile Include="..\..\src\lib\lua\lcode.c" />
+    <ClCompile Include="..\..\src\lib\lua\lcorolib.c" />
+    <ClCompile Include="..\..\src\lib\lua\lctype.c" />
+    <ClCompile Include="..\..\src\lib\lua\ldblib.c" />
+    <ClCompile Include="..\..\src\lib\lua\ldebug.c" />
+    <ClCompile Include="..\..\src\lib\lua\ldo.c" />
+    <ClCompile Include="..\..\src\lib\lua\ldump.c" />
+    <ClCompile Include="..\..\src\lib\lua\lfunc.c" />
+    <ClCompile Include="..\..\src\lib\lua\lgc.c" />
+    <ClCompile Include="..\..\src\lib\lua\linit.c" />
+    <ClCompile Include="..\..\src\lib\lua\liolib.c" />
+    <ClCompile Include="..\..\src\lib\lua\llex.c" />
+    <ClCompile Include="..\..\src\lib\lua\lmathlib.c" />
+    <ClCompile Include="..\..\src\lib\lua\lmem.c" />
+    <ClCompile Include="..\..\src\lib\lua\loadlib.c" />
+    <ClCompile Include="..\..\src\lib\lua\lobject.c" />
+    <ClCompile Include="..\..\src\lib\lua\lopcodes.c" />
+    <ClCompile Include="..\..\src\lib\lua\loslib.c" />
+    <ClCompile Include="..\..\src\lib\lua\lparser.c" />
+    <ClCompile Include="..\..\src\lib\lua\lstate.c" />
+    <ClCompile Include="..\..\src\lib\lua\lstring.c" />
+    <ClCompile Include="..\..\src\lib\lua\lstrlib.c" />
+    <ClCompile Include="..\..\src\lib\lua\ltable.c" />
+    <ClCompile Include="..\..\src\lib\lua\ltablib.c" />
+    <ClCompile Include="..\..\src\lib\lua\ltm.c" />
+    <ClCompile Include="..\..\src\lib\lua\lundump.c" />
+    <ClCompile Include="..\..\src\lib\lua\lvm.c" />
+    <ClCompile Include="..\..\src\lib\lua\lzio.c" />
+    <ClCompile Include="..\..\src\lib\sokol\sokol.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
