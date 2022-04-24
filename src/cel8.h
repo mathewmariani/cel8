@@ -38,6 +38,7 @@
     stat( n )                        : system information
     rnd( )                           : pseudo random number
     time( )                          : time since start
+
     band( x, y )                     : bitwise and
     bor( x, y )                      : bitwise or
     bxor( x, y )                     : bitwise xor
@@ -920,7 +921,6 @@ _CEL8_PRIVATE i32 l_rnd(lua_State *L) {
   return 1;
 }
 
-
 /* timer */
 
 #if defined(OS_WINDOWS)
@@ -1053,8 +1053,41 @@ _CEL8_PRIVATE i32 l_rotr(lua_State *L) {
   return 1;
 }
 
-int lua_opencel8(lua_State *L) {
-  /* init module */
+#define luax_preload(k, f)        \
+  lua_getglobal(L, "package");    \
+  lua_getfield(L, -1, "preload"); \
+  lua_pushcfunction(L, f);        \
+  lua_setfield(L, -2, k);         \
+  lua_pop(L, 2);
+
+#define luax_require(k)        \
+  lua_getglobal(L, "require"); \
+  lua_pushstring(L, k);        \
+  lua_call(L, 1, 1);
+
+int luaopen_cel8_boot(lua_State *L) {
+  #include "embed/boot.lua.h"
+  if (luaL_loadbuffer(L, (const char *) boot_lua, sizeof(boot_lua), "=[cel8 \"boot.lua\"]") == 0) {
+    lua_call(L, 0, 1);
+  }
+  
+  return 1;
+}
+
+int luaopen_cel8(lua_State *L) {
+  /* preload modules */
+  luax_preload("cel8.boot", luaopen_cel8_boot);
+
+  /* create cel8 table */
+  lua_getglobal(L, "cel8");
+  if (!lua_istable(L, -1)) {
+    lua_pop(L, 1);
+    lua_newtable(L);
+    lua_pushvalue(L, -1);
+    lua_setglobal(L, "cel8");
+  }
+
+  /* cel8 functions */
   luaL_Reg reg[] = {
     /* event */
     { "poll",          l_poll              },
@@ -1100,7 +1133,12 @@ int lua_opencel8(lua_State *L) {
     { 0, 0 },
   };
 
-  luaL_newlib(L, reg);
+  const luaL_Reg *l = &reg[0];
+  for (; l->name != NULL; l++) {
+    lua_pushcfunction(L, l->func);
+    lua_setfield(L, -2, l->name);
+  }
+
   return 1;
 }
 
@@ -1119,39 +1157,23 @@ i32 cel8_init(i32 argc, char** argv) {
   L = luaL_newstate();
   luaL_openlibs(L);
 
-  /* register api */
-  luaL_requiref(L, "cel8", lua_opencel8, 1);
+  luax_preload("cel8", luaopen_cel8);
+  luax_require("cel8");
 
   /* create `cel8.argv` */
-  lua_getglobal(L, "cel8");
-  if (!lua_isnil(L, -1)) {
-    lua_newtable(L);
-    i32 i = 0;
-    for (; i < argc; i++) {
-      lua_pushstring(L, argv[i]);
-      lua_rawseti(L, -2, i + 1);
-    }
-    lua_setfield(L, -2, "argv");
+  lua_newtable(L);
+  i32 i = 0;
+  for (; i < argc; i++) {
+    lua_pushstring(L, argv[i]);
+    lua_rawseti(L, -2, i + 1);
   }
+  lua_setfield(L, -2, "argv");
+
+  /* pop cel8 */
   lua_pop(L, 1);
 
-  /* load embedded scripts */
-  #include "embed/boot.lua.h"
-  struct { const char *name, *data; i32 size; } items[] = {
-    { "boot.lua", (const char *) boot_lua, sizeof(boot_lua) },
-    { NULL, NULL, 0 },
-  };
-
-  i32 i = 0;
-  for (; items[i].name; i++) {
-    int err = luaL_loadbuffer(L, items[i].data, items[i].size, items[i].name);
-    if (err || lua_pcall(L, 0, 0, 0) != 0) {
-      const char *str = lua_tostring(L, -1);
-      printf("Error: %s\n", str);
-
-      return -1;
-    }
-  }
+  luax_require("cel8.boot");
+  lua_pop(L, 1);
 
   /* initialize timer */
 #if defined(OS_WINDOWS)
@@ -1173,7 +1195,11 @@ void cel8_frame(void) {
   lua_getglobal(L, "cel8");
   if (!lua_isnil(L, -1)) {
     lua_getfield(L, -1, "frame");
-    lua_pcall(L, 0, 0, 0);
+    if (lua_pcall(L, 0, 0, 0) != 0) {
+      const char *str = lua_tostring(L, -1);
+      printf("Error: %s\n", str);
+      return;
+    }
   }
   lua_pop(L, 1);
 }

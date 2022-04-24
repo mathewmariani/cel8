@@ -1,4 +1,6 @@
-function cel8.boot()
+local cel8 = require("cel8")
+
+function cel8.init()
   -- handler table:
   local function makewrapper(name)
     return function(...)
@@ -15,11 +17,6 @@ function cel8.boot()
     ["keyreleased"] = makewrapper("keyreleased"),
   }
 
-  -- arguments:
-  for i, v in ipairs { cel8.argv[1], cel8.argv[2] } do
-    print("argument["..i.."] "..v)
-  end
-
   -- main:
   require("main")
 
@@ -27,8 +24,6 @@ function cel8.boot()
 end
 
 function cel8.frame()
-  cel8.step()
-
   while true do
     local name, a,b,c,d = cel8.poll()
     if not name then
@@ -78,4 +73,4 @@ function cel8.err(msg)
   end
 end
 
-xpcall(cel8.boot, cel8.err)
+xpcall(cel8.init, cel8.err)

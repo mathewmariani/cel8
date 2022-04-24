@@ -22,6 +22,7 @@ poke2( addr [, value [, ...]] )  : writes one or more 16-bit values to memory
 poke4( addr [, value [, ...]] )  : writes one or more 32-bit values to memory
 memcpy( dst, src, len )          : copies a block of memory to another block
 memset( dst, value, len )        : sets a block of memory to a specified value
+
 cls( clr, chr )                  : clears the screen to a specified color and char
 color( clr )                     : sets the draw color
 fill( x, y, w, h, chr )          : sets the characters in the rectangle to specified char
@@ -30,6 +31,7 @@ get( x, y )                      : current environment
 stat( n )                        : system information
 rnd( )                           : pseudo random number
 time( )                          : time since start
+
 band( x, y )                     : bitwise and
 bor( x, y )                      : bitwise or
 bxor( x, y )                     : bitwise xor
@@ -44,12 +46,12 @@ rotr( x, n )                     : rotate right
 ## Memory Map
 ```
 0x0000                           : color mapping
-0x0000                           : color palette
-0x0000                           : draw color
-0x0000                           : random state
-0x0000                           : unused
-0x0000                           : font atlas
-0x0000                           : screen buffer
+0x000F                           : color palette
+0x003F                           : draw color
+0x0040                           : random state
+0x0044                           : unused
+0x0050                           : font atlas
+0x0450                           : screen buffer
 ```
 
 See the **[cel8.h](src/cel8.h?raw=1)** header for a more complete documentation.
