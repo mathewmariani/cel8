@@ -1,0 +1,12 @@
+id: api-graphics
+title: Graphics
+
+desc: |
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+func: |
+  cel8.cls( clr, chr )          -- clears the screen to a specified color and char
+  cel8.color( clr )             -- sets the draw color
+  cel8.fill( x, y, w, h, chr )  -- sets the characters in the rectangle to specified char
+  cel8.put( x, y, str )         -- places text at (x, y)
+  cel8.get( x, y )              -- current environment
