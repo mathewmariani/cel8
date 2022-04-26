@@ -1,16 +1,19 @@
 <header>
-  <h1>{{ site.title }}</h1>
-
-  <!-- title stuff -->
-  <p>{{ include.collection.title }}</p>
-  <p>{{ include.collection.url }}</p>
-  <p>Author: {{ include.collection.author }}</p>
-
-  <!-- tools -->
+  <h1>{{ include.collection.title }}</h1>
+  <p>
+    {{ include.collection.version }}<br>
+    <a href="{{ include.collection.url }}">
+      {{ include.collection.url }}
+    </a><br>
+    Author: {{ include.collection.author }}<br>
+  </p>
   <p>cel8 is built with:</p>
   <ul>
     {%-for item in include.collection.tools-%}
-      <li>{{ item.name }} <a href="{{ item.url }}">{{ item.url }}</a></li>
+      <li>
+        {{ item.name }}
+        <a href="{{ item.url }}">{{ item.url }}</a>
+      </li>
     {%-endfor-%}
   </ul>
 </header>

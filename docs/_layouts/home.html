@@ -17,16 +17,16 @@ layout: default
       <a href="#api-reference">API Reference</a>
       <ul>
         <li>
-          <a href="#api-memory">Memory</a>
+          <a href="#memory">Memory</a>
         </li>
         <li>
-          <a href="#api-system">System</a>
+          <a href="#system">System</a>
         </li>
         <li>
-          <a href="#api-graphics">Graphics</a>
+          <a href="#graphics">Graphics</a>
         </li>
         <li>
-          <a href="#api-bitwise">Bitwise</a>
+          <a href="#bitwise">Bitwise</a>
         </li>
       </ul>
     </li>
@@ -34,17 +34,6 @@ layout: default
 </details>
 <hr>
 
-<section id="program-structure">
-  <h1>Program Structure</h1>
-  {%-include section.html collection=site.data.callbacks-%}
-</section>
-
-<section id="api-reference">
-  <h1>API Reference</h1>
-  {%-include section.html collection=site.data.memory-%}
-  {%-include section.html collection=site.data.system-%}
-  {%-include section.html collection=site.data.graphics-%}
-  {%-include section.html collection=site.data.bitwise-%}
-</section>
-
-{{ content }}
+{% include markdown.html path="_markdown/welcome.md"%}
+{% include markdown.html path="_markdown/structure.md"%}
+{% include markdown.html path="_markdown/reference.md"%}

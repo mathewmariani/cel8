@@ -21,6 +21,7 @@ gulp.task('browser', gulp.series('build', function() {
     '_config.yml',
     '_data/*.yml',
     '_includes/*.html',
+    '_includes/**/*.md',
     '_layouts/*.html',
     '_posts/*.md',
     '_sass/*scss',
