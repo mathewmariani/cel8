@@ -1,0 +1,11 @@
+title: cel8 User-Manual
+version: cel8 v0.0.1
+url: https://github.com/mathewmariani/cel8
+author: Mathew Mariani
+
+tools:
+  - name: Sokol
+    url: https://github.com/floooh/sokol
+
+  - name: Lua 5.2
+    url: http://www.lua.org

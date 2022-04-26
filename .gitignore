@@ -4,6 +4,11 @@
 # Intermediate files
 *.obj
 *.pyc
+.sass-cache/
+_site/
+
+# npm
+node_modules/
 
 # VSCode project files.
 .vscode
