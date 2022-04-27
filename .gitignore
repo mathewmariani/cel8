@@ -6,6 +6,7 @@
 *.pyc
 .sass-cache/
 _site/
+obj/
 
 # npm
 node_modules/
