@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>
+    cel8 User-Manual
+  </title>
+
+  <!-- google fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@500;700;900&display=swap" rel="stylesheet">
+
+  <link rel="shortcut icon" type="image/x-icon" href="" />
+  <link rel="stylesheet" href="/cel8/assets/css/main.css" />
+</head><body a="light">
+    <main class="page-content" aria-label="Content">
+      <header>
+  <h1>cel8 User-Manual</h1>
+  <p>
+    cel8 v0.0.1<br>
+    <a href="https://github.com/mathewmariani/cel8">
+      https://github.com/mathewmariani/cel8
+    </a><br>
+    Author: Mathew Mariani<br>
+  </p>
+  <p>cel8 is built with:</p>
+  <ul><li>
+        Sokol
+        <a href="https://github.com/floooh/sokol">https://github.com/floooh/sokol</a>
+      </li><li>
+        Lua 5.2
+        <a href="http://www.lua.org">http://www.lua.org</a>
+      </li></ul>
+</header><hr>
+<details>
+  <summary>
+    Content: Program Structure | API Reference
+  </summary>
+  <ul>
+    <li>
+      <a href="#program-structure">Program Structure</a>
+    </li>
+    <li>
+      <a href="#api-reference">API Reference</a>
+      <ul>
+        <li>
+          <a href="#memory">Memory</a>
+        </li>
+        <li>
+          <a href="#system">System</a>
+        </li>
+        <li>
+          <a href="#graphics">Graphics</a>
+        </li>
+        <li>
+          <a href="#bitwise">Bitwise</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</details>
+<hr>
+
+<!-- https://github.com/daveaseeman/jekyll-include-markdown/blob/gh-pages/_includes/markdown.html -->
+
+  <h2 id="welcome-to-cel8">Welcome to cel8</h2>
+<p>cel8 is a *tiny* framework for creating grid-based games in Lua.</p>
+
+<p>The sparse api of cel8 was designed to encourage smaller projects, and to give cel8 a more timely look and feel.</p>
+
+
+<!-- https://github.com/daveaseeman/jekyll-include-markdown/blob/gh-pages/_includes/markdown.html -->
+
+  <h2 id="program-structure">Program Structure</h2>
+<p>The most important parts of the api are the callbacks</p>
+
+<h5 id="cel8load-">cel8.load( )</h5>
+<p>This function is called exactly once at the beginning of the game.</p>
+
+<h5 id="cel8update-">cel8.update( )</h5>
+<p>Called once per update at 60fps.</p>
+
+<h5 id="cel8draw-">cel8.draw( )</h5>
+<p>Called once per frame.</p>
+
+<p>More interactive games can override additional callbacks in order to handle input from the user.</p>
+
+<h5 id="cel8keydown-key-">cel8.keydown( key )</h5>
+<p>Called when a key is pressed.</p>
+
+<h5 id="cel8keyup-key-">cel8.keyup( key )</h5>
+<p>Called when a key is released.</p>
+
+<p>A simple program that overrides various callback functions might look this:</p>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">function</span> <span class="nc">cel8</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+  <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nc">cel8</span><span class="p">.</span><span class="nf">keydown</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"up"</span> <span class="k">then</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span>
+  <span class="k">elseif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"down"</span> <span class="k">then</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">1</span>
+  <span class="k">elseif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"left"</span> <span class="k">then</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span>
+  <span class="k">elseif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"right"</span> <span class="k">then</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nc">cel8</span><span class="p">.</span><span class="nf">draw</span><span class="p">()</span>
+  <span class="n">cls</span><span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">)</span>
+  <span class="n">color</span><span class="p">(</span><span class="mh">0x08</span><span class="p">)</span>
+  <span class="n">put</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">"@"</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+<!-- https://github.com/daveaseeman/jekyll-include-markdown/blob/gh-pages/_includes/markdown.html -->
+
+  <h1 id="api-reference">API Reference</h1>
+<p>cel8 is built on the <a href="https://www.lua.org/">Lua programming language</a> and includes the Lua standard library.</p>
+
+<p>Functions are written here as:</p>
+
+<p><code class="highlighter-rouge">FUNCTION_NAME(PARAMETER, [OPTIONAL_PARAMETER])</code></p>
+
+<h2 id="memory">Memory</h2>
+<p>cel8 has &lt;4kb of RAM: see layout below.
+This memory can be accessed with <code class="highlighter-rouge">cel8.peek</code>, <code class="highlighter-rouge">cel8.poke</code>, <code class="highlighter-rouge">cel8.memcpy</code>, <code class="highlighter-rouge">cel8.memset</code>.</p>
+
+<h3 id="memory-layout">Memory Layout</h3>
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mh">0x0000</span>                          <span class="c1">-- color mapping</span>
+<span class="mh">0x000F</span>                          <span class="c1">-- color palette</span>
+<span class="mh">0x003F</span>                          <span class="c1">-- draw color</span>
+<span class="mh">0x0040</span>                          <span class="c1">-- random state</span>
+<span class="mh">0x0044</span>                          <span class="c1">-- unused</span>
+<span class="mh">0x0050</span>                          <span class="c1">-- font atlas</span>
+<span class="mh">0x0450</span>                          <span class="c1">-- screen buffer</span>
+</code></pre></div></div>
+
+<p>The screen buffer is composed of interleved data; the first two bytes of memory represent the color and the glyph, respectively</p>
+
+<h5 id="cel8peek-addr--n-">cel8.peek( addr [, n] )</h5>
+<p>Read <code class="highlighter-rouge">n</code> bytes from an address in ram. If <code class="highlighter-rouge">n</code> is not specified the <code class="highlighter-rouge">peek()</code> will return the first byte.</p>
+
+<p>For example, to read the first two bytes of video memory:</p>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">local</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">peek</span><span class="p">(</span><span class="mh">0x0450</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h5 id="cel8poke-addr--value---">cel8.poke( addr [, value [, …]] )</h5>
+<p>Write one or more bytes to an address in ram. If more than one parameter is provided the bytes will be written sequentially.</p>
+
+<h5 id="cel8peek2-addr--n-">cel8.peek2( addr [, n] )</h5>
+<h5 id="cel8poke2-addr--value---">cel8.poke2( addr [, value [, …]] )</h5>
+<h5 id="cel8peek4-addr--n-">cel8.peek4( addr [, n] )</h5>
+<h5 id="cel8poke4-addr--value---">cel8.poke4( addr [, value [, …]] )</h5>
+<p>16-bit and 32-bit variations of <code class="highlighter-rouge">peek( addr [, n] )</code> and <code class="highlighter-rouge">poke( addr [, value [, ...]] )</code> are also offered.</p>
+
+<h5 id="cel8memcpy-dst-src-len-">cel8.memcpy( dst, src, len )</h5>
+<p>Copies the values of <code class="highlighter-rouge">len</code> bytes from the location pointed to by <code class="highlighter-rouge">src</code> directly to the memory block pointed to by <code class="highlighter-rouge">dst</code>.</p>
+
+<h5 id="cel8memset-dst-value-len-">cel8.memset( dst, value, len )</h5>
+<p>Sets the first <code class="highlighter-rouge">len</code> bytes of the block of memory pointed by <code class="highlighter-rouge">dst</code> to the specified <code class="highlighter-rouge">value</code>.</p>
+<h2 id="system">System</h2>
+
+<h5 id="cel8stat-n-">cel8.stat( n )</h5>
+<p>Get system information where <code class="highlighter-rouge">n</code> is:</p>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mh">0x0</span>       <span class="c1">-- version string</span>
+<span class="mh">0x1</span>       <span class="c1">-- frame time</span>
+<span class="mh">0x2</span><span class="o">..</span><span class="mh">0x3</span>  <span class="c1">-- mouse x, y</span>
+<span class="mh">0x4</span><span class="o">..</span><span class="mh">0x9</span>  <span class="c1">-- GMT time: year, month, day, hour, minute, second</span>
+<span class="mh">0xA</span><span class="o">..</span><span class="mh">0xF</span>  <span class="c1">-- Local time: ...</span>
+</code></pre></div></div>
+
+<h5 id="cel8rnd-">cel8.rnd( )</h5>
+<p>Returns a 16-bit pseudo random number.</p>
+
+<p>The random number generator is mapped to adresses <code class="highlighter-rouge">0x0040..0x0043</code>. Where the first two bytes represent the seed, and the last two are the high/low values of the ouput.</p>
+
+<h5 id="cel8time-">cel8.time( )</h5>
+<p>Returns the value of a timer, in seconds, with an unspecified starting time.</p>
+
+<p>Multiple calls of <code class="highlighter-rouge">time( )</code> during the same frame will always return the same result.</p>
+<h2 id="graphics">Graphics</h2>
+<p>cel8 has a fixed capacity of 128 8x8 pixel glyphs.</p>
+
+<p>All drawing operations in cel8 are subject to the current color. The current color is seperated into background and foreground. These are determined, respectively, by the high and low nibbles of the set color.</p>
+
+<h5 id="cel8cls-clr-chr-">cel8.cls( clr, chr )</h5>
+<p>Clears the screen to a specified color and character.</p>
+
+<h5 id="cel8color-clr-">cel8.color( clr )</h5>
+<p>Set the current colour to be used by drawing functions.</p>
+
+<p>For example, to set the color for the next drawing oepration to (bg: dark_blue, fg: red).</p>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">function</span> <span class="nc">cel8</span><span class="p">.</span><span class="nf">draw</span><span class="p">()</span>
+  <span class="n">cel8</span><span class="p">.</span><span class="n">color</span><span class="p">(</span><span class="mh">0x18</span><span class="p">)</span>
+  <span class="n">cel8</span><span class="p">.</span><span class="n">put</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'@'</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h5 id="cel8fill-x-y-w-h-chr-">cel8.fill( x, y, w, h, chr )</h5>
+<p>Set the characters in the rectangle [<code class="highlighter-rouge">x</code>, <code class="highlighter-rouge">y</code>, <code class="highlighter-rouge">w</code>, <code class="highlighter-rouge">h</code>] to <code class="highlighter-rouge">chr</code>.</p>
+
+<h5 id="cel8put-x-y-str-">cel8.put( x, y, str )</h5>
+<p>Places text at [<code class="highlighter-rouge">x</code>, <code class="highlighter-rouge">y</code>].</p>
+
+<h5 id="cel8get-x-y-">cel8.get( x, y )</h5>
+<p>Returns the character at [<code class="highlighter-rouge">x</code>, <code class="highlighter-rouge">y</code>].</p>
+
+<h2 id="bitwise">Bitwise</h2>
+<p>Bitwise operation operates on a bit string at the level of its individual bits.</p>
+
+<p>There are 9 bitwise functions available in cel8:</p>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cel8</span><span class="p">.</span><span class="n">band</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">)</span>      <span class="c1">-- bitwise and</span>
+<span class="n">cel8</span><span class="p">.</span><span class="n">bor</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">)</span>       <span class="c1">-- bitwise or</span>
+<span class="n">cel8</span><span class="p">.</span><span class="n">bxor</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">)</span>      <span class="c1">-- bitwise xor</span>
+<span class="n">cel8</span><span class="p">.</span><span class="n">bnot</span><span class="p">(</span> <span class="n">x</span> <span class="p">)</span>         <span class="c1">-- bitwise not</span>
+<span class="n">cel8</span><span class="p">.</span><span class="n">shl</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">n</span> <span class="p">)</span>       <span class="c1">-- arithmetic shift left</span>
+<span class="n">cel8</span><span class="p">.</span><span class="n">shr</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">n</span> <span class="p">)</span>       <span class="c1">-- arithmetic shift right</span>
+<span class="n">cel8</span><span class="p">.</span><span class="n">lshr</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">n</span> <span class="p">)</span>      <span class="c1">-- logical shift left</span>
+<span class="n">cel8</span><span class="p">.</span><span class="n">rotl</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">n</span> <span class="p">)</span>      <span class="c1">-- rotate left</span>
+<span class="n">cel8</span><span class="p">.</span><span class="n">rotr</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">n</span> <span class="p">)</span>      <span class="c1">-- rotate right</span>
+</code></pre></div></div>
+
+
+    </main>
+  </body>
+</html>
