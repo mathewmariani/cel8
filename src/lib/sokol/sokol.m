@@ -7,3 +7,6 @@
 
 #define SOKOL_GLUE_IMPL
 #include "sokol_glue.h"
+
+#define SOKOL_ARGS_IMPL
+#include "sokol_args.h"
