@@ -343,13 +343,13 @@ typedef union {
 
   struct {
     i32 type;
-    const char *key;
+    const char* key;
     bool repeat;
   } keyboard;
 } cel8_event_t;
 
 typedef struct cel8_range {
-  void *data;
+  void* data;
   size_t size;
 } cel8_range;
 
@@ -357,7 +357,7 @@ typedef struct cel8_range {
 CEL8_API_DECL i32 cel8_init(i32 argc, char** argv);
 CEL8_API_DECL void cel8_cleanup(void);
 CEL8_API_DECL void cel8_frame(void);
-CEL8_API_DECL void cel8_event(const cel8_event_t *e);
+CEL8_API_DECL void cel8_event(const cel8_event_t* e);
 
 CEL8_API_DECL cel8_range cel8_query_memory(void);
 CEL8_API_DECL cel8_range cel8_query_vram(void);
@@ -490,7 +490,7 @@ struct {
 
 /* event */
 
-_CEL8_PRIVATE i32 l_poll(lua_State *L) {
+_CEL8_PRIVATE i32 l_poll(lua_State* L) {
   cel8_event_t e;
   if (cel8.readi != cel8.writei) {
     e = cel8.buffer[cel8.readi++];
@@ -587,7 +587,7 @@ _CEL8_PRIVATE inline void cel8_poke4(const u32 addr, const u32 index, const u32 
 
 /* memory */
 
-_CEL8_PRIVATE i32 l_peek(lua_State *L) {
+_CEL8_PRIVATE i32 l_peek(lua_State* L) {
   const i32 addr = (i32) lua_tonumber(L, 1);
   i32 n = (i32) lua_tonumber(L, 2);
 
@@ -604,7 +604,7 @@ _CEL8_PRIVATE i32 l_peek(lua_State *L) {
   return n;
 }
 
-_CEL8_PRIVATE i32 l_peek2(lua_State *L) {
+_CEL8_PRIVATE i32 l_peek2(lua_State* L) {
   const i32 addr = (i32) lua_tonumber(L, 1);
   i32 n = (i32) lua_tonumber(L, 2);
 
@@ -621,7 +621,7 @@ _CEL8_PRIVATE i32 l_peek2(lua_State *L) {
   return n;
 }
 
-_CEL8_PRIVATE i32 l_peek4(lua_State *L) {
+_CEL8_PRIVATE i32 l_peek4(lua_State* L) {
   const i32 addr = (i32) lua_tonumber(L, 1);
   i32 n = (i32) lua_tonumber(L, 2);
 
@@ -638,7 +638,7 @@ _CEL8_PRIVATE i32 l_peek4(lua_State *L) {
   return n;
 }
 
-_CEL8_PRIVATE i32 l_poke(lua_State *L) {
+_CEL8_PRIVATE i32 l_poke(lua_State* L) {
   const i32 addr = (i32) lua_tonumber(L, 1);
   const i32 n = lua_gettop(L) - 1;
 
@@ -652,7 +652,7 @@ _CEL8_PRIVATE i32 l_poke(lua_State *L) {
   return 0;
 }
 
-_CEL8_PRIVATE i32 l_poke2(lua_State *L) {
+_CEL8_PRIVATE i32 l_poke2(lua_State* L) {
   const i32 addr = (i32) lua_tonumber(L, 1);
   const i32 n = lua_gettop(L) - 1;
 
@@ -666,7 +666,7 @@ _CEL8_PRIVATE i32 l_poke2(lua_State *L) {
   return 0;
 }
 
-_CEL8_PRIVATE i32 l_poke4(lua_State *L) {
+_CEL8_PRIVATE i32 l_poke4(lua_State* L) {
   const i32 addr = (i32) lua_tonumber(L, 1);
   const i32 n = lua_gettop(L) - 1;
 
@@ -680,28 +680,28 @@ _CEL8_PRIVATE i32 l_poke4(lua_State *L) {
   return 0;
 }
 
-_CEL8_PRIVATE i32 l_memcpy(lua_State *L) {
+_CEL8_PRIVATE i32 l_memcpy(lua_State* L) {
   i32 dstaddr = (i32) lua_tonumber(L, 1);
   i32 srcaddr = (i32) lua_tonumber(L, 2);
   i32 num = (i32) lua_tonumber(L, 3);
 
   /* TODO: implement bound-checking */
 
-  void *dst = &*(cel8.memory + dstaddr);
-  void *src = &*(cel8.memory + srcaddr);
+  void* dst = &*(cel8.memory + dstaddr);
+  void* src = &*(cel8.memory + srcaddr);
   memcpy(dst, src, num);
 
   return 0;
 }
 
-_CEL8_PRIVATE i32 l_memset(lua_State *L) {
+_CEL8_PRIVATE i32 l_memset(lua_State* L) {
   i32 dstaddr = (i32) lua_tonumber(L, 1);
   i32 val = (i32) lua_tonumber(L, 2);
   i32 len = (i32) lua_tonumber(L, 3);
 
   /* TODO: implement bound-checking */
 
-  void *dst = &*(cel8.memory + dstaddr);
+  void* dst = &*(cel8.memory + dstaddr);
   memset(dst, val, len * sizeof(u8));
 
   return 0;
@@ -717,7 +717,7 @@ _CEL8_PRIVATE inline bool should_clip(u8 x, u8 y) {
   return (x < 0 || x >= 0x10 || y < 0 || y >= 0x10);
 }
 
-_CEL8_PRIVATE i32 l_cls(lua_State *L) {
+_CEL8_PRIVATE i32 l_cls(lua_State* L) {
   const u8 color = (u8) lua_tonumber(L, 1);
   const u8 glyph = (u8) lua_tonumber(L, 2);
 
@@ -729,7 +729,7 @@ _CEL8_PRIVATE i32 l_cls(lua_State *L) {
   return 0;
 }
 
-_CEL8_PRIVATE i32 l_color(lua_State *L) {
+_CEL8_PRIVATE i32 l_color(lua_State* L) {
   const u8 c = (u8) lua_tonumber(L, 1);
   cel8_poke(CEL8_COLOR_ADDR, 0, c);
   return 0;
@@ -747,7 +747,7 @@ _CEL8_PRIVATE inline void put_char(u32 x, u32 y, const char c) {
   _CEL8_SET_CELL(offset, color, c);
 }
 
-_CEL8_PRIVATE i32 l_fill(lua_State *L) {
+_CEL8_PRIVATE i32 l_fill(lua_State* L) {
   const i32 x = (i32) lua_tonumber(L, 1);
   const i32 y = (i32) lua_tonumber(L, 2);
   const i32 w = (i32) lua_tonumber(L, 3);
@@ -755,7 +755,7 @@ _CEL8_PRIVATE i32 l_fill(lua_State *L) {
 
   i32 c = 0;
   if (lua_type(L, 5) == LUA_TSTRING) {
-    const char *str = lua_tostring(L, 5);
+    const char* str = lua_tostring(L, 5);
     c = (i32) *(str + 0);
   } else {
     c = (i32) lua_tonumber(L, 5);
@@ -770,16 +770,16 @@ _CEL8_PRIVATE i32 l_fill(lua_State *L) {
   return 0;
 }
 
-_CEL8_PRIVATE i32 l_pal(lua_State *L) {
+_CEL8_PRIVATE i32 l_pal(lua_State* L) {
   return 0;
 }
 
-_CEL8_PRIVATE i32 l_put(lua_State *L) {
+_CEL8_PRIVATE i32 l_put(lua_State* L) {
   const i32 x = (i32) lua_tonumber(L, 1);
   const i32 y = (i32) lua_tonumber(L, 2);
 
   if (lua_type(L, 3) == LUA_TSTRING) {
-    const char *str = lua_tostring(L, 3);
+    const char* str = lua_tostring(L, 3);
     
     i32 i = 0;
     while (*str) {
@@ -794,7 +794,7 @@ _CEL8_PRIVATE i32 l_put(lua_State *L) {
   return 0;
 }
 
-_CEL8_PRIVATE i32 l_get(lua_State *L) {
+_CEL8_PRIVATE i32 l_get(lua_State* L) {
   const i32 x = (i32) lua_tonumber(L, 1);
   const i32 y = (i32) lua_tonumber(L, 2);
 
@@ -813,7 +813,7 @@ _CEL8_PRIVATE i32 l_get(lua_State *L) {
 
 /* system */
 
-static i32 l_stat(lua_State *L) {
+static i32 l_stat(lua_State* L) {
   const i32 id = (i32) lua_tonumber(L, 1);
 
   f64 result = 0;
@@ -902,7 +902,7 @@ static i32 l_stat(lua_State *L) {
   return 1;
 }
 
-_CEL8_PRIVATE i32 l_rnd(lua_State *L) {
+_CEL8_PRIVATE i32 l_rnd(lua_State* L) {
   i32 i = 1;
   for (; i >= 0; --i) {
     u8 reg_0 = cel8_peek(CEL8_RND_ADDR, 0);
@@ -954,7 +954,7 @@ _CEL8_PRIVATE f64 get_time(f64 start) {
 #endif
 }
 
-_CEL8_PRIVATE i32 l_step(lua_State *L) {
+_CEL8_PRIVATE i32 l_step(lua_State* L) {
   f64 prev = cel8.curr;
 
   cel8.curr = get_time(cel8.start);
@@ -963,55 +963,55 @@ _CEL8_PRIVATE i32 l_step(lua_State *L) {
   return 0;
 }
 
-_CEL8_PRIVATE i32 l_time(lua_State *L) {
+_CEL8_PRIVATE i32 l_time(lua_State* L) {
   lua_pushnumber(L, cel8.curr);
   return 1;
 }
 
 /* bitwise */
 
-_CEL8_PRIVATE i32 l_band(lua_State *L) {
+_CEL8_PRIVATE i32 l_band(lua_State* L) {
   i32 x = (i32) lua_tonumber(L, 1);
   i32 y = (i32) lua_tonumber(L, 2);
   lua_pushnumber(L, x & y);
   return 1;
 }
 
-_CEL8_PRIVATE i32 l_bor(lua_State *L) {
+_CEL8_PRIVATE i32 l_bor(lua_State* L) {
   i32 x = (i32) lua_tonumber(L, 1);
   i32 y = (i32) lua_tonumber(L, 2);
   lua_pushnumber(L, x | y);
   return 1;
 }
 
-_CEL8_PRIVATE i32 l_bxor(lua_State *L) {
+_CEL8_PRIVATE i32 l_bxor(lua_State* L) {
   i32 x = (i32) lua_tonumber(L, 1);
   i32 y = (i32) lua_tonumber(L, 2);
   lua_pushnumber(L, x ^ y);
   return 1;
 }
 
-_CEL8_PRIVATE i32 l_bnot(lua_State *L) {
+_CEL8_PRIVATE i32 l_bnot(lua_State* L) {
   i32 x = (i32) lua_tonumber(L, 1);
   lua_pushnumber(L, ~x);
   return 1;
 }
 
-_CEL8_PRIVATE i32 l_shl(lua_State *L) {
+_CEL8_PRIVATE i32 l_shl(lua_State* L) {
   i32 x = (i32) lua_tonumber(L, 1);
   i32 n = (i32) lua_tonumber(L, 2);
   lua_pushnumber(L, x << n);
   return 1;
 }
 
-_CEL8_PRIVATE i32 l_shr(lua_State *L) {
+_CEL8_PRIVATE i32 l_shr(lua_State* L) {
   i32 x = (i32) lua_tonumber(L, 1);
   i32 n = (i32) lua_tonumber(L, 2);
   lua_pushnumber(L, x >> n);
   return 1;
 }
 
-_CEL8_PRIVATE i32 l_lshr(lua_State *L) {
+_CEL8_PRIVATE i32 l_lshr(lua_State* L) {
   i32 x = (i32) lua_tonumber(L, 1);
   i32 n = (i32) lua_tonumber(L, 2);
   const i32 mask = ~(-1 << n) << (32 - n);
@@ -1019,7 +1019,7 @@ _CEL8_PRIVATE i32 l_lshr(lua_State *L) {
   return 1;
 }
 
-_CEL8_PRIVATE i32 l_rotl(lua_State *L) {
+_CEL8_PRIVATE i32 l_rotl(lua_State* L) {
   const size_t b = sizeof(i32) * 8 - 1;
 
   i32 x = (i32) lua_tonumber(L, 1);
@@ -1035,7 +1035,7 @@ _CEL8_PRIVATE i32 l_rotl(lua_State *L) {
   return 1;
 }
 
-_CEL8_PRIVATE i32 l_rotr(lua_State *L) {
+_CEL8_PRIVATE i32 l_rotr(lua_State* L) {
   const i32 b = sizeof(i32) * 8 - 1;
 
   i32 x = (i32) lua_tonumber(L, 1);
@@ -1065,16 +1065,16 @@ _CEL8_PRIVATE i32 l_rotr(lua_State *L) {
   lua_pushstring(L, k);        \
   lua_call(L, 1, 1);
 
-int luaopen_cel8_boot(lua_State *L) {
+int luaopen_cel8_boot(lua_State* L) {
   #include "embed/boot.lua.h"
-  if (luaL_loadbuffer(L, (const char *) boot_lua, sizeof(boot_lua), "=[cel8 \"boot.lua\"]") == 0) {
+  if (luaL_loadbuffer(L, (const char*) boot_lua, sizeof(boot_lua), "=[cel8 \"boot.lua\"]") == 0) {
     lua_call(L, 0, 1);
   }
   
   return 1;
 }
 
-int luaopen_cel8(lua_State *L) {
+int luaopen_cel8(lua_State* L) {
   /* preload modules */
   luax_preload("cel8.boot", luaopen_cel8_boot);
 
@@ -1142,7 +1142,7 @@ int luaopen_cel8(lua_State *L) {
   return 1;
 }
 
-_CEL8_PRIVATE lua_State *L = NULL;
+_CEL8_PRIVATE lua_State* L = NULL;
 
 i32 cel8_init(i32 argc, char** argv) {
   /* initialize font */
@@ -1196,7 +1196,7 @@ void cel8_frame(void) {
   if (!lua_isnil(L, -1)) {
     lua_getfield(L, -1, "frame");
     if (lua_pcall(L, 0, 0, 0) != 0) {
-      const char *str = lua_tostring(L, -1);
+      const char* str = lua_tostring(L, -1);
       printf("Error: %s\n", str);
       return;
     }
@@ -1204,7 +1204,7 @@ void cel8_frame(void) {
   lua_pop(L, 1);
 }
 
-void cel8_event(const cel8_event_t *e) {
+void cel8_event(const cel8_event_t* e) {
   cel8.buffer[cel8.writei++] = *e;
 }
 

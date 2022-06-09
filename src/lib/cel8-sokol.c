@@ -7,7 +7,7 @@
 #include "sokol/sokol_glue.h"
 
 /* NOTE: 121 keycodes */
-static struct { char *name; sapp_keycode keycode; } key_entries[] = {
+static struct { char* name; sapp_keycode keycode; } key_entries[] = {
   { "space", SAPP_KEYCODE_SPACE },
   { "'", SAPP_KEYCODE_APOSTROPHE },
   { ",", SAPP_KEYCODE_COMMA },
@@ -133,7 +133,7 @@ static struct { char *name; sapp_keycode keycode; } key_entries[] = {
   { "unknown", SAPP_KEYCODE_INVALID },
 };
 
-static const char *search_for_key(sapp_keycode keycode) {
+static const char* search_for_key(sapp_keycode keycode) {
   i32 i = 0;
   sapp_keycode entry = key_entries[i].keycode;
   while (entry != 0) {
@@ -192,8 +192,8 @@ static void init(void) {
   #include "../embed/vertex.vs.h"
   #include "../embed/fragment.fs.h"
   sg_shader shd = sg_make_shader(&(sg_shader_desc) {
-    .vs.source = (const char *) &vertex_vs[0],
-    .fs.source = (const char *) &fragment_fs[0],
+    .vs.source = (const char*) &vertex_vs[0],
+    .fs.source = (const char*) &fragment_fs[0],
     .fs.images = {
       [0] = { .name = "screen", .image_type = SG_IMAGETYPE_2D },
     },
@@ -228,12 +228,12 @@ static void init(void) {
   state.pass_action = (sg_pass_action) {
     .colors[0] = {
       .action = SG_ACTION_CLEAR,
-      .value= { 0.0f, 0.0f, 0.0f, 1.0f },
+      .value = { 0.0f, 0.0f, 0.0f, 1.0f },
     },
   };
 }
 
-static void event(const sapp_event *e) {
+static void event(const sapp_event* e) {
   switch (e->type) {
 
     /* mouse */
