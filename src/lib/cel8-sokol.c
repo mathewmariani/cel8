@@ -5,6 +5,7 @@
 #include "sokol/sokol_gfx.h"
 #include "sokol/sokol_app.h"
 #include "sokol/sokol_glue.h"
+#include "sokol/sokol_args.h"
 
 /* NOTE: 121 keycodes */
 static struct { char* name; sapp_keycode keycode; } key_entries[] = {
@@ -167,6 +168,7 @@ static void init(void) {
      1.0f, -1.0f,   1.0f, 1.0f, /* bottom-right */
     -1.0f, -1.0f,   0.0f, 1.0f, /* bottom-left */
   };
+
   state.bind.vertex_buffers[0] = sg_make_buffer(&(sg_buffer_desc) {
     .data = SG_RANGE(vertices),
     .label = "quad-vertices",
@@ -368,8 +370,25 @@ static void cleanup(void) {
 }
 
 sapp_desc sokol_main(i32 argc, char* argv[]) {
+  /* initialize sokol_args with default parameters */
+  sargs_setup(&(sargs_desc) {
+    .argc = argc,
+    .argv = argv,
+  });
+
+  /* build cel8_desc from command line arguments */
+  bool console = sargs_boolean("console");
+  const char* title = sargs_value_def("title", "default_value");
+  i32 scale = atoi(sargs_value_def("scale", "4"));
+
   /* cel8 */
-  cel8_init(argc, argv);
+  cel8_init(&(cel8_desc) {
+    .argc = argc,
+    .argv = argv,
+    .console = console,
+    .title = title,
+    .scale = scale,
+  });
 
   /* sokol */
   return (sapp_desc){ 
@@ -377,12 +396,13 @@ sapp_desc sokol_main(i32 argc, char* argv[]) {
     .frame_cb = frame,
     .cleanup_cb = cleanup,
     .event_cb = event,
-    .width = CEL8_WINDOW_WIDTH,
-    .height = CEL8_WINDOW_HEIGHT,
-    .window_title = "cel8",
+    .width = CEL8_SCREEN_WIDTH * scale,
+    .height = CEL8_SCREEN_HEIGHT * scale,
+    .window_title = title,
 
-#if defined(_CEL8_DEBUG)
-    .win32_console_create = true,
+#if defined(OS_WINDOWS)
+    .win32_console_create = console,
+    .win32_console_attach = console,
 #endif
   };
 }

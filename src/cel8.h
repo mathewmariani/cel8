@@ -3,10 +3,18 @@
 #endif
 #ifndef CEL8_INCLUDED
 /*
-    cel8.h -- a *tiny* framework for grid-based games in lua.
+    cel8.h -- a *tiny* framework for making grid-based games in lua.
 
     Project URL: https://github.com/mathewmariani/cel8
 
+    CONFIGURATION:
+    ==============
+
+    Some configuration options can be set through command line arguments.
+
+        title=cel8                   : the window title (string)
+        console=false                : attach a console (boolean)
+        scale=4                      : the window scale (integer)
 
     CALLBACKS:
     ==========
@@ -73,13 +81,12 @@
     00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f
 
 
+    FIXME: needs to be redone
     [0x000F] : color palette
-    (16*3 bytes)
+    (48 bytes)
 
-    +-------------------------------- r-channel
-    |  +----------------------------- g-channel
-    |  |  +-------------------------- b-channel
-    |  |  |
+    +------+------------------------- rgb color
+    |      |
     00 00 00 1D 2B 53 7E 25 53 00 87 51 AB 52 36 5F
     57 4F C2 C3 C7 FF F1 E8 FF 00 4D FF A3 00 FF EC
     27 00 E4 36 29 AD FF 83 76 9C FF 77 A8 FF CC AA
@@ -93,15 +100,14 @@
 
     +-------------------------------- current background
     |+------------------------------- current foreground
-    || +----------------------------- random state 1
-    || |  +-------------------------- random state 2
-    || |  |  +----------------------- unused
-    || |  |  |
+    || +---+------------------------- random state
+    || |   | +----------------------- unused -----+
+    || |   | |                                    |
     00 01 02 00 00 00 00 00 00 00 00 00 00 00 00 00
 
 
     [0x0050] : font atlas
-    (128*8 bytes)
+    (1024 bytes)
 
       binary representation of the glyph `!`
 
@@ -114,9 +120,9 @@
       0b11000000 ~> 0xc0
       0b11000000 ~> 0xc0
 
-    +-------------------------------- glyph 1
-    |                       +-------- glyph 2
-    |                       |
+    +---------------------+---------- glyph 1
+    |                     | +-------- glyph 2 ----+
+    |                     | |                     |
     00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
     00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
     00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
@@ -185,10 +191,8 @@
     [0x0450] : screen bufffer
     (16*16*2 bytes)
 
-    +-------------------------------- background
-    |+------------------------------- foreground
-    || +----------------------------- char glyph
-    || |
+    +---+---------------------------- cell (bg;fg, glyph)
+    |   |
     27 4b 92 70 2f 18 6a 21 d3 5b 63 2a 09 34 3e 07
     af 27 d0 41 1a 1d 7f 63 62 4e 58 60 ce 51 a8 58
     e1 59 80 26 62 5e f7 0b 69 1b 23 33 04 1f 86 35
@@ -255,10 +259,6 @@ typedef uint64_t u64;
 
 /* compile time constants */
 enum {
-  /* virtual resolution */
-  CEL8_WINDOW_WIDTH      = 512,
-  CEL8_WINDOW_HEIGHT     = 512,
-
   /* internal resolution */
   CEL8_SCREEN_WIDTH      = 128,
   CEL8_SCREEN_HEIGHT     = 128,
@@ -353,8 +353,21 @@ typedef struct cel8_range {
   size_t size;
 } cel8_range;
 
+typedef struct cel8_desc {
+  /* args */
+  i32 argc;
+  char** argv;
+  bool console;
+
+  /* window */
+  const char* title;
+  i32 width;
+  i32 height;
+  i32 scale;
+} cel8_desc;
+
 /* cel8 api */
-CEL8_API_DECL i32 cel8_init(i32 argc, char** argv);
+CEL8_API_DECL i32 cel8_init(const cel8_desc* desc);
 CEL8_API_DECL void cel8_cleanup(void);
 CEL8_API_DECL void cel8_frame(void);
 CEL8_API_DECL void cel8_event(const cel8_event_t* e);
@@ -1144,7 +1157,7 @@ int luaopen_cel8(lua_State* L) {
 
 _CEL8_PRIVATE lua_State* L = NULL;
 
-i32 cel8_init(i32 argc, char** argv) {
+i32 cel8_init(const cel8_desc* desc) {
   /* initialize font */
   #include "embed/font.h"
   memcpy(cel8.memory + CEL8_FONT_ADDR, font_h, sizeof(font_h));
@@ -1163,9 +1176,9 @@ i32 cel8_init(i32 argc, char** argv) {
   /* create `cel8.argv` */
   lua_newtable(L);
   i32 i = 0;
-  for (; i < argc; i++) {
-    lua_pushstring(L, argv[i]);
-    lua_rawseti(L, -2, i + 1);
+  for (; i < desc->argc;) {
+    lua_pushstring(L, desc->argv[i]);
+    lua_rawseti(L, -2, ++i);
   }
   lua_setfield(L, -2, "argv");
 
