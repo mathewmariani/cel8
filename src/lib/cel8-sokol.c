@@ -156,7 +156,7 @@ static u8 screen[0x4000];
 static void init(void) {
   /* setup sokol-gfx */
   sg_setup(&(sg_desc) {
-    .context = sapp_sgcontext(),
+    .environment = sglue_environment(),
   });
 
   /* a vertex buffer */
@@ -167,53 +167,68 @@ static void init(void) {
      1.0f, -1.0f,   1.0f, 1.0f, /* bottom-right */
     -1.0f, -1.0f,   0.0f, 1.0f, /* bottom-left */
   };
-  state.bind.vertex_buffers[0] = sg_make_buffer(&(sg_buffer_desc) {
+
+  /* an index buffer with 2 triangles */
+  const u16 indices[] = { 0, 1, 2, 0, 2, 3 };
+
+  sg_buffer vbuf = sg_make_buffer(&(sg_buffer_desc) {
     .data = SG_RANGE(vertices),
     .label = "quad-vertices",
   });
 
-  /* an index buffer with 2 triangles */
-  const u16 indices[] = { 0, 1, 2,  0, 2, 3 };
-  state.bind.index_buffer = sg_make_buffer(&(sg_buffer_desc) {
+  sg_buffer ibuf = sg_make_buffer(&(sg_buffer_desc) {
     .type = SG_BUFFERTYPE_INDEXBUFFER,
     .data = SG_RANGE(indices),
     .label = "quad-indices",
   });
 
-  state.bind.fs_images[0] = sg_make_image(&(sg_image_desc) {
-    .width = CEL8_SCREEN_WIDTH,
-    .height = CEL8_SCREEN_HEIGHT,
-    .pixel_format = SG_PIXELFORMAT_R8,
-    .usage = SG_USAGE_STREAM,
-    .label = "screen-texture"
-  });
-
   /* load embedded shader stages */
   #include "../embed/vertex.vs.h"
   #include "../embed/fragment.fs.h"
-  sg_shader shd = sg_make_shader(&(sg_shader_desc) {
-    .vs.source = (const char *) &vertex_vs[0],
-    .fs.source = (const char *) &fragment_fs[0],
-    .fs.images = {
-      [0] = { .name = "screen", .image_type = SG_IMAGETYPE_2D },
-    },
-    .fs.uniform_blocks = {
-      [0] = {
-        .size = sizeof(f32) * 48,
-        .uniforms = {
-          [0] = {
+  sg_shader_desc shd_desc = (sg_shader_desc){
+    .vs.source = (const char*)&vertex_vs[0],
+    .fs = {
+      .source = (const char*)&fragment_fs[0],
+      .images = {
+        [0] = { .used = true, .image_type = SG_IMAGETYPE_2D },
+      },
+      .samplers = {
+        [0] = {.used = true, .sampler_type = SG_SAMPLERTYPE_FILTERING},
+      },
+      .image_sampler_pairs = {
+        [0] = {
+        .used = true,
+        .glsl_name = "screen",
+        .image_slot = 0,
+        .sampler_slot = 0,
+        },
+      },
+      .uniform_blocks = {
+        [0] = {
+          .size = sizeof(f32) * 48,
+          .uniforms = {
+            [0] = {
             .name = "palette",
             .type = SG_UNIFORMTYPE_FLOAT3,
             .array_count = 16,
+            },
           },
         },
       },
     },
-  });
+  };
+
+  /* default pass action */
+  state.pass_action = (sg_pass_action){
+    .colors[0] = {
+      .load_action = SG_LOADACTION_CLEAR,
+      .clear_value = { 0.0f, 0.0f, 0.0f, 1.0f },
+    },
+  };
 
   /* a pipeline state object */
   state.pip = sg_make_pipeline(&(sg_pipeline_desc) {
-    .shader = shd,
+    .shader = sg_make_shader(&shd_desc),
     .index_type = SG_INDEXTYPE_UINT16,
     .layout = {
       .attrs = {
@@ -224,12 +239,29 @@ static void init(void) {
     .label = "quad-pipeline",
   });
 
-  /* default pass action */
-  state.pass_action = (sg_pass_action) {
-    .colors[0] = {
-      .action = SG_ACTION_CLEAR,
-      .value= { 0.0f, 0.0f, 0.0f, 1.0f },
-    },
+  /* images and samplers */
+  sg_sampler smp = sg_make_sampler(&(sg_sampler_desc) {
+    .min_filter = SG_FILTER_NEAREST,
+    .mag_filter = SG_FILTER_NEAREST,
+    .wrap_u = SG_WRAP_REPEAT,
+    .wrap_v = SG_WRAP_REPEAT,
+    .label = "screen-sampler",
+  });
+
+  sg_image screen = sg_make_image(&(sg_image_desc) {
+    .width = CEL8_SCREEN_WIDTH,
+    .height = CEL8_SCREEN_HEIGHT,
+    .pixel_format = SG_PIXELFORMAT_R8,
+    .usage = SG_USAGE_STREAM,
+    .label = "screen-texture"
+  });
+
+  /* bindings */
+  state.bind = (sg_bindings) {
+    .vertex_buffers[0] = vbuf,
+    .index_buffer = ibuf,
+    .fs.images[0] = screen,
+    .fs.samplers[0] = smp,
   };
 }
 
@@ -333,7 +365,7 @@ static void frame(void) {
   }
 
   /* update screen in gpu */
-  sg_update_image(state.bind.fs_images[0], &(sg_image_data) {
+  sg_update_image(state.bind.fs.images[0], &(sg_image_data) {
     .subimage[0][0] = (sg_range) {
       .ptr = screen,
       .size = sizeof(screen),
@@ -341,7 +373,7 @@ static void frame(void) {
   });
 
   /* graphics pipeline */
-  sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
+  sg_begin_pass(&(sg_pass) {.action = state.pass_action, .swapchain = sglue_swapchain()});
   sg_apply_pipeline(state.pip);
   sg_apply_bindings(&state.bind);
 

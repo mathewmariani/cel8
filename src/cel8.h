@@ -222,7 +222,7 @@
     26 4f 8d 28 0e 19 6e 0a ce 52 16 54 86 01 30 3f
     ed 46 73 27 34 29 b7 73 ff 10 d2 58 23 0f 2a 32
 */
-#define FS_INCLUDED
+#define CEL8_INCLUDED
 
 #include <stddef.h> /* size_t */
 #include <stdint.h>
@@ -388,9 +388,12 @@ CEL8_API_DECL cel8_range cel8_query_rnd(void);
 #if defined(__FreeBSD__)
   #define OS_FREEBSD 1
 #endif
+#if defined(__EMSCRIPTEN__)
+  #define OS_EMSCRIPTEN 1
+#endif
 
 /* check platform */
-#if !defined(OS_WINDOWS) && !defined(OS_MACOS) && !defined(OS_IOS) && !defined(OS_LINUX) && !defined(OS_FREEBSD)
+#if !defined(OS_WINDOWS) && !defined(OS_MACOS) && !defined(OS_IOS) && !defined(OS_LINUX) && !defined(OS_FREEBSD) && !defined(OS_EMSCRIPTEN)
   #error Could not detect target platform
 #endif
 
