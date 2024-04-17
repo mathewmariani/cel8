@@ -1,72 +1,9 @@
-# Build outputs
-/build
+# build output
+build/
+website/
 
-# Intermediate files
-*.obj
-*.pyc
-.sass-cache/
-_site/
-obj/
-
-# npm
+# dependency directories
 node_modules/
-
-# VSCode project files.
-.vscode
-
-# XCode user-specific stuff
-xcuserdata/
-
-# Visual Studio cache files
-.vs/
-ipch/
-*.aps
-*.ncb
-*.opensdf
-*.sdf
-*.cachefile
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Files built by Visual Studio
-*_i.c
-*_p.c
-*_h.h
-*.ilk
-*.meta
-*.obj
-*.iobj
-*.pch
-*.pdb
-*.ipdb
-*.pgc
-*.pgd
-*.rsp
-*.sbr
-*.tlb
-*.tli
-*.tlh
-*.tmp
-*.tmp_proj
-*_wpftmp.csproj
-*.log
-*.tlog
-*.vspscc
-*.vssscc
-.builds
-*.pidb
-*.svclog
-*.scc
-
-# Visual Studio User-specific files
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
 
 # macOS
 .DS_Store

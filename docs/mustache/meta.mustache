@@ -1,0 +1,25 @@
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+
+<title>
+cel8 User-Manual
+</title>
+
+<!-- google fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@500;700;900&display=swap" rel="stylesheet">
+
+<link href="./assets/main.css" rel="stylesheet">
+
+<script>
+// https://flatuicolors.com/palette/ca
+const palette = ["#ff9ff3", "#feca57", "#ff6b6b", "#48dbfb", "#1dd1a1"];
+window.addEventListener("mousedown", (e) => {
+  const color = palette.shift();
+  document.documentElement.style.setProperty("--highlight-background", color);
+  palette.push(color);
+});
+</script>
+
+</head>

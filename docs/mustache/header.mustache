@@ -1,9 +1,18 @@
----
-layout: default
----
-
-{%-include header.html collection=site.data.about-%}
-
+<header>
+  <h1>cel8 User-Manual</h1>
+  <p>
+    cel8 v0.0.1<br>
+    <a href="https://github.com/mathewmariani/cel8">
+      https://github.com/mathewmariani/cel8
+    </a><br>
+    Author: Mathew Mariani<br>
+  </p>
+  <p>cel8 is built with:</p>
+  <ul>
+    <li>Sokol <a href="https://github.com/floooh/sokol">https://github.com/floooh/sokol</a></li>
+    <li>Lua 5.2 <a href="http://www.lua.org">http://www.lua.org</a></li>
+  </ul>
+</header>
 <hr>
 <details>
   <summary>
@@ -33,7 +42,3 @@ layout: default
   </ul>
 </details>
 <hr>
-
-{% include markdown.html path="_markdown/welcome.md"%}
-{% include markdown.html path="_markdown/structure.md"%}
-{% include markdown.html path="_markdown/reference.md"%}

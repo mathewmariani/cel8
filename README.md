@@ -1,4 +1,7 @@
 # cel8 
+
+[![Build](/../../actions/workflows/main.yml/badge.svg)](/../../actions/workflows/main.yml)
+
 A *\*tiny\** framework for grid-based games in lua.
 
 ## Building
