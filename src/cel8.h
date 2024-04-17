@@ -469,9 +469,9 @@ CEL8_API_DECL cel8_range cel8_query_rnd(void);
 #define SWAP_INT(a, b) (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))
 
 /* lua */
-#include "lib/lua/lua.h"
-#include "lib/lua/lualib.h"
-#include "lib/lua/lauxlib.h"
+#include "lua/lua.h"
+#include "lua/lualib.h"
+#include "lua/lauxlib.h"
 
 struct {
   /* events */

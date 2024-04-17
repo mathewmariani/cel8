@@ -186,8 +186,8 @@ static void init(void) {
   });
 
   /* load embedded shader stages */
-  #include "../embed/vertex.vs.h"
-  #include "../embed/fragment.fs.h"
+  #include "embed/vertex.vs.h"
+  #include "embed/fragment.fs.h"
   sg_shader_desc shd_desc = (sg_shader_desc) {
     .vs = {
       .source = (const char*)&vertex_vs[0],

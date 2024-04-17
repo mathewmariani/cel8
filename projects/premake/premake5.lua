@@ -50,7 +50,7 @@ project "cel8"
   -- cel8:
   files {
     "../../src/cel8.h",
-    "../../src/lib/cel8-sokol.c",
+    "../../src/platform/sokol.c",
   }
 
   -- embed:
@@ -60,26 +60,27 @@ project "cel8"
 
   -- lua:
   files {
-    "../../src/lib/lua/**.c",
-    "../../src/lib/lua/**.h",
+    "../../libs/lua/**.c",
+    "../../libs/lua/**.h",
   }
 
   -- sokol:
   filter "system:windows"
     files {
-      "../../src/lib/sokol/sokol.c",
-      "../../src/lib/sokol/**.h",
+      "../../libs/sokol/sokol.c",
+      "../../libs/sokol/**.h",
     }
 
   -- sokol:
   filter "system:macosx"
     files {
-      "../../src/lib/sokol/sokol.m",
-      "../../src/lib/sokol/**.h",
+      "../../libs/sokol/sokol.m",
+      "../../libs/sokol/**.h",
     }
 
   includedirs {
     "../../src",
+    "../../libs",
   }
 
   filter "system:windows"

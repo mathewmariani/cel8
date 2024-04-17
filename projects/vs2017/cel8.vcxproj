@@ -40,44 +40,32 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>cel8</RootNamespace>
     <LatestTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</LatestTargetPlatformVersion>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 64bit|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 32bit|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 64bit|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 32bit|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug 32bit|x64'">
-    <PlatformToolset>v143</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug 64bit|Win32'">
-    <PlatformToolset>v143</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release 64bit|Win32'">
-    <PlatformToolset>v143</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release 32bit|x64'">
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -188,76 +176,78 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\libs\lua\lapi.h" />
+    <ClInclude Include="..\..\libs\lua\lauxlib.h" />
+    <ClInclude Include="..\..\libs\lua\lcode.h" />
+    <ClInclude Include="..\..\libs\lua\lctype.h" />
+    <ClInclude Include="..\..\libs\lua\ldebug.h" />
+    <ClInclude Include="..\..\libs\lua\ldo.h" />
+    <ClInclude Include="..\..\libs\lua\lfunc.h" />
+    <ClInclude Include="..\..\libs\lua\lgc.h" />
+    <ClInclude Include="..\..\libs\lua\llex.h" />
+    <ClInclude Include="..\..\libs\lua\llimits.h" />
+    <ClInclude Include="..\..\libs\lua\lmem.h" />
+    <ClInclude Include="..\..\libs\lua\lobject.h" />
+    <ClInclude Include="..\..\libs\lua\lopcodes.h" />
+    <ClInclude Include="..\..\libs\lua\lparser.h" />
+    <ClInclude Include="..\..\libs\lua\lstate.h" />
+    <ClInclude Include="..\..\libs\lua\lstring.h" />
+    <ClInclude Include="..\..\libs\lua\ltable.h" />
+    <ClInclude Include="..\..\libs\lua\ltm.h" />
+    <ClInclude Include="..\..\libs\lua\lua.h" />
+    <ClInclude Include="..\..\libs\lua\luaconf.h" />
+    <ClInclude Include="..\..\libs\lua\lualib.h" />
+    <ClInclude Include="..\..\libs\lua\lundump.h" />
+    <ClInclude Include="..\..\libs\lua\lvm.h" />
+    <ClInclude Include="..\..\libs\lua\lzio.h" />
+    <ClInclude Include="..\..\libs\sokol\sokol_app.h" />
+    <ClInclude Include="..\..\libs\sokol\sokol_gfx.h" />
+    <ClInclude Include="..\..\libs\sokol\sokol_glue.h" />
+    <ClInclude Include="..\..\libs\sokol\sokol_log.h" />
     <ClInclude Include="..\..\src\cel8.h" />
     <ClInclude Include="..\..\src\embed\boot.lua.h" />
     <ClInclude Include="..\..\src\embed\font.h" />
     <ClInclude Include="..\..\src\embed\fragment.fs.h" />
     <ClInclude Include="..\..\src\embed\palette.h" />
     <ClInclude Include="..\..\src\embed\vertex.vs.h" />
-    <ClInclude Include="..\..\src\lib\lua\lapi.h" />
-    <ClInclude Include="..\..\src\lib\lua\lauxlib.h" />
-    <ClInclude Include="..\..\src\lib\lua\lcode.h" />
-    <ClInclude Include="..\..\src\lib\lua\lctype.h" />
-    <ClInclude Include="..\..\src\lib\lua\ldebug.h" />
-    <ClInclude Include="..\..\src\lib\lua\ldo.h" />
-    <ClInclude Include="..\..\src\lib\lua\lfunc.h" />
-    <ClInclude Include="..\..\src\lib\lua\lgc.h" />
-    <ClInclude Include="..\..\src\lib\lua\llex.h" />
-    <ClInclude Include="..\..\src\lib\lua\llimits.h" />
-    <ClInclude Include="..\..\src\lib\lua\lmem.h" />
-    <ClInclude Include="..\..\src\lib\lua\lobject.h" />
-    <ClInclude Include="..\..\src\lib\lua\lopcodes.h" />
-    <ClInclude Include="..\..\src\lib\lua\lparser.h" />
-    <ClInclude Include="..\..\src\lib\lua\lstate.h" />
-    <ClInclude Include="..\..\src\lib\lua\lstring.h" />
-    <ClInclude Include="..\..\src\lib\lua\ltable.h" />
-    <ClInclude Include="..\..\src\lib\lua\ltm.h" />
-    <ClInclude Include="..\..\src\lib\lua\lua.h" />
-    <ClInclude Include="..\..\src\lib\lua\luaconf.h" />
-    <ClInclude Include="..\..\src\lib\lua\lualib.h" />
-    <ClInclude Include="..\..\src\lib\lua\lundump.h" />
-    <ClInclude Include="..\..\src\lib\lua\lvm.h" />
-    <ClInclude Include="..\..\src\lib\lua\lzio.h" />
-    <ClInclude Include="..\..\src\lib\sokol\sokol_app.h" />
-    <ClInclude Include="..\..\src\lib\sokol\sokol_gfx.h" />
-    <ClInclude Include="..\..\src\lib\sokol\sokol_glue.h" />
-    <ClInclude Include="..\..\src\lib\sokol\sokol_log.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\lib\cel8-sokol.c" />
-    <ClCompile Include="..\..\src\lib\lua\lapi.c" />
-    <ClCompile Include="..\..\src\lib\lua\lauxlib.c" />
-    <ClCompile Include="..\..\src\lib\lua\lbaselib.c" />
-    <ClCompile Include="..\..\src\lib\lua\lbitlib.c" />
-    <ClCompile Include="..\..\src\lib\lua\lcode.c" />
-    <ClCompile Include="..\..\src\lib\lua\lcorolib.c" />
-    <ClCompile Include="..\..\src\lib\lua\lctype.c" />
-    <ClCompile Include="..\..\src\lib\lua\ldblib.c" />
-    <ClCompile Include="..\..\src\lib\lua\ldebug.c" />
-    <ClCompile Include="..\..\src\lib\lua\ldo.c" />
-    <ClCompile Include="..\..\src\lib\lua\ldump.c" />
-    <ClCompile Include="..\..\src\lib\lua\lfunc.c" />
-    <ClCompile Include="..\..\src\lib\lua\lgc.c" />
-    <ClCompile Include="..\..\src\lib\lua\linit.c" />
-    <ClCompile Include="..\..\src\lib\lua\liolib.c" />
-    <ClCompile Include="..\..\src\lib\lua\llex.c" />
-    <ClCompile Include="..\..\src\lib\lua\lmathlib.c" />
-    <ClCompile Include="..\..\src\lib\lua\lmem.c" />
-    <ClCompile Include="..\..\src\lib\lua\loadlib.c" />
-    <ClCompile Include="..\..\src\lib\lua\lobject.c" />
-    <ClCompile Include="..\..\src\lib\lua\lopcodes.c" />
-    <ClCompile Include="..\..\src\lib\lua\loslib.c" />
-    <ClCompile Include="..\..\src\lib\lua\lparser.c" />
-    <ClCompile Include="..\..\src\lib\lua\lstate.c" />
-    <ClCompile Include="..\..\src\lib\lua\lstring.c" />
-    <ClCompile Include="..\..\src\lib\lua\lstrlib.c" />
-    <ClCompile Include="..\..\src\lib\lua\ltable.c" />
-    <ClCompile Include="..\..\src\lib\lua\ltablib.c" />
-    <ClCompile Include="..\..\src\lib\lua\ltm.c" />
-    <ClCompile Include="..\..\src\lib\lua\lundump.c" />
-    <ClCompile Include="..\..\src\lib\lua\lvm.c" />
-    <ClCompile Include="..\..\src\lib\lua\lzio.c" />
-    <ClCompile Include="..\..\src\lib\sokol\sokol.c" />
+    <ClCompile Include="..\..\libs\lua\lapi.c" />
+    <ClCompile Include="..\..\libs\lua\lauxlib.c" />
+    <ClCompile Include="..\..\libs\lua\lbaselib.c" />
+    <ClCompile Include="..\..\libs\lua\lbitlib.c" />
+    <ClCompile Include="..\..\libs\lua\lcode.c" />
+    <ClCompile Include="..\..\libs\lua\lcorolib.c" />
+    <ClCompile Include="..\..\libs\lua\lctype.c" />
+    <ClCompile Include="..\..\libs\lua\ldblib.c" />
+    <ClCompile Include="..\..\libs\lua\ldebug.c" />
+    <ClCompile Include="..\..\libs\lua\ldo.c" />
+    <ClCompile Include="..\..\libs\lua\ldump.c" />
+    <ClCompile Include="..\..\libs\lua\lfunc.c" />
+    <ClCompile Include="..\..\libs\lua\lgc.c" />
+    <ClCompile Include="..\..\libs\lua\linit.c" />
+    <ClCompile Include="..\..\libs\lua\liolib.c" />
+    <ClCompile Include="..\..\libs\lua\llex.c" />
+    <ClCompile Include="..\..\libs\lua\lmathlib.c" />
+    <ClCompile Include="..\..\libs\lua\lmem.c" />
+    <ClCompile Include="..\..\libs\lua\loadlib.c" />
+    <ClCompile Include="..\..\libs\lua\lobject.c" />
+    <ClCompile Include="..\..\libs\lua\lopcodes.c" />
+    <ClCompile Include="..\..\libs\lua\loslib.c" />
+    <ClCompile Include="..\..\libs\lua\lparser.c" />
+    <ClCompile Include="..\..\libs\lua\lstate.c" />
+    <ClCompile Include="..\..\libs\lua\lstring.c" />
+    <ClCompile Include="..\..\libs\lua\lstrlib.c" />
+    <ClCompile Include="..\..\libs\lua\ltable.c" />
+    <ClCompile Include="..\..\libs\lua\ltablib.c" />
+    <ClCompile Include="..\..\libs\lua\ltm.c" />
+    <ClCompile Include="..\..\libs\lua\lundump.c" />
+    <ClCompile Include="..\..\libs\lua\lvm.c" />
+    <ClCompile Include="..\..\libs\lua\lzio.c" />
+    <ClCompile Include="..\..\libs\sokol\sokol.c" />
+    <ClCompile Include="..\..\src\platform\sokol.c">
+      <ObjectFileName>$(IntDir)\sokol1.obj</ObjectFileName>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
