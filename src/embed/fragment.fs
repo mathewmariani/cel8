@@ -2,6 +2,7 @@
 
 uniform vec3[16] palette;
 uniform sampler2D screen;
+uniform sampler2D font;
 
 in vec2 uv;
 

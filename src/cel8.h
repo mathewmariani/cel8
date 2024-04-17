@@ -816,7 +816,7 @@ _CEL8_PRIVATE i32 l_get(lua_State *L) {
 
 /* system */
 
-static i32 l_stat(lua_State *L) {
+_CEL8_PRIVATE i32 l_stat(lua_State *L) {
   const i32 id = (i32) lua_tonumber(L, 1);
 
   f64 result = 0;

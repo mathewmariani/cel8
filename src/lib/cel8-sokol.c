@@ -5,6 +5,9 @@
 #include "sokol/sokol_gfx.h"
 #include "sokol/sokol_app.h"
 #include "sokol/sokol_glue.h"
+#if defined(_CEL8_DEBUG)
+  #include "sokol/sokol_log.h"
+#endif
 
 /* NOTE: 121 keycodes */
 static struct { char *name; sapp_keycode keycode; } key_entries[] = {
@@ -149,7 +152,7 @@ static struct {
   sg_pass_action pass_action;
   sg_pipeline pip;
   sg_bindings bind;
-} state;
+} display;
 
 static u8 screen[0x4000];
 
@@ -185,22 +188,24 @@ static void init(void) {
   /* load embedded shader stages */
   #include "../embed/vertex.vs.h"
   #include "../embed/fragment.fs.h"
-  sg_shader_desc shd_desc = (sg_shader_desc){
-    .vs.source = (const char*)&vertex_vs[0],
+  sg_shader_desc shd_desc = (sg_shader_desc) {
+    .vs = {
+      .source = (const char*)&vertex_vs[0],
+    },
     .fs = {
       .source = (const char*)&fragment_fs[0],
       .images = {
         [0] = { .used = true, .image_type = SG_IMAGETYPE_2D },
       },
       .samplers = {
-        [0] = {.used = true, .sampler_type = SG_SAMPLERTYPE_FILTERING},
+        [0] = { .used = true, .sampler_type = SG_SAMPLERTYPE_FILTERING },
       },
       .image_sampler_pairs = {
         [0] = {
-        .used = true,
-        .glsl_name = "screen",
-        .image_slot = 0,
-        .sampler_slot = 0,
+          .used = true,
+          .glsl_name = "screen",
+          .image_slot = 0,
+          .sampler_slot = 0,
         },
       },
       .uniform_blocks = {
@@ -219,7 +224,7 @@ static void init(void) {
   };
 
   /* default pass action */
-  state.pass_action = (sg_pass_action){
+  display.pass_action = (sg_pass_action) {
     .colors[0] = {
       .load_action = SG_LOADACTION_CLEAR,
       .clear_value = { 0.0f, 0.0f, 0.0f, 1.0f },
@@ -227,7 +232,7 @@ static void init(void) {
   };
 
   /* a pipeline state object */
-  state.pip = sg_make_pipeline(&(sg_pipeline_desc) {
+  display.pip = sg_make_pipeline(&(sg_pipeline_desc) {
     .shader = sg_make_shader(&shd_desc),
     .index_type = SG_INDEXTYPE_UINT16,
     .layout = {
@@ -257,11 +262,13 @@ static void init(void) {
   });
 
   /* bindings */
-  state.bind = (sg_bindings) {
-    .vertex_buffers[0] = vbuf,
+  display.bind = (sg_bindings) {
+    .vertex_buffers = { [0] = vbuf },
     .index_buffer = ibuf,
-    .fs.images[0] = screen,
-    .fs.samplers[0] = smp,
+    .fs = {
+      .images = { [0] = screen },
+      .samplers = { [0] = smp },
+    },
   };
 }
 
@@ -344,6 +351,7 @@ static void frame(void) {
   const cel8_range vram = cel8_query_vram();
   const cel8_range font = cel8_query_font();
 
+  /* FIXME: this can be done on the GPU in the shader */
   i32 i = 0, j = 0;
   for(; i < sizeof(screen); i+=8) {
     /* convert from screen to cell */
@@ -364,19 +372,6 @@ static void frame(void) {
     }
   }
 
-  /* update screen in gpu */
-  sg_update_image(state.bind.fs.images[0], &(sg_image_data) {
-    .subimage[0][0] = (sg_range) {
-      .ptr = screen,
-      .size = sizeof(screen),
-    }
-  });
-
-  /* graphics pipeline */
-  sg_begin_pass(&(sg_pass) {.action = state.pass_action, .swapchain = sglue_swapchain()});
-  sg_apply_pipeline(state.pip);
-  sg_apply_bindings(&state.bind);
-
   float palette[48] = { 0 };
   const cel8_range pal = cel8_query_pal();
 
@@ -387,8 +382,19 @@ static void frame(void) {
     *(palette + i+2) = *((u8 *) pal.data + i+2) / 255.0f;
   }
 
-  sg_apply_uniforms(SG_SHADERSTAGE_FS, 0, SG_RANGE_REF(palette));
+  /* update gpu resources */
+  sg_update_image(display.bind.fs.images[0], &(sg_image_data) {
+    .subimage[0][0] = (sg_range){
+      .ptr = screen,
+      .size = sizeof(screen),
+    },
+  });
 
+  /* graphics pipeline */
+  sg_begin_pass(&(sg_pass) {.action = display.pass_action, .swapchain = sglue_swapchain()});
+  sg_apply_pipeline(display.pip);
+  sg_apply_bindings(&display.bind);
+  sg_apply_uniforms(SG_SHADERSTAGE_FS, 0, SG_RANGE_REF(palette));
   sg_draw(0, 6, 1);
   sg_end_pass();
   sg_commit();
@@ -415,6 +421,7 @@ sapp_desc sokol_main(i32 argc, char* argv[]) {
 
 #if defined(_CEL8_DEBUG)
     .win32_console_create = true,
+    .logger.func = slog_func,
 #endif
   };
 }
