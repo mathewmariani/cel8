@@ -1,53 +1,29 @@
-#if defined(CEL8_IMPL) && !defined(CEL8_IMPLEMENTATION)
-#define CEL8_IMPLEMENTATION
-#endif
-#ifndef CEL8_INCLUDED
+#pragma once
 /*
-    cel8.h -- a *tiny* framework for grid-based games in lua.
+    cel8.h -- a *tiny* framework for making grid-based games.
 
     Project URL: https://github.com/mathewmariani/cel8
 
 
-    CALLBACKS:
-    ==========
-
-    load( )                          : called after initialization
-    update( )                        : called every frame
-    draw( )                          : called every frame
-    keydown( key )                   : called when a key is pressed
-    keyup( key )                     : called when a key is released
-
-
     FUNCTIONS:
     ==========
-    
+
     peek( addr [, n] )               : reads n 8-bit values from memory
     peek2( addr [, n] )              : reads n 16-bit values from memory
     peek4( addr [, n] )              : reads n 32-bit values from memory
     poke( addr [, value [, ...]] )   : writes one or more 8-bit values to memory
     poke2( addr [, value [, ...]] )  : writes one or more 16-bit values to memory
     poke4( addr [, value [, ...]] )  : writes one or more 32-bit values to memory
-    memcpy( dst, src, len )          : copies a block of memory to another block
-    memset( dst, value, len )        : sets a block of memory to a specified value
 
     cls( clr, chr )                  : clears the screen to a specified color and char
     color( clr )                     : sets the draw color
     fill( x, y, w, h, chr )          : sets the characters in the rectangle to specified char
-    put( x, y, str )                 : places text at (x, y)
+    print( x, y, str )               : places text at (x, y)
+    put( x, y, c )                   : puts a char at (x, y)
     get( x, y )                      : current environment
     stat( n )                        : system information
     rnd( )                           : pseudo random number
     time( )                          : time since start
-
-    band( x, y )                     : bitwise and
-    bor( x, y )                      : bitwise or
-    bxor( x, y )                     : bitwise xor
-    bnot( x )                        : bitwise not
-    shl( x, n )                      : arithmetic shift left
-    shr( x, n )                      : arithmetic shift right
-    lshr( x, n )                     : logical shift left
-    rotl( x, n )                     : rotate left
-    rotr( x, n )                     : rotate right
 
 
     MEMORY MAP:
@@ -222,203 +198,187 @@
     26 4f 8d 28 0e 19 6e 0a ce 52 16 54 86 01 30 3f
     ed 46 73 27 34 29 b7 73 ff 10 d2 58 23 0f 2a 32
 */
-#define CEL8_INCLUDED
 
 #include <stddef.h> /* size_t */
 #include <stdint.h>
 #include <stdbool.h>
 
-#if !defined(CEL8_API_DECL)
-  #if defined(_WIN32) && defined(CEL8_DLL) && defined(CEL8_IMPLEMENTATION)
-    #define CEL8_API_DECL __declspec(dllexport)
-  #elif defined(_WIN32) && defined(CEL8_DLL)
-    #define CEL8_API_DECL __declspec(dllimport)
-  #else
-    #define CEL8_STANDALONE (1)
-    #define CEL8_API_DECL extern
-  #endif
+#ifdef __cplusplus
+extern "C"
+{
 #endif
 
-/* floating point types */
-typedef float    f32;
-typedef double   f64;
+#if !defined(CEL8_API_DECL)
+#if defined(_WIN32) && defined(CEL8_DLL) && defined(CEL8_IMPLEMENTATION)
+#define CEL8_API_DECL __declspec(dllexport)
+#elif defined(_WIN32) && defined(CEL8_DLL)
+#define CEL8_API_DECL __declspec(dllimport)
+#else
+#define CEL8_STANDALONE (1)
+#define CEL8_API_DECL extern
+#endif
+#endif
 
-/* integer types */
-typedef int8_t   i8;
-typedef uint8_t  u8;
-typedef int16_t  i16;
-typedef uint16_t u16;
-typedef int32_t  i32;
-typedef uint32_t u32;
-typedef int64_t  i64;
-typedef uint64_t u64;
+  /* floating point types */
+  typedef float f32;
+  typedef double f64;
 
-/* compile time constants */
-enum {
-  /* virtual resolution */
-  CEL8_WINDOW_WIDTH      = 512,
-  CEL8_WINDOW_HEIGHT     = 512,
+  /* integer types */
+  typedef int8_t i8;
+  typedef uint8_t u8;
+  typedef int16_t i16;
+  typedef uint16_t u16;
+  typedef int32_t i32;
+  typedef uint32_t u32;
+  typedef int64_t i64;
+  typedef uint64_t u64;
 
-  /* internal resolution */
-  CEL8_SCREEN_WIDTH      = 128,
-  CEL8_SCREEN_HEIGHT     = 128,
+  /* compile time constants */
+  enum
+  {
+    /* virtual resolution */
+    CEL8_WINDOW_WIDTH = 512,
+    CEL8_WINDOW_HEIGHT = 512,
 
-  /* events */
-  CEL8_EVENT_BUFFER_SIZE = 256,
+    /* internal resolution */
+    CEL8_SCREEN_WIDTH = 128,
+    CEL8_SCREEN_HEIGHT = 128,
 
-  /* memory mapping */
-  CEL8_CMAP_ADDR         = 0x0000,
-  CEL8_CMAP_SIZE         = 0x000F,
-  CEL8_PAL_ADDR          = 0x000F,
-  CEL8_PAL_SIZE          = 0x0030,
-  CEL8_COLOR_ADDR        = 0x003F,
-  CEL8_COLOR_SIZE        = 0x0001,
-  CEL8_RND_ADDR          = 0x0040,
-  CEL8_RND_SIZE          = 0x0004,
-  CEL8_UNUSED_ADDR       = 0x0044,
-  CEL8_UNUSED_SIZE       = 0x000C,
-  CEL8_FONT_ADDR         = 0x0050,
-  CEL8_FONT_SIZE         = 0x0400,
-  CEL8_VRAM_ADDR         = 0x0450,
-  CEL8_VRAM_SIZE         = 0x0200,
-  CEL8_MEM_SIZE          = CEL8_CMAP_SIZE
-                         + CEL8_PAL_SIZE
-                         + CEL8_COLOR_SIZE
-                         + CEL8_RND_SIZE
-                         + CEL8_UNUSED_SIZE
-                         + CEL8_FONT_SIZE
-                         + CEL8_VRAM_SIZE,
+    /* memory mapping */
+    CEL8_CMAP_ADDR = 0x0000,
+    CEL8_CMAP_SIZE = 0x000F,
+    CEL8_PAL_ADDR = 0x000F,
+    CEL8_PAL_SIZE = 0x0030,
+    CEL8_COLOR_ADDR = 0x003F,
+    CEL8_COLOR_SIZE = 0x0001,
+    CEL8_RND_ADDR = 0x0040,
+    CEL8_RND_SIZE = 0x0004,
+    CEL8_UNUSED_ADDR = 0x0044,
+    CEL8_UNUSED_SIZE = 0x000C,
+    CEL8_FONT_ADDR = 0x0050,
+    CEL8_FONT_SIZE = 0x0400,
+    CEL8_VRAM_ADDR = 0x0450,
+    CEL8_VRAM_SIZE = 0x0200,
+    CEL8_MEM_SIZE = CEL8_CMAP_SIZE + CEL8_PAL_SIZE + CEL8_COLOR_SIZE + CEL8_RND_SIZE + CEL8_UNUSED_SIZE + CEL8_FONT_SIZE + CEL8_VRAM_SIZE,
 
-  /* stat */
-  CEL8_VERSION_STR       = 0x0000,
-  CEL8_FRAME_TIME        = 0x0001,
-  CEL8_MOUSE_X           = 0x0002,
-  CEL8_MOUSE_Y           = 0x0003,
-  CEL8_GMT_YEAR          = 0x0004,
-  CEL8_GMT_MONTH         = 0x0005,
-  CEL8_GMT_DAY           = 0x0006,
-  CEL8_GMT_HOUR          = 0x0007,
-  CEL8_GMT_MIN           = 0x0008,
-  CEL8_GMT_SEC           = 0x0009,
-  CEL8_LOCAL_YEAR        = 0x000a,
-  CEL8_LOCAL_MONTH       = 0x000b,
-  CEL8_LOCAL_DAY         = 0x000c,
-  CEL8_LOCAL_HOUR        = 0x000d,
-  CEL8_LOCAL_MIN         = 0x000e,
-  CEL8_LOCAL_SEC         = 0x000f,
-};
+    /* stat */
+    CEL8_VERSION_STR = 0x0000,
+    CEL8_FRAME_TIME = 0x0001,
+    CEL8_CURSOR_X = 0x0002,
+    CEL8_CURSOR_Y = 0x0003,
+    CEL8_GMT_YEAR = 0x0004,
+    CEL8_GMT_MONTH = 0x0005,
+    CEL8_GMT_DAY = 0x0006,
+    CEL8_GMT_HOUR = 0x0007,
+    CEL8_GMT_MIN = 0x0008,
+    CEL8_GMT_SEC = 0x0009,
+    CEL8_LOCAL_YEAR = 0x000a,
+    CEL8_LOCAL_MONTH = 0x000b,
+    CEL8_LOCAL_DAY = 0x000c,
+    CEL8_LOCAL_HOUR = 0x000d,
+    CEL8_LOCAL_MIN = 0x000e,
+    CEL8_LOCAL_SEC = 0x000f,
+  };
 
-typedef enum cel8_event_type {
-  CEL8_EVENT_INVALID,
+  typedef struct c8_range_t
+  {
+    void *ptr;
+    size_t size;
+  } c8_range_t;
 
-  /* keyboard */
-  CEL8_EVENT_KEY_DOWN,
-  CEL8_EVENT_KEY_UP,
+  typedef struct
+  {
+    struct
+    {
+      c8_range_t chars;   // 4 KByte character ROM dump
+      c8_range_t palette; // 8 KByte BASIC dump
+    } roms;
+  } c8_desc_t;
 
-  /* mouse */
-  CEL8_EVENT_MOUSE_DOWN,
-  CEL8_EVENT_MOUSE_UP,
-  CEL8_EVENT_MOUSE_MOVE,
-  CEL8_EVENT_MOUSE_SCROLL,
+  /* cel8 api */
+  CEL8_API_DECL void c8_init(const c8_desc_t *desc);
+  CEL8_API_DECL void c8_reset(void);
+  CEL8_API_DECL void c8_frame(void);
 
-  /* always last. */
-  _CEL8_EVENT_COUNT,
-} cel8_event_type;
+  CEL8_API_DECL const u8 c8_peek(const u32 addr, const u32 index);
+  CEL8_API_DECL const u16 c8_peek2(const u32 addr, const u32 index);
+  CEL8_API_DECL const u32 c8_peek4(const u32 addr, const u32 index);
+  CEL8_API_DECL void c8_poke(const u32 addr, const u32 index, const u8 value);
+  CEL8_API_DECL void c8_poke2(const u32 addr, const u32 index, const u16 value);
+  CEL8_API_DECL void c8_poke4(const u32 addr, const u32 index, const u32 value);
 
-typedef union {
-  i32 type;
+  CEL8_API_DECL void c8_cls(u8 clr, u8 chr);
+  CEL8_API_DECL void c8_color(u8 color);
+  CEL8_API_DECL void c8_fill(i32 x, i32 y, i32 w, i32 h, i32 chr);
+  CEL8_API_DECL void c8_print(i32 x, i32 y, const char *str);
+  CEL8_API_DECL void c8_put(i32 x, i32 y, u8 c);
+  CEL8_API_DECL u8 c8_get(i32 x, i32 y);
+  CEL8_API_DECL u16 c8_stat(i32 n);
+  CEL8_API_DECL u16 c8_rnd(void);
+  CEL8_API_DECL void c8_time(void);
 
-  struct {
-    i32 type;
-    i32 status;
-  } quit;
+  CEL8_API_DECL c8_range_t c8_query_memory(void);
+  CEL8_API_DECL c8_range_t c8_query_vram(void);
+  CEL8_API_DECL c8_range_t c8_query_font(void);
+  CEL8_API_DECL c8_range_t c8_query_color(void);
+  CEL8_API_DECL c8_range_t c8_query_pal(void);
+  CEL8_API_DECL c8_range_t c8_query_rnd(void);
 
-  struct {
-    i32 type;
-    i32 x, y;
-    i32 dx, dy;
-    i32 sx, sy;
-    i32 button;
-  } mouse;
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
-  struct {
-    i32 type;
-    const char *key;
-    bool repeat;
-  } keyboard;
-} cel8_event_t;
-
-typedef struct cel8_range {
-  void *data;
-  size_t size;
-} cel8_range;
-
-/* cel8 api */
-CEL8_API_DECL i32 cel8_init(i32 argc, char** argv);
-CEL8_API_DECL void cel8_cleanup(void);
-CEL8_API_DECL void cel8_frame(void);
-CEL8_API_DECL void cel8_event(const cel8_event_t *e);
-
-CEL8_API_DECL cel8_range cel8_query_memory(void);
-CEL8_API_DECL cel8_range cel8_query_vram(void);
-CEL8_API_DECL cel8_range cel8_query_font(void);
-CEL8_API_DECL cel8_range cel8_query_color(void);
-CEL8_API_DECL cel8_range cel8_query_pal(void);
-CEL8_API_DECL cel8_range cel8_query_rnd(void);
-
-#endif /* CEL8_INCLUDED */
-#ifdef CEL8_IMPLEMENTATION
-#define CEL8_IMPL_INCLUDED (1)
+#ifdef CEL8_IMPL
 
 /* platform */
 #if defined(WIN32) || defined(_WIN32)
-  #define OS_WINDOWS 1
+#define OS_WINDOWS 1
 #endif
 #if defined(__APPLE__)
-  #include <TargetConditionals.h>
-  #if defined(TARGET_OS_MAC)
-    #define OS_MACOS 1
-  #elif defined(TARGET_OS_IPHONE)
-    #define OS_IOS 1
-  #endif
+#include <TargetConditionals.h>
+#if defined(TARGET_OS_MAC)
+#define OS_MACOS 1
+#elif defined(TARGET_OS_IPHONE)
+#define OS_IOS 1
+#endif
 #endif
 #if defined(__linux__)
-  #define OS_LINUX 1
+#define OS_LINUX 1
 #endif
 #if defined(__FreeBSD__)
-  #define OS_FREEBSD 1
+#define OS_FREEBSD 1
 #endif
 #if defined(__EMSCRIPTEN__)
-  #define OS_EMSCRIPTEN 1
+#define OS_EMSCRIPTEN 1
 #endif
 
 /* check platform */
 #if !defined(OS_WINDOWS) && !defined(OS_MACOS) && !defined(OS_IOS) && !defined(OS_LINUX) && !defined(OS_FREEBSD) && !defined(OS_EMSCRIPTEN)
-  #error Could not detect target platform
+#error Could not detect target platform
 #endif
 
 /* debug */
 #if defined(_DEBUG)
-  #define _CEL8_DEBUG 1
+#define _CEL8_DEBUG 1
 #endif
 
 /* version */
-#define CEL8_VERSION_MAJOR      0
-#define CEL8_VERSION_MINOR      0
-#define CEL8_VERSION_REVISION   1
-#define CEL8_RELEASE_CANDIDATE  0
+#define CEL8_VERSION_MAJOR 0
+#define CEL8_VERSION_MINOR 0
+#define CEL8_VERSION_REVISION 1
+#define CEL8_RELEASE_CANDIDATE 0
 
 #define CEL8_VERSION_NUMBER     \
   ((CEL8_VERSION_MAJOR << 16) | \
-   (CEL8_VERSION_MINOR <<  8) | \
+   (CEL8_VERSION_MINOR << 8) |  \
    (CEL8_VERSION_REVISION))
 
 #if defined(_CEL8_DEBUG)
-  #define _CONCAT_VERSION(m, n, r) \
-    #m "." #n "." #r "-debug"
+#define _CONCAT_VERSION(m, n, r) \
+  #m "." #n "." #r "-debug"
 #else
-  #define _CONCAT_VERSION(m, n, r) \
-    #m "." #n "." #r
+#define _CONCAT_VERSION(m, n, r) \
+  #m "." #n "." #r
 #endif
 
 #define _MAKE_VERSION(m, n, r) \
@@ -431,813 +391,367 @@ CEL8_API_DECL cel8_range cel8_query_rnd(void);
 #include <time.h>
 
 #if defined(OS_WINDOWS)
-  #ifndef WIN32_LEAN_AND_MEAN
-    #define WIN32_LEAN_AND_MEAN
-  #endif
-  #ifndef NOMINMAX
-    #define NOMINMAX
-  #endif
-  #include <windows.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
 #elif defined(OS_MACOS)
-  #include <unistd.h>
-  #include <mach/mach_time.h>
+#include <unistd.h>
+#include <mach/mach_time.h>
 #endif
 
 #ifndef _CEL8_PRIVATE
- #if defined(__GNUC__) || defined(__clang__)
-   #define _CEL8_PRIVATE __attribute__((unused)) static
- #else
-   #define _CEL8_PRIVATE static
- #endif
+#if defined(__GNUC__) || defined(__clang__)
+#define _CEL8_PRIVATE __attribute__((unused)) static
+#else
+#define _CEL8_PRIVATE static
+#endif
 #endif
 
 /* stubbed */
-#if defined (_CEL8_DEBUG)
-  #include <stdio.h>
-  #define STUBBED(x) \
-    printf("STUBBED: %s at %s (%s:%d)\n", x, __FUNCTION__, __FILE__, __LINE__);
+#if defined(_CEL8_DEBUG)
+#include <stdio.h>
+#define STUBBED(x) \
+  printf("STUBBED: %s at %s (%s:%d)\n", x, __FUNCTION__, __FILE__, __LINE__);
 #else
-  #define STUBBED(x)
+#define STUBBED(x)
 #endif
 
 /* utils */
-#define UNUSED(x)      ((void)(x))
-#define MAX(a, b)      ((a) > (b) ? (a) : (b))
-#define MIN(a, b)      ((a) < (b) ? (a) : (b))
+#define UNUSED(x) ((void)(x))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define CLAMP(v, a, b) (MIN(MAX(v, a), b))
-#define ABS(n)         ((n<0)?(-n):(n))
+#define ABS(n) ((n < 0) ? (-n) : (n))
 #define SWAP_INT(a, b) (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))
 
-/* lua */
-#include "lua/lua.h"
-#include "lua/lualib.h"
-#include "lua/lauxlib.h"
-
-struct {
-  /* events */
-  cel8_event_t buffer[CEL8_EVENT_BUFFER_SIZE];
-  u8 writei;
-  u8 readi;
-
-  /* mouse */
-  i32 mouse_x;
-  i32 mouse_y;
-
+struct
+{
   /* timer */
   f64 curr;
   f64 start;
   f64 dt;
 
   u8 memory[CEL8_MEM_SIZE];
+  u8 screen[0x4000];
 } cel8;
 
-/* event */
+_CEL8_PRIVATE inline bool _c8__set_cell(u32 offset, u8 color, u8 glyph)
+{
+  c8_poke(CEL8_VRAM_ADDR + offset, 0x00, color);
+  c8_poke(CEL8_VRAM_ADDR + offset, 0x01, glyph);
+}
 
-_CEL8_PRIVATE i32 l_poll(lua_State *L) {
-  cel8_event_t e;
-  if (cel8.readi != cel8.writei) {
-    e = cel8.buffer[cel8.readi++];
+_CEL8_PRIVATE inline bool _c8__should_clip(u8 x, u8 y)
+{
+  return (x < 0 || x >= 0x10 || y < 0 || y >= 0x10);
+}
 
-    switch (e.type) {
-      /* keyboard */
-      case CEL8_EVENT_KEY_DOWN:
-        lua_pushstring(L, "keypressed");
-        lua_pushstring(L, e.keyboard.key);
-        return 2;
-      case CEL8_EVENT_KEY_UP:
-        lua_pushstring(L, "keyreleased");
-        lua_pushstring(L, e.keyboard.key);
-        return 2;
-
-      /* mouse */
-      case CEL8_EVENT_MOUSE_DOWN:
-        lua_pushstring(L, "mousepressed");
-        lua_pushnumber(L, e.mouse.x);
-        lua_pushnumber(L, e.mouse.y);
-        lua_pushnumber(L, e.mouse.button);
-        return 4;
-      case CEL8_EVENT_MOUSE_UP:
-        lua_pushstring(L, "mousereleased");
-        lua_pushnumber(L, e.mouse.x);
-        lua_pushnumber(L, e.mouse.y);
-        lua_pushnumber(L, e.mouse.button);
-        return 4;
-      case CEL8_EVENT_MOUSE_MOVE:
-        /* store mouse position */
-        cel8.mouse_x = e.mouse.x;
-        cel8.mouse_y = e.mouse.y;
-
-        lua_pushstring(L, "mousemoved");
-        lua_pushnumber(L, e.mouse.x);
-        lua_pushnumber(L, e.mouse.y);
-        lua_pushnumber(L, e.mouse.dx);
-        lua_pushnumber(L, e.mouse.dy);
-        return 5;
-      case CEL8_EVENT_MOUSE_SCROLL:
-        lua_pushstring(L, "mousescroll");
-        lua_pushnumber(L, e.mouse.sx);
-        lua_pushnumber(L, e.mouse.sy);
-        return 3;
-
-      case CEL8_EVENT_INVALID:
-      default:
-        break;
-    }
+_CEL8_PRIVATE inline void _c8__put_char(u32 x, u32 y, u8 c)
+{
+  if (_c8__should_clip(x, y))
+  {
+    return;
   }
 
-  return 0;
+  /* FIXME: magic number */
+  const u8 color = c8_peek(CEL8_COLOR_ADDR, 0);
+  const u32 offset = (x * 2) + 0x20 * y;
+
+  _c8__set_cell(offset, color, c);
 }
 
 /* memory */
 
-_CEL8_PRIVATE inline const u8 cel8_peek(const u32 addr, const u32 index) {
+void c8_init(const c8_desc_t *desc)
+{
+  /* initialize default font */
+  memcpy(cel8.memory + CEL8_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
+  memcpy(cel8.memory + CEL8_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
+
+  /* initialize timer */
+#if defined(OS_WINDOWS)
+  cel8.start = get_time_absolute();
+#elif defined(OS_MACOS)
+  cel8.start = mach_absolute_time();
+#endif
+}
+
+void c8_reset(void)
+{
+  /* body */
+}
+
+void c8_frame(void)
+{
+  /* query memory */
+  const c8_range_t vram = c8_query_vram();
+  const c8_range_t font = c8_query_font();
+
+  /* update screen data */
+  /* FIXME: I think this should be done on the the GPU by the platform. */
+  for (i32 i = 0, j = 0; i < sizeof(cel8.screen); i += 8)
+  {
+    /* convert from screen to cell */
+    j = ((i % 128) / 8) + 16 * (i / 1024);
+
+    /* screen buffer */
+    u8 color = *((u8 *)vram.ptr + (j * 2) + 0);
+    u8 glyph = *((u8 *)vram.ptr + (j * 2) + 1);
+
+    /* convert color */
+    u8 h = ((color >> 4) & 0x0F);
+    u8 l = ((color) & 0x0F);
+
+    i32 x = 0;
+    i32 y = (i / 128) % 8;
+    for (; x < 8; x++)
+    {
+      u8 b = *((u8 *)font.ptr + y + glyph * 8) >> x;
+      *((u8 *)cel8.screen + i + x) = (b & 1) ? l : h;
+    }
+  }
+}
+
+inline const u8 c8_peek(const u32 addr, const u32 index)
+{
   return *(cel8.memory + addr + index);
 }
 
-_CEL8_PRIVATE inline const u16 cel8_peek2(const u32 addr, const u32 index) {
-  const u8 b0 = cel8_peek(addr, index+0);
-  const u8 b1 = cel8_peek(addr, index+1);
+inline const u16 c8_peek2(const u32 addr, const u32 index)
+{
+  const u8 b0 = c8_peek(addr, index + 0);
+  const u8 b1 = c8_peek(addr, index + 1);
 
   /* combine 16-bit value */
   return ((b0 << 8) | (b1 << 0));
 }
 
-_CEL8_PRIVATE inline const u32 cel8_peek4(const u32 addr, const u32 index) {
-  const u8 b0 = cel8_peek(addr, index+0);
-  const u8 b1 = cel8_peek(addr, index+1);
-  const u8 b2 = cel8_peek(addr, index+2);
-  const u8 b3 = cel8_peek(addr, index+3);
+inline const u32 c8_peek4(const u32 addr, const u32 index)
+{
+  const u8 b0 = c8_peek(addr, index + 0);
+  const u8 b1 = c8_peek(addr, index + 1);
+  const u8 b2 = c8_peek(addr, index + 2);
+  const u8 b3 = c8_peek(addr, index + 3);
 
   /* combine 32-bit value */
-  return ((b0 << 24) | (b1 << 16) | (b2 <<  8) | (b3 <<  0));
+  return ((b0 << 24) | (b1 << 16) | (b2 << 8) | (b3 << 0));
 }
 
-_CEL8_PRIVATE inline void cel8_poke(const u32 addr, const u32 index, const u8 value) {
+inline void c8_poke(const u32 addr, const u32 index, const u8 value)
+{
   *(cel8.memory + addr + index) = value;
 }
 
-_CEL8_PRIVATE inline void cel8_poke2(const u32 addr, const u32 index, const u16 value) {
-  cel8_poke(addr, index+0, (value >> 8) & 0xff);
-  cel8_poke(addr, index+1, (value >> 0) & 0xff);
+inline void c8_poke2(const u32 addr, const u32 index, const u16 value)
+{
+  c8_poke(addr, index + 0, (value >> 8) & 0xff);
+  c8_poke(addr, index + 1, (value >> 0) & 0xff);
 }
 
-_CEL8_PRIVATE inline void cel8_poke4(const u32 addr, const u32 index, const u32 value) {
-  cel8_poke(addr, index+0, (value >> 24) & 0xff);
-  cel8_poke(addr, index+1, (value >> 16) & 0xff);
-  cel8_poke(addr, index+2, (value >>  8) & 0xff);
-  cel8_poke(addr, index+3, (value >>  0) & 0xff);
+inline void c8_poke4(const u32 addr, const u32 index, const u32 value)
+{
+  c8_poke(addr, index + 0, (value >> 24) & 0xff);
+  c8_poke(addr, index + 1, (value >> 16) & 0xff);
+  c8_poke(addr, index + 2, (value >> 8) & 0xff);
+  c8_poke(addr, index + 3, (value >> 0) & 0xff);
 }
 
-/* memory */
-
-_CEL8_PRIVATE i32 l_peek(lua_State *L) {
-  const i32 addr = (i32) lua_tonumber(L, 1);
-  i32 n = (i32) lua_tonumber(L, 2);
-
-  if (n == 0) {
-    n = 1;
+void c8_cls(u8 clr, u8 chr)
+{
+  for (i32 i = 0; i < CEL8_VRAM_SIZE; i += 2)
+  {
+    _c8__set_cell(i, clr, chr);
   }
-
-  i32 i = 0;
-  for (; i < n; ++i) {
-    /* TODO: implement bound-checking */
-    lua_pushnumber(L, cel8_peek(addr, i));
-  }
-
-  return n;
 }
 
-_CEL8_PRIVATE i32 l_peek2(lua_State *L) {
-  const i32 addr = (i32) lua_tonumber(L, 1);
-  i32 n = (i32) lua_tonumber(L, 2);
-
-  if (n == 0) {
-    n = 1;
-  }
-
-  i32 i = 0;
-  for (; i < n; ++i) {
-    /* TODO: implement bound-checking */
-    lua_pushnumber(L, cel8_peek2(addr, i*2));
-  }
-
-  return n;
+void c8_color(u8 color)
+{
+  c8_poke(CEL8_COLOR_ADDR, 0x00, color);
 }
 
-_CEL8_PRIVATE i32 l_peek4(lua_State *L) {
-  const i32 addr = (i32) lua_tonumber(L, 1);
-  i32 n = (i32) lua_tonumber(L, 2);
-
-  if (n == 0) {
-    n = 1;
-  }
-
-  i32 i = 0;
-  for (; i < n; ++i) {
-    /* TODO: implement bound-checking */
-    lua_pushnumber(L, cel8_peek4(addr, i*4));
-  }
-
-  return n;
-}
-
-_CEL8_PRIVATE i32 l_poke(lua_State *L) {
-  const i32 addr = (i32) lua_tonumber(L, 1);
-  const i32 n = lua_gettop(L) - 1;
-
-  i32 i = 0;
-  for (; i < n; i++) {
-    /* TODO: implement bound-checking */
-    const u8 value = (u8) lua_tonumber(L, 2 + i);
-    cel8_poke(addr, i, value);
-  }
-
-  return 0;
-}
-
-_CEL8_PRIVATE i32 l_poke2(lua_State *L) {
-  const i32 addr = (i32) lua_tonumber(L, 1);
-  const i32 n = lua_gettop(L) - 1;
-
-  i32 i = 0;
-  for (; i < n; i++) {
-    /* TODO: implement bound-checking */
-    const u16 value = (u16) lua_tonumber(L, 2 + i);
-    cel8_poke2(addr, (i*2), value);
-  }
-
-  return 0;
-}
-
-_CEL8_PRIVATE i32 l_poke4(lua_State *L) {
-  const i32 addr = (i32) lua_tonumber(L, 1);
-  const i32 n = lua_gettop(L) - 1;
-
-  i32 i = 0;
-  for (; i < n; i++) {
-    /* TODO: implement bound-checking */
-    const u32 value = (u32) lua_tonumber(L, 2 + i);
-    cel8_poke4(addr, (i*4), value);
-  }
-
-  return 0;
-}
-
-_CEL8_PRIVATE i32 l_memcpy(lua_State *L) {
-  i32 dstaddr = (i32) lua_tonumber(L, 1);
-  i32 srcaddr = (i32) lua_tonumber(L, 2);
-  i32 num = (i32) lua_tonumber(L, 3);
-
-  /* TODO: implement bound-checking */
-
-  void *dst = &*(cel8.memory + dstaddr);
-  void *src = &*(cel8.memory + srcaddr);
-  memcpy(dst, src, num);
-
-  return 0;
-}
-
-_CEL8_PRIVATE i32 l_memset(lua_State *L) {
-  i32 dstaddr = (i32) lua_tonumber(L, 1);
-  i32 val = (i32) lua_tonumber(L, 2);
-  i32 len = (i32) lua_tonumber(L, 3);
-
-  /* TODO: implement bound-checking */
-
-  void *dst = &*(cel8.memory + dstaddr);
-  memset(dst, val, len * sizeof(u8));
-
-  return 0;
-}
-
-/* drawing */
-
-#define _CEL8_SET_CELL(offset, color, glyph) \
-  cel8_poke(CEL8_VRAM_ADDR + offset, 0, color); \
-  cel8_poke(CEL8_VRAM_ADDR + offset, 1, glyph);
-
-_CEL8_PRIVATE inline bool should_clip(u8 x, u8 y) {
-  return (x < 0 || x >= 0x10 || y < 0 || y >= 0x10);
-}
-
-_CEL8_PRIVATE i32 l_cls(lua_State *L) {
-  const u8 color = (u8) lua_tonumber(L, 1);
-  const u8 glyph = (u8) lua_tonumber(L, 2);
-
-  i32 i = 0;
-  for (; i < CEL8_VRAM_SIZE; i+=2) {
-    _CEL8_SET_CELL(i, color, glyph);
-  }
-
-  return 0;
-}
-
-_CEL8_PRIVATE i32 l_color(lua_State *L) {
-  const u8 c = (u8) lua_tonumber(L, 1);
-  cel8_poke(CEL8_COLOR_ADDR, 0, c);
-  return 0;
-}
-
-_CEL8_PRIVATE inline void put_char(u32 x, u32 y, const char c) {
-  if (should_clip(x, y)) {
-    return;
-  }
-
-  /* FIXME: magic number */
-  const u8 color = cel8_peek(CEL8_COLOR_ADDR, 0);
-  const u32 offset = (x * 2) + 0x20 * y;
-
-  _CEL8_SET_CELL(offset, color, c);
-}
-
-_CEL8_PRIVATE i32 l_fill(lua_State *L) {
-  const i32 x = (i32) lua_tonumber(L, 1);
-  const i32 y = (i32) lua_tonumber(L, 2);
-  const i32 w = (i32) lua_tonumber(L, 3);
-  const i32 h = (i32) lua_tonumber(L, 4);
-
-  i32 c = 0;
-  if (lua_type(L, 5) == LUA_TSTRING) {
-    const char *str = lua_tostring(L, 5);
-    c = (i32) *(str + 0);
-  } else {
-    c = (i32) lua_tonumber(L, 5);
-  }
-
-  for (i32 i = y; i < (y + h); i++) {
-    for (i32 j = x; j < (x + w); j++) {
-      put_char(j, i, (char) c);
+void c8_fill(i32 x, i32 y, i32 w, i32 h, i32 chr)
+{
+  for (i32 i = y; i < (y + h); i++)
+  {
+    for (i32 j = x; j < (x + w); j++)
+    {
+      _c8__put_char(j, i, chr);
     }
   }
-
-  return 0;
 }
 
-_CEL8_PRIVATE i32 l_pal(lua_State *L) {
-  return 0;
-}
-
-_CEL8_PRIVATE i32 l_put(lua_State *L) {
-  const i32 x = (i32) lua_tonumber(L, 1);
-  const i32 y = (i32) lua_tonumber(L, 2);
-
-  if (lua_type(L, 3) == LUA_TSTRING) {
-    const char *str = lua_tostring(L, 3);
-    
-    i32 i = 0;
-    while (*str) {
-      put_char(x+(i++), y, *(str++));
-    }
-
-  } else {
-    const i32 c = lua_tonumber(L, 3);
-    put_char(x, y, c);
+void c8_print(i32 x, i32 y, const char *str)
+{
+  i32 i = 0;
+  while (*str)
+  {
+    _c8__put_char(x + (i++), y, *(str++));
   }
-
-  return 0;
 }
 
-_CEL8_PRIVATE i32 l_get(lua_State *L) {
-  const i32 x = (i32) lua_tonumber(L, 1);
-  const i32 y = (i32) lua_tonumber(L, 2);
+void c8_put(i32 x, i32 y, u8 c)
+{
+  _c8__put_char(x, y, c);
+}
 
+u8 c8_get(i32 x, i32 y)
+{
   /* boundary check */
-  if (should_clip(x, y)) {
+  if (_c8__should_clip(x, y))
+  {
     return 0;
   }
 
   /* FIXME: magic numbers (0x20) */
   const u32 offset = (x * 2) + 0x20 * y;
 
-  lua_pushnumber(L, cel8_peek(offset, 0));
-
-  return 1;
+  return c8_peek(offset, 0);
 }
 
-/* system */
+u16 c8_stat(i32 n)
+{
+  switch (n)
+  {
+  case CEL8_VERSION_STR:
+  {
+    return 0;
+  }
+  case CEL8_FRAME_TIME:
+  {
+    return cel8.dt;
+  }
+  case CEL8_CURSOR_X:
+  {
+    return 0;
+  }
+  case CEL8_CURSOR_Y:
+  {
+    return 0;
+  }
+  case CEL8_GMT_YEAR:
+  {
+    time_t t = time(NULL);
+    return gmtime(&t)->tm_year + 1900;
+  }
+  case CEL8_GMT_MONTH:
+  {
+    time_t t = time(NULL);
+    return gmtime(&t)->tm_mon + 1;
+  }
+  case CEL8_GMT_DAY:
+  {
+    time_t t = time(NULL);
+    return gmtime(&t)->tm_mday;
+  }
+  case CEL8_GMT_HOUR:
+  {
+    time_t t = time(NULL);
+    return gmtime(&t)->tm_hour;
+  }
+  case CEL8_GMT_MIN:
+  {
+    time_t t = time(NULL);
+    return gmtime(&t)->tm_min;
+  }
+  case CEL8_GMT_SEC:
+  {
+    time_t t = time(NULL);
+    return gmtime(&t)->tm_sec;
+  }
+  case CEL8_LOCAL_YEAR:
+  {
+    time_t t = time(NULL);
+    return localtime(&t)->tm_year + 1900;
+  }
+  case CEL8_LOCAL_MONTH:
+  {
+    time_t t = time(NULL);
+    return localtime(&t)->tm_mon + 1;
+  }
+  case CEL8_LOCAL_DAY:
+  {
+    time_t t = time(NULL);
+    return localtime(&t)->tm_mday;
+  }
+  case CEL8_LOCAL_HOUR:
+  {
+    time_t t = time(NULL);
+    return localtime(&t)->tm_hour;
+  }
+  case CEL8_LOCAL_MIN:
+  {
+    time_t t = time(NULL);
+    return localtime(&t)->tm_min;
+  }
+  case CEL8_LOCAL_SEC:
+  {
+    time_t t = time(NULL);
+    return localtime(&t)->tm_sec;
+  }
+  default:
+    return 0;
+  }
+}
 
-_CEL8_PRIVATE i32 l_stat(lua_State *L) {
-  const i32 id = (i32) lua_tonumber(L, 1);
+u16 c8_rnd(void)
+{
+  for (i32 i = 1; i >= 0; --i)
+  {
+    u8 reg_0 = c8_peek(CEL8_RND_ADDR, 0);
+    u8 reg_1 = c8_peek(CEL8_RND_ADDR, 1);
 
-  f64 result = 0;
-  switch (id) {
-    case CEL8_VERSION_STR: {
-      lua_pushstring(L, CEL8_VERSION_STRING);
-      return 1;
-    }
-    case CEL8_FRAME_TIME: {
-      result = cel8.dt;
-      break;
-    }
-    case CEL8_MOUSE_X: {
-      result = cel8.mouse_x;
-      break;
-    }
-    case CEL8_MOUSE_Y: {
-      result = cel8.mouse_y;
-      break;
-    }
-    case CEL8_GMT_YEAR: {
-      time_t t = time(NULL);
-      result = gmtime(&t)->tm_year + 1900;
-      break;
-    }
-    case CEL8_GMT_MONTH: {
-      time_t t = time(NULL);
-      result = gmtime(&t)->tm_mon + 1;
-      break;
-    }
-    case CEL8_GMT_DAY: {
-      time_t t = time(NULL);
-      result = gmtime(&t)->tm_mday;
-      break;
-    }
-    case CEL8_GMT_HOUR: {
-      time_t t = time(NULL);
-      result = gmtime(&t)->tm_hour;
-      break;
-    }
-    case CEL8_GMT_MIN: {
-      time_t t = time(NULL);
-      result = gmtime(&t)->tm_min;
-      break;
-    }
-    case CEL8_GMT_SEC: {
-      time_t t = time(NULL);
-      result = gmtime(&t)->tm_sec;
-      break;
-    }
-    case CEL8_LOCAL_YEAR: {
-      time_t t = time(NULL);
-      result = localtime(&t)->tm_year + 1900;
-      break;
-    }
-    case CEL8_LOCAL_MONTH: {
-      time_t t = time(NULL);
-      result = localtime(&t)->tm_mon + 1;
-      break;
-    }
-    case CEL8_LOCAL_DAY: {
-      time_t t = time(NULL);
-      result = localtime(&t)->tm_mday;
-      break;
-    }
-    case CEL8_LOCAL_HOUR: {
-      time_t t = time(NULL);
-      result = localtime(&t)->tm_hour;
-      break;
-    }
-    case CEL8_LOCAL_MIN: {
-      time_t t = time(NULL);
-      result = localtime(&t)->tm_min;
-      break;
-    }
-    case CEL8_LOCAL_SEC: {
-      time_t t = time(NULL);
-      result = localtime(&t)->tm_sec;
-      break;
-    }
-    default:
-      return 0;
+    c8_poke(CEL8_RND_ADDR, 0, 5 * reg_0 + 1);
+    c8_poke(CEL8_RND_ADDR, 1, ((reg_1 & 0x80) == (reg_1 & 0x10)) ? 2 * reg_1 + 1 : 2 * reg_1);
+    c8_poke(CEL8_RND_ADDR, 2 + i, (reg_0 ^ reg_1));
   }
 
-  lua_pushnumber(L, result);
-  return 1;
+  u8 reg_2 = c8_peek(CEL8_RND_ADDR, 2);
+  u8 reg_3 = c8_peek(CEL8_RND_ADDR, 3);
+  return ((u16)reg_2 << 0x8) | reg_3;
 }
 
-_CEL8_PRIVATE i32 l_rnd(lua_State *L) {
-  i32 i = 1;
-  for (; i >= 0; --i) {
-    u8 reg_0 = cel8_peek(CEL8_RND_ADDR, 0);
-    u8 reg_1 = cel8_peek(CEL8_RND_ADDR, 1);
-
-    cel8_poke(CEL8_RND_ADDR, 0, 5 * reg_0 + 1);
-    cel8_poke(CEL8_RND_ADDR, 1, ((reg_1 & 0x80) == (reg_1 & 0x10)) ? 2 * reg_1 + 1 : 2 * reg_1);
-    cel8_poke(CEL8_RND_ADDR, 2+i, (reg_0 ^ reg_1));
-  }
-
-  u8 reg_2 = cel8_peek(CEL8_RND_ADDR, 2);
-  u8 reg_3 = cel8_peek(CEL8_RND_ADDR, 3);
-  u16 n = ((u16) reg_2 << 0x8) | reg_3;
-  
-  lua_pushnumber(L, n);
-  return 1;
-}
-
-/* timer */
-
-#if defined(OS_WINDOWS)
-_CEL8_PRIVATE f64 get_frequency() {
-  LARGE_INTEGER li;
-  QueryPerformanceFrequency(&li);
-  return (f64) li.QuadPart;
-}
-_CEL8_PRIVATE f64 get_time_absolute() {
-  LARGE_INTEGER li;
-  QueryPerformanceCounter(&li);
-  return (f64) li.QuadPart;
-}
-#elif defined(OS_MACOS)
-_CEL8_PRIVATE mach_timebase_info_data_t get_timebase_info() {
-  mach_timebase_info_data_t info;
-  mach_timebase_info(&info);
-  return info;
-}
-#endif
-
-_CEL8_PRIVATE f64 get_time(f64 start) {
-#if defined(OS_WINDOWS)
-  const f64 now = get_time_absolute();
-  const f64 frequency = get_frequency();
-  return (now - start) / frequency;
-#elif defined(OS_MACOS)
-  const mach_timebase_info_data_t timebase = get_timebase_info();
-  const u64 mach_now = mach_absolute_time() - start;
-  return ((f64) mach_now * 1.0e-9) * (f64) timebase.numer / (f64) timebase.denom;
-#endif
-}
-
-_CEL8_PRIVATE i32 l_step(lua_State *L) {
-  f64 prev = cel8.curr;
-
-  cel8.curr = get_time(cel8.start);
-  cel8.dt = cel8.curr - prev;
-
-  return 0;
-}
-
-_CEL8_PRIVATE i32 l_time(lua_State *L) {
-  lua_pushnumber(L, cel8.curr);
-  return 1;
-}
-
-/* bitwise */
-
-_CEL8_PRIVATE i32 l_band(lua_State *L) {
-  i32 x = (i32) lua_tonumber(L, 1);
-  i32 y = (i32) lua_tonumber(L, 2);
-  lua_pushnumber(L, x & y);
-  return 1;
-}
-
-_CEL8_PRIVATE i32 l_bor(lua_State *L) {
-  i32 x = (i32) lua_tonumber(L, 1);
-  i32 y = (i32) lua_tonumber(L, 2);
-  lua_pushnumber(L, x | y);
-  return 1;
-}
-
-_CEL8_PRIVATE i32 l_bxor(lua_State *L) {
-  i32 x = (i32) lua_tonumber(L, 1);
-  i32 y = (i32) lua_tonumber(L, 2);
-  lua_pushnumber(L, x ^ y);
-  return 1;
-}
-
-_CEL8_PRIVATE i32 l_bnot(lua_State *L) {
-  i32 x = (i32) lua_tonumber(L, 1);
-  lua_pushnumber(L, ~x);
-  return 1;
-}
-
-_CEL8_PRIVATE i32 l_shl(lua_State *L) {
-  i32 x = (i32) lua_tonumber(L, 1);
-  i32 n = (i32) lua_tonumber(L, 2);
-  lua_pushnumber(L, x << n);
-  return 1;
-}
-
-_CEL8_PRIVATE i32 l_shr(lua_State *L) {
-  i32 x = (i32) lua_tonumber(L, 1);
-  i32 n = (i32) lua_tonumber(L, 2);
-  lua_pushnumber(L, x >> n);
-  return 1;
-}
-
-_CEL8_PRIVATE i32 l_lshr(lua_State *L) {
-  i32 x = (i32) lua_tonumber(L, 1);
-  i32 n = (i32) lua_tonumber(L, 2);
-  const i32 mask = ~(-1 << n) << (32 - n);
-  lua_pushnumber(L, ~mask & (x >> n));
-  return 1;
-}
-
-_CEL8_PRIVATE i32 l_rotl(lua_State *L) {
-  const size_t b = sizeof(i32) * 8 - 1;
-
-  i32 x = (i32) lua_tonumber(L, 1);
-  i32 n = (i32) lua_tonumber(L, 2);
-  
-  i32 d;
-  n %= b;
-  while (n--) {
-    d = (x >> b) & 1; 
-    x = (x << 1) | d;
-  }
-  lua_pushnumber(L, x);
-  return 1;
-}
-
-_CEL8_PRIVATE i32 l_rotr(lua_State *L) {
-  const i32 b = sizeof(i32) * 8 - 1;
-
-  i32 x = (i32) lua_tonumber(L, 1);
-  i32 n = (i32) lua_tonumber(L, 2);
-
-  i32 d;
-  n %= b;
-  while (n--) {
-    d = x & 1;
-    x = (x >> 1) & (~(1 << b));
-    x = x | (d << b);
-  }
-
-  lua_pushnumber(L, x);
-  return 1;
-}
-
-#define luax_preload(k, f)        \
-  lua_getglobal(L, "package");    \
-  lua_getfield(L, -1, "preload"); \
-  lua_pushcfunction(L, f);        \
-  lua_setfield(L, -2, k);         \
-  lua_pop(L, 2);
-
-#define luax_require(k)        \
-  lua_getglobal(L, "require"); \
-  lua_pushstring(L, k);        \
-  lua_call(L, 1, 1);
-
-int luaopen_cel8_boot(lua_State *L) {
-  #include "embed/boot.lua.h"
-  if (luaL_loadbuffer(L, (const char *) boot_lua, sizeof(boot_lua), "=[cel8 \"boot.lua\"]") == 0) {
-    lua_call(L, 0, 1);
-  }
-  
-  return 1;
-}
-
-int luaopen_cel8(lua_State *L) {
-  /* preload modules */
-  luax_preload("cel8.boot", luaopen_cel8_boot);
-
-  /* create cel8 table */
-  lua_getglobal(L, "cel8");
-  if (!lua_istable(L, -1)) {
-    lua_pop(L, 1);
-    lua_newtable(L);
-    lua_pushvalue(L, -1);
-    lua_setglobal(L, "cel8");
-  }
-
-  /* cel8 functions */
-  luaL_Reg reg[] = {
-    /* event */
-    { "poll",          l_poll              },
-
-    /* memory */
-    { "peek",          l_peek              },
-    { "peek2",         l_peek2             },
-    { "peek4",         l_peek4             },
-    { "poke",          l_poke              },
-    { "poke2",         l_poke2             },
-    { "poke4",         l_poke4             },
-    { "memcpy",        l_memcpy            },
-    { "memset",        l_memset            },
-
-    /* drawing */
-    { "cls",           l_cls               },
-    { "color",         l_color             },
-    { "fill",          l_fill              },
-    { "pal",           l_pal               },
-    { "put",           l_put               },
-    { "get",           l_get               },
-
-    /* system */
-    { "stat",          l_stat              },
-    { "rnd",           l_rnd               },
-
-    /* time */
-    { "step",          l_step              },
-    { "time",          l_time              },
-
-    /* bitwise */
-    { "band",          l_band              },
-    { "bor",           l_bor               },
-    { "bxor",          l_bxor              },
-    { "bnot",          l_bnot              },
-    { "shl",           l_shl               },
-    { "shr",           l_shr               },
-    { "lshr",          l_lshr              },
-    { "rotl",          l_rotl              },
-    { "rotr",          l_rotr              },
-
-    /* always last. */
-    { 0, 0 },
-  };
-
-  const luaL_Reg *l = &reg[0];
-  for (; l->name != NULL; l++) {
-    lua_pushcfunction(L, l->func);
-    lua_setfield(L, -2, l->name);
-  }
-
-  return 1;
-}
-
-_CEL8_PRIVATE lua_State *L = NULL;
-
-i32 cel8_init(i32 argc, char** argv) {
-  /* initialize font */
-  #include "embed/font.h"
-  memcpy(cel8.memory + CEL8_FONT_ADDR, font_h, sizeof(font_h));
-
-  /* initialize palette */
-  #include "embed/palette.h"
-  memcpy(cel8.memory + CEL8_PAL_ADDR, palette_h, sizeof(palette_h));
-  
-  /* initialize lua state */
-  L = luaL_newstate();
-  luaL_openlibs(L);
-
-  luax_preload("cel8", luaopen_cel8);
-  luax_require("cel8");
-
-  /* create `cel8.argv` */
-  lua_newtable(L);
-  i32 i = 0;
-  for (; i < argc; i++) {
-    lua_pushstring(L, argv[i]);
-    lua_rawseti(L, -2, i + 1);
-  }
-  lua_setfield(L, -2, "argv");
-
-  /* pop cel8 */
-  lua_pop(L, 1);
-
-  luax_require("cel8.boot");
-  lua_pop(L, 1);
-
-  /* initialize timer */
-#if defined(OS_WINDOWS)
-  cel8.start = get_time_absolute();
-#elif defined(OS_MACOS) 
-  cel8.start = mach_absolute_time();
-#endif
-
-  return 0;
-}
-
-void cel8_cleanup(void) {
-  /* lua virtual machine */
-  lua_close(L);
-  L = NULL;
-}
-
-void cel8_frame(void) {
-  lua_getglobal(L, "cel8");
-  if (!lua_isnil(L, -1)) {
-    lua_getfield(L, -1, "frame");
-    if (lua_pcall(L, 0, 0, 0) != 0) {
-      const char *str = lua_tostring(L, -1);
-      printf("Error: %s\n", str);
-      return;
-    }
-  }
-  lua_pop(L, 1);
-}
-
-void cel8_event(const cel8_event_t *e) {
-  cel8.buffer[cel8.writei++] = *e;
+void c8_time(void)
+{
+  /* body */
 }
 
 #define _CEL8_RANGE(addr, sz) \
-  (cel8_range) { .data = cel8.memory + addr, .size = sz };
+  (c8_range_t){.ptr = cel8.memory + addr, .size = sz};
 
-cel8_range cel8_query_memory(void) {
+c8_range_t c8_query_memory(void)
+{
   return _CEL8_RANGE(0x0000, CEL8_MEM_SIZE);
 }
 
-cel8_range cel8_query_pal(void) {
- return _CEL8_RANGE(CEL8_PAL_ADDR, CEL8_PAL_SIZE);
+c8_range_t c8_query_pal(void)
+{
+  return _CEL8_RANGE(CEL8_PAL_ADDR, CEL8_PAL_SIZE);
 }
 
-cel8_range cel8_query_color(void) {
+c8_range_t c8_query_color(void)
+{
   return _CEL8_RANGE(CEL8_COLOR_ADDR, CEL8_COLOR_SIZE);
 }
 
-cel8_range cel8_query_rnd(void) {
- return _CEL8_RANGE(CEL8_RND_ADDR, CEL8_RND_SIZE);
+c8_range_t c8_query_rnd(void)
+{
+  return _CEL8_RANGE(CEL8_RND_ADDR, CEL8_RND_SIZE);
 }
 
-cel8_range cel8_query_font(void) {
+c8_range_t c8_query_font(void)
+{
   return _CEL8_RANGE(CEL8_FONT_ADDR, CEL8_FONT_SIZE);
 }
 
-cel8_range cel8_query_vram(void) {
+c8_range_t c8_query_vram(void)
+{
   return _CEL8_RANGE(CEL8_VRAM_ADDR, CEL8_VRAM_SIZE);
 }
 
 #undef _CEL8_RANGE
 
-#endif
+#endif /* C8_IMPL */
