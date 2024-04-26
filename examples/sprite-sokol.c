@@ -1,11 +1,11 @@
-#define CEL8_IMPL
+#define C8_IMPL
 #include "cel8.h"
 
 /* sokol */
 #include "sokol/sokol_gfx.h"
 #include "sokol/sokol_app.h"
 #include "sokol/sokol_glue.h"
-#if defined(_CEL8_DEBUG)
+#if defined(_C8_DEBUG)
 #include "sokol/sokol_log.h"
 #endif
 
@@ -117,8 +117,8 @@ static void init(void)
     });
 
     sg_image screen = sg_make_image(&(sg_image_desc){
-        .width = CEL8_SCREEN_WIDTH,
-        .height = CEL8_SCREEN_HEIGHT,
+        .width = C8_SCREEN_WIDTH,
+        .height = C8_SCREEN_HEIGHT,
         .pixel_format = SG_PIXELFORMAT_R8,
         .usage = SG_USAGE_STREAM,
         .label = "screen-texture",
@@ -143,18 +143,7 @@ static void init(void)
             .palette = (c8_range_t){.ptr = palette_h, .size = sizeof(palette_h)},
         },
     });
-}
 
-static void event(const sapp_event *e)
-{
-    /* body */
-}
-
-#include <stdlib.h>
-f32 i = 0;
-static void frame(void)
-{
-    /* program */
     // custom ascii sprite:
     // 01111110  -- 0x7E
     // 11011011  -- 0xDB
@@ -179,15 +168,26 @@ static void frame(void)
     c8_poke(font_addr + font_size * 0, 0x07, 0x7E);
 
     /* poke */
-    c8_poke2(font_addr + font_size * 1, 0x00, 0x7EDB);
-    c8_poke2(font_addr + font_size * 1, 0x01, 0xDBDB);
-    c8_poke2(font_addr + font_size * 1, 0x02, 0xFFBD);
-    c8_poke2(font_addr + font_size * 1, 0x03, 0xC37E);
+    c8_poke2(font_addr + font_size * 1, 0x00 * 2, 0x7EDB);
+    c8_poke2(font_addr + font_size * 1, 0x01 * 2, 0xDBDB);
+    c8_poke2(font_addr + font_size * 1, 0x02 * 2, 0xFFBD);
+    c8_poke2(font_addr + font_size * 1, 0x03 * 2, 0xC37E);
 
     /* poke */
-    c8_poke4(font_addr + font_size * 2, 0x00, 0x7EDBDBDB);
-    c8_poke4(font_addr + font_size * 2, 0x01, 0xFFBDC37E);
+    c8_poke4(font_addr + font_size * 2, 0x00 * 4, 0x7EDBDBDB);
+    c8_poke4(font_addr + font_size * 2, 0x01 * 4, 0xFFBDC37E);
+}
 
+static void event(const sapp_event *e)
+{
+    /* body */
+}
+
+#include <stdlib.h>
+f32 i = 0;
+static void frame(void)
+{
+    /* program */
     c8_color(0x08);
     c8_put(0, 0, 0x00);
     c8_put(1, 0, 0x01);
@@ -234,11 +234,11 @@ sapp_desc sokol_main(i32 argc, char *argv[])
         .frame_cb = frame,
         .cleanup_cb = cleanup,
         .event_cb = event,
-        .width = CEL8_WINDOW_WIDTH,
-        .height = CEL8_WINDOW_HEIGHT,
+        .width = C8_WINDOW_WIDTH,
+        .height = C8_WINDOW_HEIGHT,
         .window_title = "cel8",
 
-#if defined(_CEL8_DEBUG)
+#if defined(_C8_DEBUG)
         .win32_console_create = true,
         .logger.func = slog_func,
 #endif

@@ -208,14 +208,14 @@ extern "C"
 {
 #endif
 
-#if !defined(CEL8_API_DECL)
-#if defined(_WIN32) && defined(CEL8_DLL) && defined(CEL8_IMPLEMENTATION)
-#define CEL8_API_DECL __declspec(dllexport)
-#elif defined(_WIN32) && defined(CEL8_DLL)
-#define CEL8_API_DECL __declspec(dllimport)
+#if !defined(C8_API_DECL)
+#if defined(_WIN32) && defined(C8_DLL) && defined(C8_IMPLEMENTATION)
+#define C8_API_DECL __declspec(dllexport)
+#elif defined(_WIN32) && defined(C8_DLL)
+#define C8_API_DECL __declspec(dllimport)
 #else
-#define CEL8_STANDALONE (1)
-#define CEL8_API_DECL extern
+#define C8_STANDALONE (1)
+#define C8_API_DECL extern
 #endif
 #endif
 
@@ -237,47 +237,47 @@ extern "C"
   enum
   {
     /* virtual resolution */
-    CEL8_WINDOW_WIDTH = 512,
-    CEL8_WINDOW_HEIGHT = 512,
+    C8_WINDOW_WIDTH = 512,
+    C8_WINDOW_HEIGHT = 512,
 
     /* internal resolution */
-    CEL8_SCREEN_WIDTH = 128,
-    CEL8_SCREEN_HEIGHT = 128,
+    C8_SCREEN_WIDTH = 128,
+    C8_SCREEN_HEIGHT = 128,
 
     /* memory mapping */
-    CEL8_CMAP_ADDR = 0x0000,
-    CEL8_CMAP_SIZE = 0x000F,
-    CEL8_PAL_ADDR = 0x000F,
-    CEL8_PAL_SIZE = 0x0030,
-    CEL8_COLOR_ADDR = 0x003F,
-    CEL8_COLOR_SIZE = 0x0001,
-    CEL8_RND_ADDR = 0x0040,
-    CEL8_RND_SIZE = 0x0004,
-    CEL8_UNUSED_ADDR = 0x0044,
-    CEL8_UNUSED_SIZE = 0x000C,
-    CEL8_FONT_ADDR = 0x0050,
-    CEL8_FONT_SIZE = 0x0400,
-    CEL8_VRAM_ADDR = 0x0450,
-    CEL8_VRAM_SIZE = 0x0200,
-    CEL8_MEM_SIZE = CEL8_CMAP_SIZE + CEL8_PAL_SIZE + CEL8_COLOR_SIZE + CEL8_RND_SIZE + CEL8_UNUSED_SIZE + CEL8_FONT_SIZE + CEL8_VRAM_SIZE,
+    C8_CMAP_ADDR = 0x0000,
+    C8_CMAP_SIZE = 0x000F,
+    C8_PAL_ADDR = 0x000F,
+    C8_PAL_SIZE = 0x0030,
+    C8_COLOR_ADDR = 0x003F,
+    C8_COLOR_SIZE = 0x0001,
+    C8_RND_ADDR = 0x0040,
+    C8_RND_SIZE = 0x0004,
+    C8_UNUSED_ADDR = 0x0044,
+    C8_UNUSED_SIZE = 0x000C,
+    C8_FONT_ADDR = 0x0050,
+    C8_FONT_SIZE = 0x0400,
+    C8_VRAM_ADDR = 0x0450,
+    C8_VRAM_SIZE = 0x0200,
+    C8_MEM_SIZE = C8_CMAP_SIZE + C8_PAL_SIZE + C8_COLOR_SIZE + C8_RND_SIZE + C8_UNUSED_SIZE + C8_FONT_SIZE + C8_VRAM_SIZE,
 
     /* stat */
-    CEL8_VERSION_STR = 0x0000,
-    CEL8_FRAME_TIME = 0x0001,
-    CEL8_CURSOR_X = 0x0002,
-    CEL8_CURSOR_Y = 0x0003,
-    CEL8_GMT_YEAR = 0x0004,
-    CEL8_GMT_MONTH = 0x0005,
-    CEL8_GMT_DAY = 0x0006,
-    CEL8_GMT_HOUR = 0x0007,
-    CEL8_GMT_MIN = 0x0008,
-    CEL8_GMT_SEC = 0x0009,
-    CEL8_LOCAL_YEAR = 0x000a,
-    CEL8_LOCAL_MONTH = 0x000b,
-    CEL8_LOCAL_DAY = 0x000c,
-    CEL8_LOCAL_HOUR = 0x000d,
-    CEL8_LOCAL_MIN = 0x000e,
-    CEL8_LOCAL_SEC = 0x000f,
+    C8_VERSION_STR = 0x0000,
+    C8_FRAME_TIME = 0x0001,
+    C8_CURSOR_X = 0x0002,
+    C8_CURSOR_Y = 0x0003,
+    C8_GMT_YEAR = 0x0004,
+    C8_GMT_MONTH = 0x0005,
+    C8_GMT_DAY = 0x0006,
+    C8_GMT_HOUR = 0x0007,
+    C8_GMT_MIN = 0x0008,
+    C8_GMT_SEC = 0x0009,
+    C8_LOCAL_YEAR = 0x000a,
+    C8_LOCAL_MONTH = 0x000b,
+    C8_LOCAL_DAY = 0x000c,
+    C8_LOCAL_HOUR = 0x000d,
+    C8_LOCAL_MIN = 0x000e,
+    C8_LOCAL_SEC = 0x000f,
   };
 
   typedef struct c8_range_t
@@ -290,45 +290,45 @@ extern "C"
   {
     struct
     {
-      c8_range_t chars;   // 4 KByte character ROM dump
-      c8_range_t palette; // 8 KByte BASIC dump
+      c8_range_t chars;
+      c8_range_t palette;
     } roms;
   } c8_desc_t;
 
   /* cel8 api */
-  CEL8_API_DECL void c8_init(const c8_desc_t *desc);
-  CEL8_API_DECL void c8_reset(void);
-  CEL8_API_DECL void c8_frame(void);
+  C8_API_DECL void c8_init(const c8_desc_t *desc);
+  C8_API_DECL void c8_reset(void);
+  C8_API_DECL void c8_frame(void);
 
-  CEL8_API_DECL const u8 c8_peek(const u32 addr, const u32 index);
-  CEL8_API_DECL const u16 c8_peek2(const u32 addr, const u32 index);
-  CEL8_API_DECL const u32 c8_peek4(const u32 addr, const u32 index);
-  CEL8_API_DECL void c8_poke(const u32 addr, const u32 index, const u8 value);
-  CEL8_API_DECL void c8_poke2(const u32 addr, const u32 index, const u16 value);
-  CEL8_API_DECL void c8_poke4(const u32 addr, const u32 index, const u32 value);
+  C8_API_DECL const u8 c8_peek(const u32 addr, const u32 index);
+  C8_API_DECL const u16 c8_peek2(const u32 addr, const u32 index);
+  C8_API_DECL const u32 c8_peek4(const u32 addr, const u32 index);
+  C8_API_DECL void c8_poke(const u32 addr, const u32 index, const u8 value);
+  C8_API_DECL void c8_poke2(const u32 addr, const u32 index, const u16 value);
+  C8_API_DECL void c8_poke4(const u32 addr, const u32 index, const u32 value);
 
-  CEL8_API_DECL void c8_cls(u8 clr, u8 chr);
-  CEL8_API_DECL void c8_color(u8 color);
-  CEL8_API_DECL void c8_fill(i32 x, i32 y, i32 w, i32 h, i32 chr);
-  CEL8_API_DECL void c8_print(i32 x, i32 y, const char *str);
-  CEL8_API_DECL void c8_put(i32 x, i32 y, u8 c);
-  CEL8_API_DECL u8 c8_get(i32 x, i32 y);
-  CEL8_API_DECL u16 c8_stat(i32 n);
-  CEL8_API_DECL u16 c8_rnd(void);
-  CEL8_API_DECL void c8_time(void);
+  C8_API_DECL void c8_cls(u8 clr, u8 chr);
+  C8_API_DECL void c8_color(u8 color);
+  C8_API_DECL void c8_fill(i32 x, i32 y, i32 w, i32 h, i32 chr);
+  C8_API_DECL void c8_print(i32 x, i32 y, const char *str);
+  C8_API_DECL void c8_put(i32 x, i32 y, u8 c);
+  C8_API_DECL u8 c8_get(i32 x, i32 y);
+  C8_API_DECL u16 c8_stat(i32 n);
+  C8_API_DECL u16 c8_rnd(void);
+  C8_API_DECL void c8_time(void);
 
-  CEL8_API_DECL c8_range_t c8_query_memory(void);
-  CEL8_API_DECL c8_range_t c8_query_vram(void);
-  CEL8_API_DECL c8_range_t c8_query_font(void);
-  CEL8_API_DECL c8_range_t c8_query_color(void);
-  CEL8_API_DECL c8_range_t c8_query_pal(void);
-  CEL8_API_DECL c8_range_t c8_query_rnd(void);
+  C8_API_DECL c8_range_t c8_query_memory(void);
+  C8_API_DECL c8_range_t c8_query_vram(void);
+  C8_API_DECL c8_range_t c8_query_font(void);
+  C8_API_DECL c8_range_t c8_query_color(void);
+  C8_API_DECL c8_range_t c8_query_pal(void);
+  C8_API_DECL c8_range_t c8_query_rnd(void);
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-#ifdef CEL8_IMPL
+#ifdef C8_IMPL
 
 /* platform */
 #if defined(WIN32) || defined(_WIN32)
@@ -359,21 +359,21 @@ extern "C"
 
 /* debug */
 #if defined(_DEBUG)
-#define _CEL8_DEBUG 1
+#define _C8_DEBUG 1
 #endif
 
 /* version */
-#define CEL8_VERSION_MAJOR 0
-#define CEL8_VERSION_MINOR 0
-#define CEL8_VERSION_REVISION 1
-#define CEL8_RELEASE_CANDIDATE 0
+#define C8_VERSION_MAJOR 0
+#define C8_VERSION_MINOR 0
+#define C8_VERSION_REVISION 1
+#define C8_RELEASE_CANDIDATE 0
 
-#define CEL8_VERSION_NUMBER     \
-  ((CEL8_VERSION_MAJOR << 16) | \
-   (CEL8_VERSION_MINOR << 8) |  \
-   (CEL8_VERSION_REVISION))
+#define C8_VERSION_NUMBER     \
+  ((C8_VERSION_MAJOR << 16) | \
+   (C8_VERSION_MINOR << 8) |  \
+   (C8_VERSION_REVISION))
 
-#if defined(_CEL8_DEBUG)
+#if defined(_C8_DEBUG)
 #define _CONCAT_VERSION(m, n, r) \
   #m "." #n "." #r "-debug"
 #else
@@ -384,8 +384,8 @@ extern "C"
 #define _MAKE_VERSION(m, n, r) \
   _CONCAT_VERSION(m, n, r)
 
-#define CEL8_VERSION_STRING \
-  _MAKE_VERSION(CEL8_VERSION_MAJOR, CEL8_VERSION_MINOR, CEL8_VERSION_REVISION)
+#define C8_VERSION_STRING \
+  _MAKE_VERSION(C8_VERSION_MAJOR, C8_VERSION_MINOR, C8_VERSION_REVISION)
 
 #include <string.h>
 #include <time.h>
@@ -403,16 +403,16 @@ extern "C"
 #include <mach/mach_time.h>
 #endif
 
-#ifndef _CEL8_PRIVATE
+#ifndef _C8_PRIVATE
 #if defined(__GNUC__) || defined(__clang__)
-#define _CEL8_PRIVATE __attribute__((unused)) static
+#define _C8_PRIVATE __attribute__((unused)) static
 #else
-#define _CEL8_PRIVATE static
+#define _C8_PRIVATE static
 #endif
 #endif
 
 /* stubbed */
-#if defined(_CEL8_DEBUG)
+#if defined(_C8_DEBUG)
 #include <stdio.h>
 #define STUBBED(x) \
   printf("STUBBED: %s at %s (%s:%d)\n", x, __FUNCTION__, __FILE__, __LINE__);
@@ -433,24 +433,75 @@ struct
   /* timer */
   f64 curr;
   f64 start;
+  f64 prev;
   f64 dt;
+  u64 ticks;
 
-  u8 memory[CEL8_MEM_SIZE];
+  u8 memory[C8_MEM_SIZE];
   u8 screen[0x4000];
 } cel8;
 
-_CEL8_PRIVATE inline bool _c8__set_cell(u32 offset, u8 color, u8 glyph)
+#if defined(OS_WINDOWS)
+_C8_PRIVATE f64 get_frequency()
 {
-  c8_poke(CEL8_VRAM_ADDR + offset, 0x00, color);
-  c8_poke(CEL8_VRAM_ADDR + offset, 0x01, glyph);
+  LARGE_INTEGER li;
+  QueryPerformanceFrequency(&li);
+  return (f64)li.QuadPart;
+}
+_C8_PRIVATE f64 get_time_absolute()
+{
+  LARGE_INTEGER li;
+  QueryPerformanceCounter(&li);
+  return (f64)li.QuadPart;
+}
+#elif defined(OS_MACOS)
+_C8_PRIVATE mach_timebase_info_data_t get_timebase_info()
+{
+  mach_timebase_info_data_t info;
+  mach_timebase_info(&info);
+  return info;
+}
+#endif
+
+_C8_PRIVATE f64 _c8__get_time(f64 start)
+{
+#if defined(OS_WINDOWS)
+  const f64 now = get_time_absolute();
+  const f64 frequency = get_frequency();
+  return (now - start) / frequency;
+#elif defined(OS_MACOS)
+  const mach_timebase_info_data_t timebase = get_timebase_info();
+  const u64 mach_now = mach_absolute_time() - start;
+  return ((f64)mach_now * 1.0e-9) * (f64)timebase.numer / (f64)timebase.denom;
+#endif
 }
 
-_CEL8_PRIVATE inline bool _c8__should_clip(u8 x, u8 y)
+_C8_PRIVATE void _c8__sleep(f64 wait)
+{
+#if defined(OS_WINDOWS)
+  Sleep(wait * 1000);
+#else
+  usleep(wait * 1000000);
+#endif
+}
+
+_C8_PRIVATE inline f64 _c8__get_step_time()
+{
+  return 1.0 / 30.0;
+}
+
+_C8_PRIVATE inline void _c8__set_cell(u32 offset, u8 color, u8 glyph)
+{
+  c8_poke(C8_VRAM_ADDR + offset, 0x00, color);
+  c8_poke(C8_VRAM_ADDR + offset, 0x01, glyph);
+}
+
+_C8_PRIVATE inline bool _c8__should_clip(u8 x, u8 y)
 {
   return (x < 0 || x >= 0x10 || y < 0 || y >= 0x10);
 }
 
-_CEL8_PRIVATE inline void _c8__put_char(u32 x, u32 y, u8 c)
+_C8_PRIVATE inline void _c8__put_char(u32 x, u32 y, u8 c)
 {
   if (_c8__should_clip(x, y))
   {
@@ -458,7 +509,7 @@ _CEL8_PRIVATE inline void _c8__put_char(u32 x, u32 y, u8 c)
   }
 
   /* FIXME: magic number */
-  const u8 color = c8_peek(CEL8_COLOR_ADDR, 0);
+  const u8 color = c8_peek(C8_COLOR_ADDR, 0);
   const u32 offset = (x * 2) + 0x20 * y;
 
   _c8__set_cell(offset, color, c);
@@ -469,8 +520,8 @@ _CEL8_PRIVATE inline void _c8__put_char(u32 x, u32 y, u8 c)
 void c8_init(const c8_desc_t *desc)
 {
   /* initialize default font */
-  memcpy(cel8.memory + CEL8_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
-  memcpy(cel8.memory + CEL8_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
+  memcpy(cel8.memory + C8_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
+  memcpy(cel8.memory + C8_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
 
   /* initialize timer */
 #if defined(OS_WINDOWS)
@@ -487,12 +538,26 @@ void c8_reset(void)
 
 void c8_frame(void)
 {
+  f64 now = _c8__get_time(cel8.start);
+  f64 wait = (cel8.prev + _c8__get_step_time()) - now;
+  f64 prev = cel8.prev;
+  if (wait > 0)
+  {
+    _c8__sleep(wait);
+    cel8.prev += _c8__get_step_time();
+  }
+  else
+  {
+    cel8.prev = now;
+  }
+  cel8.ticks++;
+
   /* query memory */
   const c8_range_t vram = c8_query_vram();
   const c8_range_t font = c8_query_font();
 
   /* update screen data */
-  /* FIXME: I think this should be done on the the GPU by the platform. */
+  /* FIXME: This should be done on the the GPU by the platform implementation. */
   for (i32 i = 0, j = 0; i < sizeof(cel8.screen); i += 8)
   {
     /* convert from screen to cell */
@@ -562,7 +627,7 @@ inline void c8_poke4(const u32 addr, const u32 index, const u32 value)
 
 void c8_cls(u8 clr, u8 chr)
 {
-  for (i32 i = 0; i < CEL8_VRAM_SIZE; i += 2)
+  for (i32 i = 0; i < C8_VRAM_SIZE; i += 2)
   {
     _c8__set_cell(i, clr, chr);
   }
@@ -570,7 +635,7 @@ void c8_cls(u8 clr, u8 chr)
 
 void c8_color(u8 color)
 {
-  c8_poke(CEL8_COLOR_ADDR, 0x00, color);
+  c8_poke(C8_COLOR_ADDR, 0x00, color);
 }
 
 void c8_fill(i32 x, i32 y, i32 w, i32 h, i32 chr)
@@ -616,78 +681,78 @@ u16 c8_stat(i32 n)
 {
   switch (n)
   {
-  case CEL8_VERSION_STR:
+  case C8_VERSION_STR:
   {
     return 0;
   }
-  case CEL8_FRAME_TIME:
-  {
-    return cel8.dt;
-  }
-  case CEL8_CURSOR_X:
+  case C8_FRAME_TIME:
   {
     return 0;
   }
-  case CEL8_CURSOR_Y:
+  case C8_CURSOR_X:
   {
     return 0;
   }
-  case CEL8_GMT_YEAR:
+  case C8_CURSOR_Y:
+  {
+    return 0;
+  }
+  case C8_GMT_YEAR:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_year + 1900;
   }
-  case CEL8_GMT_MONTH:
+  case C8_GMT_MONTH:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_mon + 1;
   }
-  case CEL8_GMT_DAY:
+  case C8_GMT_DAY:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_mday;
   }
-  case CEL8_GMT_HOUR:
+  case C8_GMT_HOUR:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_hour;
   }
-  case CEL8_GMT_MIN:
+  case C8_GMT_MIN:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_min;
   }
-  case CEL8_GMT_SEC:
+  case C8_GMT_SEC:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_sec;
   }
-  case CEL8_LOCAL_YEAR:
+  case C8_LOCAL_YEAR:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_year + 1900;
   }
-  case CEL8_LOCAL_MONTH:
+  case C8_LOCAL_MONTH:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_mon + 1;
   }
-  case CEL8_LOCAL_DAY:
+  case C8_LOCAL_DAY:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_mday;
   }
-  case CEL8_LOCAL_HOUR:
+  case C8_LOCAL_HOUR:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_hour;
   }
-  case CEL8_LOCAL_MIN:
+  case C8_LOCAL_MIN:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_min;
   }
-  case CEL8_LOCAL_SEC:
+  case C8_LOCAL_SEC:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_sec;
@@ -701,16 +766,16 @@ u16 c8_rnd(void)
 {
   for (i32 i = 1; i >= 0; --i)
   {
-    u8 reg_0 = c8_peek(CEL8_RND_ADDR, 0);
-    u8 reg_1 = c8_peek(CEL8_RND_ADDR, 1);
+    u8 reg_0 = c8_peek(C8_RND_ADDR, 0);
+    u8 reg_1 = c8_peek(C8_RND_ADDR, 1);
 
-    c8_poke(CEL8_RND_ADDR, 0, 5 * reg_0 + 1);
-    c8_poke(CEL8_RND_ADDR, 1, ((reg_1 & 0x80) == (reg_1 & 0x10)) ? 2 * reg_1 + 1 : 2 * reg_1);
-    c8_poke(CEL8_RND_ADDR, 2 + i, (reg_0 ^ reg_1));
+    c8_poke(C8_RND_ADDR, 0, 5 * reg_0 + 1);
+    c8_poke(C8_RND_ADDR, 1, ((reg_1 & 0x80) == (reg_1 & 0x10)) ? 2 * reg_1 + 1 : 2 * reg_1);
+    c8_poke(C8_RND_ADDR, 2 + i, (reg_0 ^ reg_1));
   }
 
-  u8 reg_2 = c8_peek(CEL8_RND_ADDR, 2);
-  u8 reg_3 = c8_peek(CEL8_RND_ADDR, 3);
+  u8 reg_2 = c8_peek(C8_RND_ADDR, 2);
+  u8 reg_3 = c8_peek(C8_RND_ADDR, 3);
   return ((u16)reg_2 << 0x8) | reg_3;
 }
 
@@ -719,39 +784,39 @@ void c8_time(void)
   /* body */
 }
 
-#define _CEL8_RANGE(addr, sz) \
+#define _C8_RANGE(addr, sz) \
   (c8_range_t){.ptr = cel8.memory + addr, .size = sz};
 
 c8_range_t c8_query_memory(void)
 {
-  return _CEL8_RANGE(0x0000, CEL8_MEM_SIZE);
+  return _C8_RANGE(0x0000, C8_MEM_SIZE);
 }
 
 c8_range_t c8_query_pal(void)
 {
-  return _CEL8_RANGE(CEL8_PAL_ADDR, CEL8_PAL_SIZE);
+  return _C8_RANGE(C8_PAL_ADDR, C8_PAL_SIZE);
 }
 
 c8_range_t c8_query_color(void)
 {
-  return _CEL8_RANGE(CEL8_COLOR_ADDR, CEL8_COLOR_SIZE);
+  return _C8_RANGE(C8_COLOR_ADDR, C8_COLOR_SIZE);
 }
 
 c8_range_t c8_query_rnd(void)
 {
-  return _CEL8_RANGE(CEL8_RND_ADDR, CEL8_RND_SIZE);
+  return _C8_RANGE(C8_RND_ADDR, C8_RND_SIZE);
 }
 
 c8_range_t c8_query_font(void)
 {
-  return _CEL8_RANGE(CEL8_FONT_ADDR, CEL8_FONT_SIZE);
+  return _C8_RANGE(C8_FONT_ADDR, C8_FONT_SIZE);
 }
 
 c8_range_t c8_query_vram(void)
 {
-  return _CEL8_RANGE(CEL8_VRAM_ADDR, CEL8_VRAM_SIZE);
+  return _C8_RANGE(C8_VRAM_ADDR, C8_VRAM_SIZE);
 }
 
-#undef _CEL8_RANGE
+#undef _C8_RANGE
 
 #endif /* C8_IMPL */

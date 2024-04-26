@@ -1,11 +1,11 @@
-#define CEL8_IMPL
+#define C8_IMPL
 #include "cel8.h"
 
 /* sokol */
 #include "sokol/sokol_gfx.h"
 #include "sokol/sokol_app.h"
 #include "sokol/sokol_glue.h"
-#if defined(_CEL8_DEBUG)
+#if defined(_C8_DEBUG)
 #include "sokol/sokol_log.h"
 #endif
 
@@ -117,8 +117,8 @@ static void init(void)
   });
 
   sg_image screen = sg_make_image(&(sg_image_desc){
-      .width = CEL8_SCREEN_WIDTH,
-      .height = CEL8_SCREEN_HEIGHT,
+      .width = C8_SCREEN_WIDTH,
+      .height = C8_SCREEN_HEIGHT,
       .pixel_format = SG_PIXELFORMAT_R8,
       .usage = SG_USAGE_STREAM,
       .label = "screen-texture",
@@ -227,11 +227,11 @@ sapp_desc sokol_main(i32 argc, char *argv[])
     .frame_cb = frame,
     .cleanup_cb = cleanup,
     .event_cb = event,
-    .width = CEL8_WINDOW_WIDTH,
-    .height = CEL8_WINDOW_HEIGHT,
+    .width = C8_WINDOW_WIDTH,
+    .height = C8_WINDOW_HEIGHT,
     .window_title = "cel8",
 
-#if defined(_CEL8_DEBUG)
+#if defined(_C8_DEBUG)
     .win32_console_create = true,
     .logger.func = slog_func,
 #endif
