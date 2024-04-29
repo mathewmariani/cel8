@@ -4,12 +4,12 @@ macro(c8_project target file)
   target_include_directories(${target} PUBLIC ${THIRDPARTY_DIR})
 endmacro()
 
-# simple test program
+# programs
 c8_project(clock clock-sokol.c)
 c8_project(crosshair crosshair-sokol.c)
 c8_project(font font-sokol.c)
 c8_project(glitch glitch-sokol.c)
 c8_project(hello hello-sokol.c)
 c8_project(palette palette-sokol.c)
-c8_project(numbers numbers-sokol.c)
 c8_project(sprite sprite-sokol.c)
+c8_project(tetris tetris-sokol.c)

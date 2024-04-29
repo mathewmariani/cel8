@@ -487,7 +487,7 @@ _C8_PRIVATE void _c8__sleep(f64 wait)
 
 _C8_PRIVATE inline f64 _c8__get_step_time()
 {
-  return 1.0 / 30.0;
+  return 1.0 / 60.0;
 }
 
 _C8_PRIVATE inline void _c8__set_cell(u32 offset, u8 color, u8 glyph)

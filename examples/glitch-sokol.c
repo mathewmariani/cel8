@@ -9,7 +9,9 @@
 #include "sokol/sokol_log.h"
 #endif
 
+/* std */
 #include <stdio.h>
+#include <stdlib.h>
 
 static struct
 {
@@ -149,8 +151,6 @@ static void event(const sapp_event *e)
 {
     /* body */
 }
-
-#include <stdlib.h>
 
 static void frame(void)
 {
