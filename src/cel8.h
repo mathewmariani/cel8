@@ -8,22 +8,24 @@
     FUNCTIONS:
     ==========
 
-    peek( addr [, n] )               : reads n 8-bit values from memory
-    peek2( addr [, n] )              : reads n 16-bit values from memory
-    peek4( addr [, n] )              : reads n 32-bit values from memory
-    poke( addr [, value [, ...]] )   : writes one or more 8-bit values to memory
-    poke2( addr [, value [, ...]] )  : writes one or more 16-bit values to memory
-    poke4( addr [, value [, ...]] )  : writes one or more 32-bit values to memory
+    c8_peek( addr [, n] )               : reads n 8-bit values from memory
+    c8_peek2( addr [, n] )              : reads n 16-bit values from memory
+    c8_peek4( addr [, n] )              : reads n 32-bit values from memory
+    c8_poke( addr [, value [, ...]] )   : writes one or more 8-bit values to memory
+    c8_poke2( addr [, value [, ...]] )  : writes one or more 16-bit values to memory
+    c8_poke4( addr [, value [, ...]] )  : writes one or more 32-bit values to memory
+    c8_memcpy( dst, src, len )          : copies a block of memory to another block
+    c8_memset( dst, value, len )        : sets a block of memory to a specified value
 
-    cls( clr, chr )                  : clears the screen to a specified color and char
-    color( clr )                     : sets the draw color
-    fill( x, y, w, h, chr )          : sets the characters in the rectangle to specified char
-    print( x, y, str )               : places text at (x, y)
-    put( x, y, c )                   : puts a char at (x, y)
-    get( x, y )                      : current environment
-    stat( n )                        : system information
-    rnd( )                           : pseudo random number
-    time( )                          : time since start
+    c8_cls( clr, chr )                  : clears the screen to a specified color and char
+    c8_color( clr )                     : sets the draw color
+    c8_fill( x, y, w, h, chr )          : sets the characters in the rectangle to specified char
+    c8_print( x, y, str )               : places text at (x, y)
+    c8_put( x, y, c )                   : puts a char at (x, y)
+    c8_get( x, y )                      : current environment
+    c8_stat( n )                        : system information
+    c8_rnd( )                           : pseudo random number
+    c8_time( )                          : time since start
 
 
     MEMORY MAP:
@@ -306,6 +308,8 @@ extern "C"
   C8_API_DECL void c8_poke(const u32 addr, const u32 index, const u8 value);
   C8_API_DECL void c8_poke2(const u32 addr, const u32 index, const u16 value);
   C8_API_DECL void c8_poke4(const u32 addr, const u32 index, const u32 value);
+  C8_API_DECL void c8_memcpy(void *dst, const void *src, size_t len);
+  C8_API_DECL void c8_memset(void *dst, int value, size_t len);
 
   C8_API_DECL void c8_cls(u8 clr, u8 chr);
   C8_API_DECL void c8_color(u8 color);
@@ -315,7 +319,7 @@ extern "C"
   C8_API_DECL u8 c8_get(i32 x, i32 y);
   C8_API_DECL u16 c8_stat(i32 n);
   C8_API_DECL u16 c8_rnd(void);
-  C8_API_DECL void c8_time(void);
+  C8_API_DECL f64 c8_time(void);
 
   C8_API_DECL c8_range_t c8_query_memory(void);
   C8_API_DECL c8_range_t c8_query_vram(void);
@@ -387,7 +391,7 @@ extern "C"
 #define C8_VERSION_STRING \
   _MAKE_VERSION(C8_VERSION_MAJOR, C8_VERSION_MINOR, C8_VERSION_REVISION)
 
-#include <string.h>
+#include <string.h> /* memcpy, memset */
 #include <time.h>
 
 #if defined(OS_WINDOWS)
@@ -511,7 +515,6 @@ _C8_PRIVATE inline void _c8__put_char(u32 x, u32 y, u8 c)
   /* FIXME: magic number */
   const u8 color = c8_peek(C8_COLOR_ADDR, 0);
   const u32 offset = (x * 2) + 0x20 * y;
-
   _c8__set_cell(offset, color, c);
 }
 
@@ -625,12 +628,19 @@ inline void c8_poke4(const u32 addr, const u32 index, const u32 value)
   c8_poke(addr, index + 3, (value >> 0) & 0xff);
 }
 
+void c8_memcpy(void *dst, const void *src, size_t len)
+{
+  memcpy(dst, src, len);
+}
+
+void c8_memset(void *dst, int value, size_t len)
+{
+  memset(dst, value, len);
+}
+
 void c8_cls(u8 clr, u8 chr)
 {
-  for (i32 i = 0; i < C8_VRAM_SIZE; i += 2)
-  {
-    _c8__set_cell(i, clr, chr);
-  }
+  memset(cel8.memory + C8_VRAM_ADDR, ((clr << 4) | chr), C8_VRAM_SIZE);
 }
 
 void c8_color(u8 color)
@@ -683,18 +693,22 @@ u16 c8_stat(i32 n)
   {
   case C8_VERSION_STR:
   {
+    /* TODO: implementation. */
     return 0;
   }
   case C8_FRAME_TIME:
   {
+    /* TODO: implementation. */
     return 0;
   }
   case C8_CURSOR_X:
   {
+    /* TODO: implementation. */
     return 0;
   }
   case C8_CURSOR_Y:
   {
+    /* TODO: implementation. */
     return 0;
   }
   case C8_GMT_YEAR:
@@ -779,9 +793,9 @@ u16 c8_rnd(void)
   return ((u16)reg_2 << 0x8) | reg_3;
 }
 
-void c8_time(void)
+f64 c8_time(void)
 {
-  /* body */
+  return cel8.curr;
 }
 
 #define _C8_RANGE(addr, sz) \
