@@ -4,6 +4,10 @@
 
     Project URL: https://github.com/mathewmariani/cel8
 
+    Do this:
+        #define C8_IMPL
+    before you include this file in *one* C or C++ file to create the
+    implementation.
 
     FUNCTIONS:
     ==========
@@ -246,6 +250,15 @@ extern "C"
     C8_SCREEN_WIDTH = 128,
     C8_SCREEN_HEIGHT = 128,
 
+    /* flags */
+    C8_SCALE2X = (1 << 0),
+    C8_SCALE3X = (1 << 1),
+    C8_SCALE4X = (1 << 2),
+    C8_FPS30 = (1 << 3),
+    C8_FPS60 = (1 << 4),
+    C8_FPS144 = (1 << 5),
+    C8_FPSINF = (1 << 6),
+
     /* memory mapping */
     C8_CMAP_ADDR = 0x0000,
     C8_CMAP_SIZE = 0x000F,
@@ -290,6 +303,7 @@ extern "C"
 
   typedef struct
   {
+    u8 flags;
     struct
     {
       c8_range_t chars;
@@ -439,7 +453,7 @@ struct
   f64 start;
   f64 prev;
   f64 dt;
-  u64 ticks;
+  u8 flags;
 
   u8 memory[C8_MEM_SIZE];
   u8 screen[0x4000];
@@ -491,7 +505,22 @@ _C8_PRIVATE void _c8__sleep(f64 wait)
 
 _C8_PRIVATE inline f64 _c8__get_step_time()
 {
-  return 1.0 / 60.0;
+  if (cel8.flags & C8_FPS30)
+  {
+    return 1.0 / 30.0;
+  }
+  if (cel8.flags & C8_FPS60)
+  {
+    return 1.0 / 30.0;
+  }
+  if (cel8.flags & C8_FPS144)
+  {
+    return 1.0 / 144.0;
+  }
+  if (cel8.flags & C8_FPSINF)
+  {
+    return 0;
+  }
 }
 
 _C8_PRIVATE inline void _c8__set_cell(u32 offset, u8 color, u8 glyph)
@@ -526,6 +555,7 @@ void c8_init(const c8_desc_t *desc)
   memcpy(cel8.memory + C8_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
   memcpy(cel8.memory + C8_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
 
+  cel8.flags = desc->flags;
   /* initialize timer */
 #if defined(OS_WINDOWS)
   cel8.start = get_time_absolute();
@@ -553,7 +583,6 @@ void c8_frame(void)
   {
     cel8.prev = now;
   }
-  cel8.ticks++;
 
   /* query memory */
   const c8_range_t vram = c8_query_vram();
@@ -571,15 +600,14 @@ void c8_frame(void)
     u8 glyph = *((u8 *)vram.ptr + (j * 2) + 1);
 
     /* convert color */
-    u8 h = ((color >> 4) & 0x0F);
-    u8 l = ((color) & 0x0F);
+    u8 high = ((color >> 4) & 0x0F);
+    u8 low = ((color) & 0x0F);
 
-    i32 x = 0;
     i32 y = (i / 128) % 8;
-    for (; x < 8; x++)
+    for (i32 x = 0; x < 8; x++)
     {
       u8 b = *((u8 *)font.ptr + y + glyph * 8) >> x;
-      *((u8 *)cel8.screen + i + x) = (b & 1) ? l : h;
+      *((u8 *)cel8.screen + i + x) = (b & 1) ? low : high;
     }
   }
 }
