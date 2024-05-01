@@ -1,3 +1,11 @@
+# visual studio project file
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
 # build output
 build/
 website/
