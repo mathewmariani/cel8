@@ -1,6 +1,6 @@
 ## Memory
 cel8 has <4kb of RAM: see layout below.
-This memory can be accessed with `c8_peek`, `c8_poke`, `c8_memcpy`, `c8_memset`.
+This memory can be accessed with the functions `c8_peek`, `c8_poke`, `c8_memcpy`, `c8_memset`.
 
 ### Memory Layout
 ```c
