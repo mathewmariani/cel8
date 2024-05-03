@@ -91,6 +91,7 @@ static struct
   sg_pass_action pass_action;
   sg_pipeline pip;
   sg_bindings bind;
+  u8 screen[0x4000];
 } display;
 
 static void init(void)
@@ -213,7 +214,7 @@ static void init(void)
 #include "embed/font.h"
 #include "embed/palette.h"
   c8_init(&(c8_desc_t){
-      .flags = C8_FPS30,
+      .flags = C8_FLAG_FPS30,
       .roms = {
           .chars = (c8_range_t){.ptr = font_h, .size = sizeof(font_h)},
           .palette = (c8_range_t){.ptr = palette_h, .size = sizeof(palette_h)},
@@ -230,8 +231,8 @@ static void init(void)
   /* 11111111  -- 0xFF */
   /* 11111111  -- 0xFF */
   /* 01111110  -- 0x7E */
-  c8_poke4(C8_FONT_ADDR + 0x00, 0x00 * 4, 0x7EFFDBFF);
-  c8_poke4(C8_FONT_ADDR + 0x00, 0x01 * 4, 0xFFFFFF7E);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x00, 0x00 * 4, 0x7EFFDBFF);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x00, 0x01 * 4, 0xFFFFFF7E);
 
   /* snake segment */
   /* 01111110  -- 0x7E */
@@ -242,8 +243,8 @@ static void init(void)
   /* 11111111  -- 0xFF */
   /* 11111111  -- 0xFF */
   /* 01111110  -- 0x7E */
-  c8_poke4(C8_FONT_ADDR + 0x08, 0x00 * 4, 0x7EFFFFFF);
-  c8_poke4(C8_FONT_ADDR + 0x08, 0x01 * 4, 0xFFFFFF7E);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x08, 0x00 * 4, 0x7EFFFFFF);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x08, 0x01 * 4, 0xFFFFFF7E);
 
   /* grid pattern */
   /* 00000000  -- 0x00 */
@@ -254,8 +255,8 @@ static void init(void)
   /* 00000000  -- 0x00 */
   /* 00000000  -- 0x00 */
   /* 00000000  -- 0x00 */
-  c8_poke4(C8_FONT_ADDR + 0x10, 0x00 * 4, 0x00000018);
-  c8_poke4(C8_FONT_ADDR + 0x10, 0x01 * 4, 0x18000000);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x10, 0x00 * 4, 0x00000018);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x10, 0x01 * 4, 0x18000000);
 
   place_snake();
   place_apple();
@@ -329,6 +330,8 @@ static void event(const sapp_event *e)
 
 static void frame(void)
 {
+  c8_frame();
+
   if ((--state.timer) <= 0)
   {
     state.timer = 5 - (snake.size / 12);
@@ -368,8 +371,32 @@ static void frame(void)
     }
   }
 
-  /* program */
-  c8_frame();
+  /* query memory */
+  const c8_range_t vram = c8_query_vram();
+  const c8_range_t font = c8_query_font();
+
+  /* decode vram */
+  for (i32 i = 0, j = 0; i < sizeof(display.screen); i += 8)
+  {
+    /* convert from screen to cell */
+    j = ((i % 128) / 8) + 16 * (i / 1024);
+
+    /* screen buffer */
+    u8 color = *((u8 *)vram.ptr + (j * 2) + 0);
+    u8 glyph = *((u8 *)vram.ptr + (j * 2) + 1);
+
+    /* convert color */
+    u8 high = ((color >> 4) & 0x0F);
+    u8 low = ((color) & 0x0F);
+
+    /* decode glyph */
+    i32 y = (i / 128) % 8;
+    for (i32 x = 0; x < 8; x++)
+    {
+      u8 b = *((u8 *)font.ptr + y + glyph * 8) >> x;
+      *((u8 *)display.screen + i + x) = (b & 1) ? low : high;
+    }
+  }
 
   /* query palette data. */
   const c8_range_t pal = c8_query_pal();
@@ -383,7 +410,7 @@ static void frame(void)
 
   /* update gpu resources */
   sg_update_image(display.bind.fs.images[0], &(sg_image_data){
-                                                 .subimage[0][0] = SG_RANGE(cel8.screen),
+                                                 .subimage[0][0] = SG_RANGE(display.screen),
                                              });
 
   /* graphics pipeline */

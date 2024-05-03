@@ -16,6 +16,7 @@ static struct
     sg_pass_action pass_action;
     sg_pipeline pip;
     sg_bindings bind;
+    u8 screen[0x4000];
 } display;
 
 static void init(void)
@@ -187,13 +188,40 @@ static void event(const sapp_event *e)
 f32 i = 0;
 static void frame(void)
 {
+    c8_frame();
+
     /* program */
     c8_color(0x08);
     c8_put(0, 0, 0x00);
     c8_put(1, 0, 0x01);
     c8_put(2, 0, 0x02);
 
-    c8_frame();
+    /* query memory */
+    const c8_range_t vram = c8_query_vram();
+    const c8_range_t font = c8_query_font();
+
+    /* decode vram */
+    for (i32 i = 0, j = 0; i < sizeof(display.screen); i += 8)
+    {
+        /* convert from screen to cell */
+        j = ((i % 128) / 8) + 16 * (i / 1024);
+
+        /* screen buffer */
+        u8 color = *((u8 *)vram.ptr + (j * 2) + 0);
+        u8 glyph = *((u8 *)vram.ptr + (j * 2) + 1);
+
+        /* convert color */
+        u8 high = ((color >> 4) & 0x0F);
+        u8 low = ((color) & 0x0F);
+
+        /* decode glyph */
+        i32 y = (i / 128) % 8;
+        for (i32 x = 0; x < 8; x++)
+        {
+            u8 b = *((u8 *)font.ptr + y + glyph * 8) >> x;
+            *((u8 *)display.screen + i + x) = (b & 1) ? low : high;
+        }
+    }
 
     /* query palette data. */
     const c8_range_t pal = c8_query_pal();
@@ -207,7 +235,7 @@ static void frame(void)
 
     /* update gpu resources */
     sg_update_image(display.bind.fs.images[0], &(sg_image_data){
-                                                   .subimage[0][0] = SG_RANGE(cel8.screen),
+                                                   .subimage[0][0] = SG_RANGE(display.screen),
                                                });
 
     /* graphics pipeline */

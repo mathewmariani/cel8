@@ -53,6 +53,16 @@ u8 tetromino[7][16] = {
     {0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0},
 };
 
+u16 b_tetromino[7] = {
+    0b0010001000100010,
+    0b0010011000100000,
+    0b0000011001100000,
+    0b0010011001000000,
+    0b0100011000100000,
+    0b0100010001100000,
+    0b0010001001100000,
+};
+
 typedef struct
 {
   i8 x, y, r;
@@ -75,7 +85,6 @@ struct
   int cx, cy, cr;
   int cp, np;
   i8 grid[16][8];
-
 } state;
 
 static int rotate(int x, int y, int r)
@@ -253,10 +262,10 @@ static void reset()
 
   /* create sprites */
   /* FIXME: api needs to adapt. */
-  c8_poke4(C8_FONT_ADDR + 0x00, 0x00 * 4, 0x00808080);
-  c8_poke4(C8_FONT_ADDR + 0x00, 0x01 * 4, 0x8080807E);
-  c8_poke4(C8_FONT_ADDR + 0x08, 0x00 * 4, 0x00000018);
-  c8_poke4(C8_FONT_ADDR + 0x08, 0x01 * 4, 0x18000000);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x00, 0x00 * 4, 0x00808080);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x00, 0x01 * 4, 0x8080807E);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x08, 0x00 * 4, 0x00000018);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x08, 0x01 * 4, 0x18000000);
 
   state.ticks = 0;
   state.fx_ticks = 0;
@@ -287,7 +296,8 @@ static struct
   sg_pass_action pass_action;
   sg_pipeline pip;
   sg_bindings bind;
-} str_buffer;
+  u8 screen[0x4000];
+} display;
 
 static void init(void)
 {
@@ -358,7 +368,7 @@ static void init(void)
   };
 
   /* default pass action */
-  str_buffer.pass_action = (sg_pass_action){
+  display.pass_action = (sg_pass_action){
       .colors[0] = {
           .load_action = SG_LOADACTION_CLEAR,
           .clear_value = {0.0f, 0.0f, 0.0f, 1.0f},
@@ -366,7 +376,7 @@ static void init(void)
   };
 
   /* a pipeline state object */
-  str_buffer.pip = sg_make_pipeline(&(sg_pipeline_desc){
+  display.pip = sg_make_pipeline(&(sg_pipeline_desc){
       .shader = sg_make_shader(&shd_desc),
       .index_type = SG_INDEXTYPE_UINT16,
       .layout = {
@@ -396,7 +406,7 @@ static void init(void)
   });
 
   /* bindings */
-  str_buffer.bind = (sg_bindings){
+  display.bind = (sg_bindings){
       .vertex_buffers = {[0] = vbuf},
       .index_buffer = ibuf,
       .fs = {
@@ -454,6 +464,8 @@ static inline int drop_speed()
 
 static void frame(void)
 {
+  c8_frame();
+
   if (!state.gameover)
   {
     if (state.ticks % drop_speed() == 0)
@@ -535,7 +547,32 @@ static void frame(void)
     }
   }
 
-  c8_frame();
+  /* query memory */
+  const c8_range_t vram = c8_query_vram();
+  const c8_range_t font = c8_query_font();
+
+  /* decode vram */
+  for (i32 i = 0, j = 0; i < sizeof(display.screen); i += 8)
+  {
+    /* convert from screen to cell */
+    j = ((i % 128) / 8) + 16 * (i / 1024);
+
+    /* screen buffer */
+    u8 color = *((u8 *)vram.ptr + (j * 2) + 0);
+    u8 glyph = *((u8 *)vram.ptr + (j * 2) + 1);
+
+    /* convert color */
+    u8 high = ((color >> 4) & 0x0F);
+    u8 low = ((color) & 0x0F);
+
+    /* decode glyph */
+    i32 y = (i / 128) % 8;
+    for (i32 x = 0; x < 8; x++)
+    {
+      u8 b = *((u8 *)font.ptr + y + glyph * 8) >> x;
+      *((u8 *)display.screen + i + x) = (b & 1) ? low : high;
+    }
+  }
 
   /* query palette data. */
   const c8_range_t pal = c8_query_pal();
@@ -548,14 +585,14 @@ static void frame(void)
   }
 
   /* update gpu resources */
-  sg_update_image(str_buffer.bind.fs.images[0], &(sg_image_data){
-                                                    .subimage[0][0] = SG_RANGE(cel8.screen),
-                                                });
+  sg_update_image(display.bind.fs.images[0], &(sg_image_data){
+                                                 .subimage[0][0] = SG_RANGE(display.screen),
+                                             });
 
   /* graphics pipeline */
-  sg_begin_pass(&(sg_pass){.action = str_buffer.pass_action, .swapchain = sglue_swapchain()});
-  sg_apply_pipeline(str_buffer.pip);
-  sg_apply_bindings(&str_buffer.bind);
+  sg_begin_pass(&(sg_pass){.action = display.pass_action, .swapchain = sglue_swapchain()});
+  sg_apply_pipeline(display.pip);
+  sg_apply_bindings(&display.bind);
   sg_apply_uniforms(SG_SHADERSTAGE_FS, 0, SG_RANGE_REF(palette));
   sg_draw(0, 6, 1);
   sg_end_pass();

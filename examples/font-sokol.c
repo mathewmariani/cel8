@@ -17,6 +17,7 @@ static struct
     sg_pass_action pass_action;
     sg_pipeline pip;
     sg_bindings bind;
+    u8 screen[0x4000];
 } display;
 
 static void init(void)
@@ -179,7 +180,7 @@ static void frame(void)
 
     /* update gpu resources */
     sg_update_image(display.bind.fs.images[0], &(sg_image_data){
-                                                   .subimage[0][0] = SG_RANGE(cel8.screen),
+                                                   .subimage[0][0] = SG_RANGE(display.screen),
                                                });
 
     /* graphics pipeline */
