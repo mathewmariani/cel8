@@ -73,12 +73,13 @@
 
     (16 bytes)
 
-    +-------------------------------- current background
-    |+------------------------------- current foreground
-    || +----------------------------- random state 1
-    || |  +-------------------------- random state 2
-    || |  |  +----------------------- unused
-    || |  |  |
+    +-------------------------------- system flags
+    |  +----------------------------- current background
+    |  |+---------------------------- current foreground
+    |  || +-------------------------- random state 1
+    |  || |  +----------------------- random state 2
+    |  || |  |  +-------------------- unused
+    |  || |  |  |
     00 01 02 00 00 00 00 00 00 00 00 00 00 00 00 00
 
 
@@ -250,49 +251,53 @@ extern "C"
     C8_SCREEN_WIDTH = 128,
     C8_SCREEN_HEIGHT = 128,
 
+    /* FIXME: rename to C8_FLAG_[...] */
     /* flags */
-    C8_SCALE2X = (1 << 0),
-    C8_SCALE3X = (1 << 1),
-    C8_SCALE4X = (1 << 2),
-    C8_FPS30 = (1 << 3),
-    C8_FPS60 = (1 << 4),
-    C8_FPS144 = (1 << 5),
-    C8_FPSINF = (1 << 6),
+    C8_FLAG_SCALE2X = (1 << 0),
+    C8_FLAG_SCALE3X = (1 << 1),
+    C8_FLAG_SCALE4X = (1 << 2),
+    C8_FLAG_FPS30 = (1 << 3),
+    C8_FLAG_FPS60 = (1 << 4),
+    C8_FLAG_FPS144 = (1 << 5),
+    C8_FLAG_FPSINF = (1 << 6),
 
+    /* FIXME: rename to C8_MEM_[...] */
     /* memory mapping */
-    C8_CMAP_ADDR = 0x0000,
-    C8_CMAP_SIZE = 0x000F,
-    C8_PAL_ADDR = 0x000F,
-    C8_PAL_SIZE = 0x0030,
-    C8_COLOR_ADDR = 0x003F,
-    C8_COLOR_SIZE = 0x0001,
-    C8_RND_ADDR = 0x0040,
-    C8_RND_SIZE = 0x0004,
-    C8_UNUSED_ADDR = 0x0044,
-    C8_UNUSED_SIZE = 0x000C,
-    C8_FONT_ADDR = 0x0050,
-    C8_FONT_SIZE = 0x0400,
-    C8_VRAM_ADDR = 0x0450,
-    C8_VRAM_SIZE = 0x0200,
-    C8_MEM_SIZE = C8_CMAP_SIZE + C8_PAL_SIZE + C8_COLOR_SIZE + C8_RND_SIZE + C8_UNUSED_SIZE + C8_FONT_SIZE + C8_VRAM_SIZE,
+    C8_MEM_CMAP_ADDR = 0x0000,
+    C8_MEM_CMAP_SIZE = 0x000F,
+    C8_MEM_PAL_ADDR = 0x000F,
+    C8_MEM_PAL_SIZE = 0x0030,
+    C8_MEM_COLOR_ADDR = 0x003F,
+    C8_MEM_COLOR_SIZE = 0x0001,
+    C8_MEM_RND_ADDR = 0x0040,
+    C8_MEM_RND_SIZE = 0x0004,
+    C8_MEM_UNUSED_ADDR = 0x0044,
+    C8_MEM_UNUSED_SIZE = 0x000C,
+    C8_MEM_FONT_ADDR = 0x0050,
+    C8_MEM_FONT_SIZE = 0x0400,
+    C8_MEM_VRAM_ADDR = 0x0450,
+    C8_MEM_VRAM_SIZE = 0x0200,
+    C8_MEM_SIZE = C8_MEM_CMAP_SIZE + C8_MEM_PAL_SIZE + C8_MEM_COLOR_SIZE + C8_MEM_RND_SIZE + C8_MEM_UNUSED_SIZE + C8_MEM_FONT_SIZE + C8_MEM_VRAM_SIZE,
 
+    /* FIXME: rename to C8_STAT_[...] */
     /* stat */
-    C8_VERSION_STR = 0x0000,
-    C8_FRAME_TIME = 0x0001,
-    C8_CURSOR_X = 0x0002,
-    C8_CURSOR_Y = 0x0003,
-    C8_GMT_YEAR = 0x0004,
-    C8_GMT_MONTH = 0x0005,
-    C8_GMT_DAY = 0x0006,
-    C8_GMT_HOUR = 0x0007,
-    C8_GMT_MIN = 0x0008,
-    C8_GMT_SEC = 0x0009,
-    C8_LOCAL_YEAR = 0x000a,
-    C8_LOCAL_MONTH = 0x000b,
-    C8_LOCAL_DAY = 0x000c,
-    C8_LOCAL_HOUR = 0x000d,
-    C8_LOCAL_MIN = 0x000e,
-    C8_LOCAL_SEC = 0x000f,
+    C8_STAT_VERSION_STR = 0x0000,
+    C8_STAT_FRAME_TIME = 0x0001,
+    C8_STAT_CURSOR_X = 0x0002,
+    C8_STAT_CURSOR_Y = 0x0003,
+    C8_STAT_GMT_YEAR = 0x0004,
+    C8_STAT_GMT_MONTH = 0x0005,
+    C8_STAT_GMT_DAY = 0x0006,
+    C8_STAT_GMT_HOUR = 0x0007,
+    C8_STAT_GMT_MIN = 0x0008,
+    C8_STAT_GMT_SEC = 0x0009,
+    C8_STAT_LOCAL_YEAR = 0x000a,
+    C8_STAT_LOCAL_MONTH = 0x000b,
+    C8_STAT_LOCAL_DAY = 0x000c,
+    C8_STAT_LOCAL_HOUR = 0x000d,
+    C8_STAT_LOCAL_MIN = 0x000e,
+    C8_STAT_LOCAL_SEC = 0x000f,
+    C8_STAT_FLAGS = 0x0010,
   };
 
   typedef struct c8_range_t
@@ -446,7 +451,7 @@ extern "C"
 #define ABS(n) ((n < 0) ? (-n) : (n))
 #define SWAP_INT(a, b) (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))
 
-struct
+static struct
 {
   /* timer */
   f64 curr;
@@ -457,7 +462,7 @@ struct
 
   u8 memory[C8_MEM_SIZE];
   u8 screen[0x4000];
-} cel8;
+} _c8;
 
 #if defined(OS_WINDOWS)
 _C8_PRIVATE f64 get_frequency()
@@ -505,28 +510,29 @@ _C8_PRIVATE void _c8__sleep(f64 wait)
 
 _C8_PRIVATE inline f64 _c8__get_step_time()
 {
-  if (cel8.flags & C8_FPS30)
+  if (_c8.flags & C8_FLAG_FPS30)
   {
     return 1.0 / 30.0;
   }
-  if (cel8.flags & C8_FPS60)
+  if (_c8.flags & C8_FLAG_FPS60)
   {
-    return 1.0 / 30.0;
+    return 1.0 / 60.0;
   }
-  if (cel8.flags & C8_FPS144)
+  if (_c8.flags & C8_FLAG_FPS144)
   {
     return 1.0 / 144.0;
   }
-  if (cel8.flags & C8_FPSINF)
+  if (_c8.flags & C8_FLAG_FPSINF)
   {
     return 0;
   }
+  return 0;
 }
 
 _C8_PRIVATE inline void _c8__set_cell(u32 offset, u8 color, u8 glyph)
 {
-  c8_poke(C8_VRAM_ADDR + offset, 0x00, color);
-  c8_poke(C8_VRAM_ADDR + offset, 0x01, glyph);
+  c8_poke(C8_MEM_VRAM_ADDR + offset, 0x00, color);
+  c8_poke(C8_MEM_VRAM_ADDR + offset, 0x01, glyph);
 }
 
 _C8_PRIVATE inline bool _c8__should_clip(u8 x, u8 y)
@@ -542,7 +548,7 @@ _C8_PRIVATE inline void _c8__put_char(u32 x, u32 y, u8 c)
   }
 
   /* FIXME: magic number */
-  const u8 color = c8_peek(C8_COLOR_ADDR, 0);
+  const u8 color = c8_peek(C8_MEM_COLOR_ADDR, 0);
   const u32 offset = (x * 2) + 0x20 * y;
   _c8__set_cell(offset, color, c);
 }
@@ -552,15 +558,15 @@ _C8_PRIVATE inline void _c8__put_char(u32 x, u32 y, u8 c)
 void c8_init(const c8_desc_t *desc)
 {
   /* initialize default font */
-  memcpy(cel8.memory + C8_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
-  memcpy(cel8.memory + C8_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
+  memcpy(_c8.memory + C8_MEM_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
+  memcpy(_c8.memory + C8_MEM_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
 
-  cel8.flags = desc->flags;
+  _c8.flags = desc->flags;
   /* initialize timer */
 #if defined(OS_WINDOWS)
-  cel8.start = get_time_absolute();
+  _c8.start = get_time_absolute();
 #elif defined(OS_MACOS)
-  cel8.start = mach_absolute_time();
+  _c8.start = mach_absolute_time();
 #endif
 }
 
@@ -571,50 +577,23 @@ void c8_reset(void)
 
 void c8_frame(void)
 {
-  f64 now = _c8__get_time(cel8.start);
-  f64 wait = (cel8.prev + _c8__get_step_time()) - now;
-  f64 prev = cel8.prev;
+  f64 now = _c8__get_time(_c8.start);
+  f64 wait = (_c8.prev + _c8__get_step_time()) - now;
+  f64 prev = _c8.prev;
   if (wait > 0)
   {
     _c8__sleep(wait);
-    cel8.prev += _c8__get_step_time();
+    _c8.prev += _c8__get_step_time();
   }
   else
   {
-    cel8.prev = now;
-  }
-
-  /* query memory */
-  const c8_range_t vram = c8_query_vram();
-  const c8_range_t font = c8_query_font();
-
-  /* update screen data */
-  /* FIXME: This should be done on the the GPU by the platform implementation. */
-  for (i32 i = 0, j = 0; i < sizeof(cel8.screen); i += 8)
-  {
-    /* convert from screen to cell */
-    j = ((i % 128) / 8) + 16 * (i / 1024);
-
-    /* screen buffer */
-    u8 color = *((u8 *)vram.ptr + (j * 2) + 0);
-    u8 glyph = *((u8 *)vram.ptr + (j * 2) + 1);
-
-    /* convert color */
-    u8 high = ((color >> 4) & 0x0F);
-    u8 low = ((color) & 0x0F);
-
-    i32 y = (i / 128) % 8;
-    for (i32 x = 0; x < 8; x++)
-    {
-      u8 b = *((u8 *)font.ptr + y + glyph * 8) >> x;
-      *((u8 *)cel8.screen + i + x) = (b & 1) ? low : high;
-    }
+    _c8.prev = now;
   }
 }
 
 inline const u8 c8_peek(const u32 addr, const u32 index)
 {
-  return *(cel8.memory + addr + index);
+  return *(_c8.memory + addr + index);
 }
 
 inline const u16 c8_peek2(const u32 addr, const u32 index)
@@ -639,7 +618,7 @@ inline const u32 c8_peek4(const u32 addr, const u32 index)
 
 inline void c8_poke(const u32 addr, const u32 index, const u8 value)
 {
-  *(cel8.memory + addr + index) = value;
+  *(_c8.memory + addr + index) = value;
 }
 
 inline void c8_poke2(const u32 addr, const u32 index, const u16 value)
@@ -668,12 +647,12 @@ void c8_memset(void *dst, int value, size_t len)
 
 void c8_cls(u8 clr, u8 chr)
 {
-  memset(cel8.memory + C8_VRAM_ADDR, ((clr << 4) | chr), C8_VRAM_SIZE);
+  memset(_c8.memory + C8_MEM_VRAM_ADDR, ((clr << 4) | chr), C8_MEM_VRAM_SIZE);
 }
 
 void c8_color(u8 color)
 {
-  c8_poke(C8_COLOR_ADDR, 0x00, color);
+  c8_poke(C8_MEM_COLOR_ADDR, 0x00, color);
 }
 
 void c8_fill(i32 x, i32 y, i32 w, i32 h, i32 chr)
@@ -719,85 +698,89 @@ u16 c8_stat(i32 n)
 {
   switch (n)
   {
-  case C8_VERSION_STR:
+  case C8_STAT_VERSION_STR:
   {
     /* TODO: implementation. */
     return 0;
   }
-  case C8_FRAME_TIME:
+  case C8_STAT_FRAME_TIME:
   {
     /* TODO: implementation. */
     return 0;
   }
-  case C8_CURSOR_X:
+  case C8_STAT_CURSOR_X:
   {
     /* TODO: implementation. */
     return 0;
   }
-  case C8_CURSOR_Y:
+  case C8_STAT_CURSOR_Y:
   {
     /* TODO: implementation. */
     return 0;
   }
-  case C8_GMT_YEAR:
+  case C8_STAT_GMT_YEAR:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_year + 1900;
   }
-  case C8_GMT_MONTH:
+  case C8_STAT_GMT_MONTH:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_mon + 1;
   }
-  case C8_GMT_DAY:
+  case C8_STAT_GMT_DAY:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_mday;
   }
-  case C8_GMT_HOUR:
+  case C8_STAT_GMT_HOUR:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_hour;
   }
-  case C8_GMT_MIN:
+  case C8_STAT_GMT_MIN:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_min;
   }
-  case C8_GMT_SEC:
+  case C8_STAT_GMT_SEC:
   {
     time_t t = time(NULL);
     return gmtime(&t)->tm_sec;
   }
-  case C8_LOCAL_YEAR:
+  case C8_STAT_LOCAL_YEAR:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_year + 1900;
   }
-  case C8_LOCAL_MONTH:
+  case C8_STAT_LOCAL_MONTH:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_mon + 1;
   }
-  case C8_LOCAL_DAY:
+  case C8_STAT_LOCAL_DAY:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_mday;
   }
-  case C8_LOCAL_HOUR:
+  case C8_STAT_LOCAL_HOUR:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_hour;
   }
-  case C8_LOCAL_MIN:
+  case C8_STAT_LOCAL_MIN:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_min;
   }
-  case C8_LOCAL_SEC:
+  case C8_STAT_LOCAL_SEC:
   {
     time_t t = time(NULL);
     return localtime(&t)->tm_sec;
+  }
+  case C8_STAT_FLAGS:
+  {
+    return _c8.flags;
   }
   default:
     return 0;
@@ -808,26 +791,26 @@ u16 c8_rnd(void)
 {
   for (i32 i = 1; i >= 0; --i)
   {
-    u8 reg_0 = c8_peek(C8_RND_ADDR, 0);
-    u8 reg_1 = c8_peek(C8_RND_ADDR, 1);
+    u8 reg_0 = c8_peek(C8_MEM_RND_ADDR, 0);
+    u8 reg_1 = c8_peek(C8_MEM_RND_ADDR, 1);
 
-    c8_poke(C8_RND_ADDR, 0, 5 * reg_0 + 1);
-    c8_poke(C8_RND_ADDR, 1, ((reg_1 & 0x80) == (reg_1 & 0x10)) ? 2 * reg_1 + 1 : 2 * reg_1);
-    c8_poke(C8_RND_ADDR, 2 + i, (reg_0 ^ reg_1));
+    c8_poke(C8_MEM_RND_ADDR, 0, 5 * reg_0 + 1);
+    c8_poke(C8_MEM_RND_ADDR, 1, ((reg_1 & 0x80) == (reg_1 & 0x10)) ? 2 * reg_1 + 1 : 2 * reg_1);
+    c8_poke(C8_MEM_RND_ADDR, 2 + i, (reg_0 ^ reg_1));
   }
 
-  u8 reg_2 = c8_peek(C8_RND_ADDR, 2);
-  u8 reg_3 = c8_peek(C8_RND_ADDR, 3);
+  u8 reg_2 = c8_peek(C8_MEM_RND_ADDR, 2);
+  u8 reg_3 = c8_peek(C8_MEM_RND_ADDR, 3);
   return ((u16)reg_2 << 0x8) | reg_3;
 }
 
 f64 c8_time(void)
 {
-  return cel8.curr;
+  return _c8.curr;
 }
 
 #define _C8_RANGE(addr, sz) \
-  (c8_range_t){.ptr = cel8.memory + addr, .size = sz};
+  (c8_range_t){.ptr = _c8.memory + addr, .size = sz};
 
 c8_range_t c8_query_memory(void)
 {
@@ -836,27 +819,27 @@ c8_range_t c8_query_memory(void)
 
 c8_range_t c8_query_pal(void)
 {
-  return _C8_RANGE(C8_PAL_ADDR, C8_PAL_SIZE);
+  return _C8_RANGE(C8_MEM_PAL_ADDR, C8_MEM_PAL_SIZE);
 }
 
 c8_range_t c8_query_color(void)
 {
-  return _C8_RANGE(C8_COLOR_ADDR, C8_COLOR_SIZE);
+  return _C8_RANGE(C8_MEM_COLOR_ADDR, C8_MEM_COLOR_SIZE);
 }
 
 c8_range_t c8_query_rnd(void)
 {
-  return _C8_RANGE(C8_RND_ADDR, C8_RND_SIZE);
+  return _C8_RANGE(C8_MEM_RND_ADDR, C8_MEM_RND_SIZE);
 }
 
 c8_range_t c8_query_font(void)
 {
-  return _C8_RANGE(C8_FONT_ADDR, C8_FONT_SIZE);
+  return _C8_RANGE(C8_MEM_FONT_ADDR, C8_MEM_FONT_SIZE);
 }
 
 c8_range_t c8_query_vram(void)
 {
-  return _C8_RANGE(C8_VRAM_ADDR, C8_VRAM_SIZE);
+  return _C8_RANGE(C8_MEM_VRAM_ADDR, C8_MEM_VRAM_SIZE);
 }
 
 #undef _C8_RANGE
