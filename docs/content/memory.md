@@ -1,40 +1,42 @@
 ## Memory
 cel8 has <4kb of RAM: see layout below.
-This memory can be accessed with `cel8.peek`, `cel8.poke`, `cel8.memcpy`, `cel8.memset`.
+This memory can be accessed with the functions `c8_peek`, `c8_poke`, `c8_memcpy`, `c8_memset`.
 
 ### Memory Layout
-```lua
-0x0000                          -- color mapping
-0x000F                          -- color palette
-0x003F                          -- draw color
-0x0040                          -- random state
-0x0044                          -- unused
-0x0050                          -- font atlas
-0x0450                          -- screen buffer
+```c
+/*
+    0x0000: color mapping
+    0x000F: color palette
+    0x003F: draw color
+    0x0040: random state
+    0x0044: unused
+    0x0050: font atlas
+    0x0450: screen buffer
+*/
 ```
 
 The screen buffer is composed of interleved data; the first two bytes of memory represent the color and the glyph, respectively
 
-##### cel8.peek( addr [, n] )
+##### u8 c8_peek(const u32 addr, const u32 index)
 Read `n` bytes from an address in ram. If `n` is not specified the `peek()` will return the first byte.
 
 For example, to read the first two bytes of video memory:
 
-```lua
-local a, b = peek(0x0450, 2)
+```c
+u8 value = c8_peek(0x0450, 0x00);
 ```
 
-##### cel8.poke( addr [, value [, ...]] )
-Write one or more bytes to an address in ram. If more than one parameter is provided the bytes will be written sequentially.
+##### void c8_poke(const u32 addr, const u32 index, const u8 value)
+Write a single bytes to an address in ram.
 
-##### cel8.peek2( addr [, n] )
-##### cel8.poke2( addr [, value [, ...]] )
-##### cel8.peek4( addr [, n] )
-##### cel8.poke4( addr [, value [, ...]] )
-16-bit and 32-bit variations of `peek( addr [, n] )` and `poke( addr [, value [, ...]] )` are also offered.
+##### u16 c8_peek2(const u32 addr, const u32 index)
+##### void c8_poke2(const u32 addr, const u32 index, const u8 value)
+##### u32 c8_peek4(const u32 addr, const u32 index)
+##### void c8_poke4(const u32 addr, const u32 index, const u16 value)
+16-bit and 32-bit variations of `c8_peek` and `c8_poke` are also offered.
 
-##### cel8.memcpy( dst, src, len )
+##### void c8_memcpy(void *dst, const void *src, size_t len)
 Copies the values of `len` bytes from the location pointed to by `src` directly to the memory block pointed to by `dst`.
 
-##### cel8.memset( dst, value, len )
+##### void c8_memset(void *dst, int value, size_t len)
 Sets the first `len` bytes of the block of memory pointed by `dst` to the specified `value`.

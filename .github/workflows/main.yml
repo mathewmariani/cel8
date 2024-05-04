@@ -17,6 +17,11 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
 
+      - name: Build with Cmake 🔧
+        run: |
+          cmake --preset Release -B build
+          cmake --build build --preset Release
+
       - name: Install Packages 📦
         run: npm ci
 
