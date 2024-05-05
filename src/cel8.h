@@ -251,7 +251,6 @@ extern "C"
     C8_SCREEN_WIDTH = 128,
     C8_SCREEN_HEIGHT = 128,
 
-    /* FIXME: rename to C8_FLAG_[...] */
     /* flags */
     C8_FLAG_SCALE2X = (1 << 0),
     C8_FLAG_SCALE3X = (1 << 1),
@@ -261,7 +260,16 @@ extern "C"
     C8_FLAG_FPS144 = (1 << 5),
     C8_FLAG_FPSINF = (1 << 6),
 
-    /* FIXME: rename to C8_MEM_[...] */
+    /* input */
+    C8_INPUT_UP = (1 << 0),
+    C8_INPUT_LEFT = (1 << 1),
+    C8_INPUT_RIGHT = (1 << 2),
+    C8_INPUT_DOWN = (1 << 3),
+    C8_INPUT_A = (1 << 4),
+    C8_INPUT_B = (1 << 5),
+    C8_INPUT_START = (1 << 6),
+    C8_INPUT_SELECT = (1 << 7),
+
     /* memory mapping */
     C8_MEM_CMAP_ADDR = 0x0000,
     C8_MEM_CMAP_SIZE = 0x000F,
@@ -279,7 +287,6 @@ extern "C"
     C8_MEM_VRAM_SIZE = 0x0200,
     C8_MEM_SIZE = C8_MEM_CMAP_SIZE + C8_MEM_PAL_SIZE + C8_MEM_COLOR_SIZE + C8_MEM_RND_SIZE + C8_MEM_UNUSED_SIZE + C8_MEM_FONT_SIZE + C8_MEM_VRAM_SIZE,
 
-    /* FIXME: rename to C8_STAT_[...] */
     /* stat */
     C8_STAT_VERSION_STR = 0x0000,
     C8_STAT_FRAME_TIME = 0x0001,
@@ -320,6 +327,9 @@ extern "C"
   C8_API_DECL void c8_init(const c8_desc_t *desc);
   C8_API_DECL void c8_reset(void);
   C8_API_DECL void c8_frame(void);
+
+  C8_API_DECL void c8_input_set(u32 mask);
+  C8_API_DECL void c8_input_clear(u32 mask);
 
   C8_API_DECL const u8 c8_peek(const u32 addr, const u32 index);
   C8_API_DECL const u16 c8_peek2(const u32 addr, const u32 index);
@@ -460,6 +470,8 @@ static struct
   f64 dt;
   u8 flags;
 
+  u8 input;
+
   u8 memory[C8_MEM_SIZE];
   u8 screen[0x4000];
 } _c8;
@@ -573,6 +585,78 @@ void c8_init(const c8_desc_t *desc)
 void c8_reset(void)
 {
   /* body */
+}
+
+void c8_input_set(u32 mask)
+{
+  if (mask & C8_INPUT_UP)
+  {
+    _c8.input |= C8_INPUT_UP;
+  }
+  if (mask & C8_INPUT_LEFT)
+  {
+    _c8.input |= C8_INPUT_LEFT;
+  }
+  if (mask & C8_INPUT_RIGHT)
+  {
+    _c8.input |= C8_INPUT_RIGHT;
+  }
+  if (mask & C8_INPUT_DOWN)
+  {
+    _c8.input |= C8_INPUT_DOWN;
+  }
+  if (mask & C8_INPUT_A)
+  {
+    _c8.input |= C8_INPUT_A;
+  }
+  if (mask & C8_INPUT_B)
+  {
+    _c8.input |= C8_INPUT_B;
+  }
+  if (mask & C8_INPUT_START)
+  {
+    _c8.input |= C8_INPUT_START;
+  }
+  if (mask & C8_INPUT_SELECT)
+  {
+    _c8.input |= C8_INPUT_SELECT;
+  }
+}
+
+void c8_input_clear(u32 mask)
+{
+  if (mask & C8_INPUT_UP)
+  {
+    _c8.input &= ~C8_INPUT_UP;
+  }
+  if (mask & C8_INPUT_LEFT)
+  {
+    _c8.input &= ~C8_INPUT_LEFT;
+  }
+  if (mask & C8_INPUT_RIGHT)
+  {
+    _c8.input &= ~C8_INPUT_RIGHT;
+  }
+  if (mask & C8_INPUT_DOWN)
+  {
+    _c8.input &= ~C8_INPUT_DOWN;
+  }
+  if (mask & C8_INPUT_A)
+  {
+    _c8.input &= ~C8_INPUT_A;
+  }
+  if (mask & C8_INPUT_B)
+  {
+    _c8.input &= ~C8_INPUT_B;
+  }
+  if (mask & C8_INPUT_START)
+  {
+    _c8.input &= ~C8_INPUT_START;
+  }
+  if (mask & C8_INPUT_SELECT)
+  {
+    _c8.input &= ~C8_INPUT_SELECT;
+  }
 }
 
 void c8_frame(void)

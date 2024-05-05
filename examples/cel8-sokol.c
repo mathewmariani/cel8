@@ -151,10 +151,75 @@ static void init(void)
 
 static void event(const sapp_event *e)
 {
+    switch (e->type)
+    {
+    case SAPP_EVENTTYPE_KEY_DOWN:
+        switch (e->key_code)
+        {
+        case SAPP_KEYCODE_RIGHT:
+            c8_input_set(C8_INPUT_RIGHT);
+            break;
+        case SAPP_KEYCODE_LEFT:
+            c8_input_set(C8_INPUT_LEFT);
+            break;
+        case SAPP_KEYCODE_UP:
+            c8_input_set(C8_INPUT_UP);
+            break;
+        case SAPP_KEYCODE_DOWN:
+            c8_input_set(C8_INPUT_DOWN);
+            break;
+        case SAPP_KEYCODE_Z:
+            c8_input_set(C8_INPUT_A);
+            break;
+        case SAPP_KEYCODE_X:
+            c8_input_set(C8_INPUT_B);
+            break;
+        case SAPP_KEYCODE_E:
+            c8_input_set(C8_INPUT_START);
+            break;
+        case SAPP_KEYCODE_R:
+            c8_input_set(C8_INPUT_SELECT);
+            break;
+        default:
+            break;
+        }
+        break;
+    case SAPP_EVENTTYPE_KEY_UP:
+        switch (e->key_code)
+        {
+        case SAPP_KEYCODE_RIGHT:
+            c8_input_clear(C8_INPUT_RIGHT);
+            break;
+        case SAPP_KEYCODE_LEFT:
+            c8_input_clear(C8_INPUT_LEFT);
+            break;
+        case SAPP_KEYCODE_UP:
+            c8_input_clear(C8_INPUT_UP);
+            break;
+        case SAPP_KEYCODE_DOWN:
+            c8_input_clear(C8_INPUT_DOWN);
+            break;
+        case SAPP_KEYCODE_Z:
+            c8_input_clear(C8_INPUT_A);
+            break;
+        case SAPP_KEYCODE_X:
+            c8_input_clear(C8_INPUT_B);
+            break;
+        case SAPP_KEYCODE_E:
+            c8_input_clear(C8_INPUT_START);
+            break;
+        case SAPP_KEYCODE_R:
+            c8_input_clear(C8_INPUT_SELECT);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 static void frame(void)
 {
+    c8_frame();
     c8_update();
     c8_draw();
 
