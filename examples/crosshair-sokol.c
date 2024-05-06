@@ -6,6 +6,9 @@
 
 #include <stdio.h>
 
+int x = 8;
+int y = 8;
+
 void c8_load(void)
 {
 /* cel8 */
@@ -19,31 +22,24 @@ void c8_load(void)
   });
 }
 
-int x = 8;
-int y = 8;
-// static void event(const sapp_event *e)
-// {
-//   if (e->key_code == SAPP_KEYCODE_UP)
-//   {
-//     y++;
-//   }
-//   else if (e->key_code == SAPP_KEYCODE_DOWN)
-//   {
-//     y--;
-//   }
-//   else if (e->key_code == SAPP_KEYCODE_LEFT)
-//   {
-//     x--;
-//   }
-//   else if (e->key_code == SAPP_KEYCODE_RIGHT)
-//   {
-//     x++;
-//   }
-// }
-
 static void c8_update(void)
 {
-  /* body */
+  if (c8_btn(C8_INPUT_UP))
+  {
+    y--;
+  }
+  else if (c8_btn(C8_INPUT_DOWN))
+  {
+    y++;
+  }
+  else if (c8_btn(C8_INPUT_LEFT))
+  {
+    x--;
+  }
+  else if (c8_btn(C8_INPUT_RIGHT))
+  {
+    x++;
+  }
 }
 
 static void c8_draw(void)

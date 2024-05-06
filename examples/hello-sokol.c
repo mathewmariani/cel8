@@ -25,7 +25,6 @@ void c8_update(void)
 int i = 0;
 void c8_draw(void)
 {
-    c8_frame();
     c8_color(0x80);
     c8_print(2, 7, "Hello");
     c8_color(0x08);

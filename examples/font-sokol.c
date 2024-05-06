@@ -31,8 +31,6 @@ void c8_load(void)
             c8_poke(0x0450 + (i * 2), 0x01, i);
         }
     }
-
-    c8_frame();
 }
 
 void c8_update(void)
