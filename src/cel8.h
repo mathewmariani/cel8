@@ -340,6 +340,7 @@ extern "C"
   C8_API_DECL void c8_memcpy(void *dst, const void *src, size_t len);
   C8_API_DECL void c8_memset(void *dst, int value, size_t len);
 
+  C8_API_DECL bool c8_btn(u32 mask);
   C8_API_DECL void c8_cls(u8 clr, u8 chr);
   C8_API_DECL void c8_color(u8 color);
   C8_API_DECL void c8_fill(i32 x, i32 y, i32 w, i32 h, i32 chr);
@@ -727,6 +728,11 @@ void c8_memcpy(void *dst, const void *src, size_t len)
 void c8_memset(void *dst, int value, size_t len)
 {
   memset(dst, value, len);
+}
+
+bool c8_btn(u32 mask)
+{
+  return (_c8.input & mask) == mask;
 }
 
 void c8_cls(u8 clr, u8 chr)
