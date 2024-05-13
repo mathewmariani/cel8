@@ -11,11 +11,11 @@ if(BUILD_WITH_SOKOL)
   endif()
 
   #defines
-  # if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
-  #   add_definitions(-DSOKOL_GLES3)
-  # elseif (CMAKE_SYSTEM_NAME STREQUAL Darwin)
-  #   add_definitions(-DSOKOL_GLCORE33)
-  # endif()
+  if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+    add_definitions(-DSOKOL_GLES3)
+  elseif (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    add_definitions(-DSOKOL_GLCORE33)
+  endif()
 
   set(SOKOL_DIR ${THIRDPARTY_DIR}/sokol)
   set(SOKOL_SRC

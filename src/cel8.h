@@ -372,6 +372,7 @@ extern "C"
 #define OS_FREEBSD 1
 #endif
 #if defined(__EMSCRIPTEN__)
+#include <emscripten.h>
 #define OS_EMSCRIPTEN 1
 #endif
 
@@ -503,6 +504,8 @@ _C8_PRIVATE void _c8__sleep(f64 wait)
 {
 #if defined(OS_WINDOWS)
   Sleep(wait * 1000);
+#elif defined(OS_EMSCRIPTEN)
+  emscripten_sleep(wait * 1000);
 #else
   usleep(wait * 1000000);
 #endif
