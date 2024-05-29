@@ -13,9 +13,9 @@ endmacro()
 
 macro(c8_project target file)
   add_executable(${target} ${file})
-  emscripten(${target})
   target_link_libraries(${target} PRIVATE sokol)
   target_include_directories(${target} PUBLIC ${THIRDPARTY_DIR})
+  emscripten(${target})
 endmacro()
 
 # programs

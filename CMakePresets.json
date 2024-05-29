@@ -7,35 +7,42 @@
   },
   "configurePresets": [
     {
-      "name": "Debug",
-      "displayName": "Debug",
+      "name": "dekstop",
+      "displayName": "Deskop",
       "generator": "Ninja Multi-Config",
-      "binaryDir": "build",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "binaryDir": "build"
     },
     {
-      "name": "Release",
-      "displayName": "Release",
+      "name": "web",
+      "displayName": "Web",
       "generator": "Ninja Multi-Config",
       "binaryDir": "build",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+      "toolchainFile": "emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
     }
   ],
   "buildPresets": [
     {
-      "name": "Debug",
-      "displayName": "Build Debug",
-      "configurePreset": "Debug",
+      "name": "debug",
+      "displayName": "Debug",
+      "configurePreset": "dekstop",
       "configuration": "Debug"
     },
     {
-      "name": "Release",
+      "name": "release",
+      "displayName": "Release",
+      "configurePreset": "dekstop",
+      "configuration": "Release"
+    },
+    {
+      "name": "Web Debug",
+      "displayName": "Debug",
+      "configurePreset": "web",
+      "configuration": "Debug"
+    },
+    {
+      "name": "Web Release",
       "displayName": "Build Release",
-      "configurePreset": "Release",
+      "configurePreset": "web",
       "configuration": "Release"
     }
   ]
