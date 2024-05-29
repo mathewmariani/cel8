@@ -33,6 +33,13 @@
                 "program": "${command:cmake.getLaunchTargetPath}",
                 "MIMode": "gdb",
             }
+        },
+        {
+            "name": "Web",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000/build/examples/${command:cmake.buildType}/${command:cmake.launchTargetFilename}",
+            "preLaunchTask": "StartServer",
         }
     ]
 }
