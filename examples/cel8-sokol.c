@@ -61,14 +61,19 @@ static void init(void)
     });
 
 /* load embedded shader stages */
+#if defined(OS_EMSCRIPTEN)
+#include "embed/opengles_vertex.vs.h"
+#include "embed/opengles_fragment.fs.h"
+#else
 #include "embed/vertex.vs.h"
 #include "embed/fragment.fs.h"
+#endif
     sg_shader_desc shd_desc = (sg_shader_desc){
         .vs = {
-            .source = (const char *)&vertex_vs[0],
+            .source = (const char *)&vertex_vs,
         },
         .fs = {
-            .source = (const char *)&fragment_fs[0],
+            .source = (const char *)&fragment_fs,
             .images = {
                 [0] = {.used = true, .image_type = SG_IMAGETYPE_2D},
             },
@@ -218,8 +223,7 @@ static void cleanup(void)
 sapp_desc sokol_main(int argc, char *argv[])
 {
     /* sokol */
-    return (sapp_desc)
-    {
+    return (sapp_desc){
         .init_cb = init,
         .frame_cb = frame,
         .cleanup_cb = cleanup,
@@ -227,7 +231,6 @@ sapp_desc sokol_main(int argc, char *argv[])
         .width = C8_WINDOW_WIDTH,
         .height = C8_WINDOW_HEIGHT,
         .window_title = "cel8",
-
 #if defined(_C8_DEBUG)
         .win32_console_create = true,
         .logger.func = slog_func,

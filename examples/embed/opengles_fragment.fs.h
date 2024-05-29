@@ -1,5 +1,7 @@
 const char *fragment_fs =
-    "#version 330\n"
+    "#version 300 es\n"
+    "precision mediump float;\n"
+    "precision mediump int;\n"
     "uniform vec3[16] palette;\n"
     "uniform sampler2D screen;\n"
     "in vec2 uv;\n"
