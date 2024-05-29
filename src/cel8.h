@@ -498,6 +498,7 @@ _C8_PRIVATE f64 _c8__get_time(f64 start)
   const u64 mach_now = mach_absolute_time() - start;
   return ((f64)mach_now * 1.0e-9) * (f64)timebase.numer / (f64)timebase.denom;
 #endif
+  return 0.0f;
 }
 
 _C8_PRIVATE void _c8__sleep(f64 wait)
@@ -511,7 +512,7 @@ _C8_PRIVATE void _c8__sleep(f64 wait)
 #endif
 }
 
-_C8_PRIVATE inline f64 _c8__get_step_time()
+_C8_PRIVATE f64 _c8__get_step_time()
 {
   if (_c8.flags & C8_FLAG_FPS30)
   {
@@ -532,18 +533,18 @@ _C8_PRIVATE inline f64 _c8__get_step_time()
   return 0;
 }
 
-_C8_PRIVATE inline void _c8__set_cell(u32 offset, u8 color, u8 glyph)
+_C8_PRIVATE void _c8__set_cell(u32 offset, u8 color, u8 glyph)
 {
   c8_poke(C8_MEM_VRAM_ADDR + offset, 0x00, color);
   c8_poke(C8_MEM_VRAM_ADDR + offset, 0x01, glyph);
 }
 
-_C8_PRIVATE inline bool _c8__should_clip(u8 x, u8 y)
+_C8_PRIVATE bool _c8__should_clip(u8 x, u8 y)
 {
   return (x < 0 || x >= 0x10 || y < 0 || y >= 0x10);
 }
 
-_C8_PRIVATE inline void _c8__put_char(u32 x, u32 y, u8 c)
+_C8_PRIVATE void _c8__put_char(u32 x, u32 y, u8 c)
 {
   if (_c8__should_clip(x, y))
   {
@@ -594,12 +595,12 @@ void c8_frame(void)
   }
 }
 
-inline const u8 c8_peek(const u32 addr, const u32 index)
+const u8 c8_peek(const u32 addr, const u32 index)
 {
   return *(_c8.memory + addr + index);
 }
 
-inline const u16 c8_peek2(const u32 addr, const u32 index)
+const u16 c8_peek2(const u32 addr, const u32 index)
 {
   const u8 b0 = c8_peek(addr, index + 0);
   const u8 b1 = c8_peek(addr, index + 1);
@@ -608,7 +609,7 @@ inline const u16 c8_peek2(const u32 addr, const u32 index)
   return ((b0 << 8) | (b1 << 0));
 }
 
-inline const u32 c8_peek4(const u32 addr, const u32 index)
+const u32 c8_peek4(const u32 addr, const u32 index)
 {
   const u8 b0 = c8_peek(addr, index + 0);
   const u8 b1 = c8_peek(addr, index + 1);
@@ -619,18 +620,18 @@ inline const u32 c8_peek4(const u32 addr, const u32 index)
   return ((b0 << 24) | (b1 << 16) | (b2 << 8) | (b3 << 0));
 }
 
-inline void c8_poke(const u32 addr, const u32 index, const u8 value)
+void c8_poke(const u32 addr, const u32 index, const u8 value)
 {
   *(_c8.memory + addr + index) = value;
 }
 
-inline void c8_poke2(const u32 addr, const u32 index, const u16 value)
+void c8_poke2(const u32 addr, const u32 index, const u16 value)
 {
   c8_poke(addr, index + 0, (value >> 8) & 0xff);
   c8_poke(addr, index + 1, (value >> 0) & 0xff);
 }
 
-inline void c8_poke4(const u32 addr, const u32 index, const u32 value)
+void c8_poke4(const u32 addr, const u32 index, const u32 value)
 {
   c8_poke(addr, index + 0, (value >> 24) & 0xff);
   c8_poke(addr, index + 1, (value >> 16) & 0xff);
