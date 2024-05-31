@@ -14,7 +14,7 @@ if(BUILD_WITH_SOKOL)
   if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     add_definitions(-DSOKOL_GLES3)
   elseif (CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    add_definitions(-DSOKOL_GLCORE33)
+    add_definitions(-DSOKOL_GLCORE)
   endif()
 
   set(SOKOL_DIR ${THIRDPARTY_DIR}/sokol)
