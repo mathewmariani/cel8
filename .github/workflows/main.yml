@@ -34,8 +34,8 @@ jobs:
 
       - name: Build with Cmake 🔧
         run: |
-          cmake --preset Release -B build
-          cmake --build build --preset Release
+          cmake --preset web -B build
+          cmake --build build --preset web-release
 
       - name: Install Packages 📦
         run: npm ci
