@@ -41,7 +41,6 @@ window.addEventListener("mousedown", (e) => {
   <p>cel8 is built with:</p>
   <ul>
     <li>Sokol <a href="https://github.com/floooh/sokol">https://github.com/floooh/sokol</a></li>
-    <li>Lua 5.2 <a href="http://www.lua.org">http://www.lua.org</a></li>
   </ul>
 </header>
 <hr>
@@ -65,142 +64,87 @@ window.addEventListener("mousedown", (e) => {
         <li>
           <a href="#graphics">Graphics</a>
         </li>
-        <li>
-          <a href="#bitwise">Bitwise</a>
-        </li>
       </ul>
     </li>
   </ul>
 </details>
 <hr><h2>Welcome to cel8</h2>
-<p>cel8 is a *tiny* framework for creating grid-based games in Lua.</p>
+<p>cel8 is a *tiny* framework for creating grid-based games in c99.</p>
 <p>The sparse api of cel8 was designed to encourage smaller projects, and to give cel8 a more timely look and feel.</p>
 
-<h2>Program Structure</h2>
-<p>The most important parts of the api are the callbacks</p>
-<h5>cel8.load( )</h5>
-<p>This function is called exactly once at the beginning of the game.</p>
-<h5>cel8.update( )</h5>
-<p>Called once per update at 60fps.</p>
-<h5>cel8.draw( )</h5>
-<p>Called once per frame.</p>
-<p>More interactive games can override additional callbacks in order to handle input from the user.</p>
-<h5>cel8.keydown( key )</h5>
-<p>Called when a key is pressed.</p>
-<h5>cel8.keyup( key )</h5>
-<p>Called when a key is released.</p>
-<p>A simple program that overrides various callback functions might look this:</p>
-<pre><code class="language-lua">function cel8.load(key)
-  x, y = 0, 0
-end
 
-function cel8.keydown(key)
-  if key == &quot;up&quot; then
-    y = y - 1
-  elseif key == &quot;down&quot; then
-    y = y + 1
-  elseif key == &quot;left&quot; then
-    x = x - 1
-  elseif key == &quot;right&quot; then
-    x = x + 1
-  end
-end
-
-function cel8.draw()
-  cls(0x00, 0x00)
-  color(0x08)
-  put(x, y, &quot;@&quot;)
-end
-</code></pre>
-
-<h1>API Reference</h1>
-<p>cel8 is built on the <a href="https://www.lua.org/">Lua programming language</a> and includes the Lua standard library.</p>
-<p>Functions are written here as:</p>
-<p><code>FUNCTION_NAME(PARAMETER, [OPTIONAL_PARAMETER])</code></p>
-<p>{% include _markdown/memory.md %}
-{% include _markdown/system.md %}
-{% include _markdown/graphics.md %}
-{% include _markdown/bitwise.md %}</p>
 
 <h2>Memory</h2>
 <p>cel8 has &lt;4kb of RAM: see layout below.
-This memory can be accessed with <code>cel8.peek</code>, <code>cel8.poke</code>, <code>cel8.memcpy</code>, <code>cel8.memset</code>.</p>
+This memory can be accessed with the functions <code>c8_peek</code>, <code>c8_poke</code>, <code>c8_memcpy</code>, <code>c8_memset</code>.</p>
 <h3>Memory Layout</h3>
-<pre><code class="language-lua">0x0000                          -- color mapping
-0x000F                          -- color palette
-0x003F                          -- draw color
-0x0040                          -- random state
-0x0044                          -- unused
-0x0050                          -- font atlas
-0x0450                          -- screen buffer
+<pre><code class="language-c">/*
+    0x0000: color mapping
+    0x000F: color palette
+    0x003F: draw color
+    0x0040: random state
+    0x0044: unused
+    0x0050: font atlas
+    0x0450: screen buffer
+*/
 </code></pre>
 <p>The screen buffer is composed of interleved data; the first two bytes of memory represent the color and the glyph, respectively</p>
-<h5>cel8.peek( addr [, n] )</h5>
+<h5>u8 c8_peek(const u32 addr, const u32 index)</h5>
 <p>Read <code>n</code> bytes from an address in ram. If <code>n</code> is not specified the <code>peek()</code> will return the first byte.</p>
 <p>For example, to read the first two bytes of video memory:</p>
-<pre><code class="language-lua">local a, b = peek(0x0450, 2)
+<pre><code class="language-c">u8 value = c8_peek(0x0450, 0x00);
 </code></pre>
-<h5>cel8.poke( addr [, value [, ...]] )</h5>
-<p>Write one or more bytes to an address in ram. If more than one parameter is provided the bytes will be written sequentially.</p>
-<h5>cel8.peek2( addr [, n] )</h5>
-<h5>cel8.poke2( addr [, value [, ...]] )</h5>
-<h5>cel8.peek4( addr [, n] )</h5>
-<h5>cel8.poke4( addr [, value [, ...]] )</h5>
-<p>16-bit and 32-bit variations of <code>peek( addr [, n] )</code> and <code>poke( addr [, value [, ...]] )</code> are also offered.</p>
-<h5>cel8.memcpy( dst, src, len )</h5>
+<h5>void c8_poke(const u32 addr, const u32 index, const u8 value)</h5>
+<p>Write a single bytes to an address in ram.</p>
+<h5>u16 c8_peek2(const u32 addr, const u32 index)</h5>
+<h5>void c8_poke2(const u32 addr, const u32 index, const u8 value)</h5>
+<h5>u32 c8_peek4(const u32 addr, const u32 index)</h5>
+<h5>void c8_poke4(const u32 addr, const u32 index, const u16 value)</h5>
+<p>16-bit and 32-bit variations of <code>c8_peek</code> and <code>c8_poke</code> are also offered.</p>
+<h5>void c8_memcpy(void *dst, const void *src, size_t len)</h5>
 <p>Copies the values of <code>len</code> bytes from the location pointed to by <code>src</code> directly to the memory block pointed to by <code>dst</code>.</p>
-<h5>cel8.memset( dst, value, len )</h5>
+<h5>void c8_memset(void *dst, int value, size_t len)</h5>
 <p>Sets the first <code>len</code> bytes of the block of memory pointed by <code>dst</code> to the specified <code>value</code>.</p>
 
 <h2>System</h2>
-<h5>cel8.stat( n )</h5>
-<p>Get system information where <code>n</code> is:</p>
-<pre><code class="language-lua">0x0       -- version string
-0x1       -- frame time
-0x2..0x3  -- mouse x, y
-0x4..0x9  -- GMT time: year, month, day, hour, minute, second
-0xA..0xF  -- Local time: ...
+<h5>void c8_stat(u8 n)</h5>
+<p>Gets the system information where <code>n</code> can be:</p>
+<pre><code class="language-c">/*
+    0x0       : version string
+    0x1       : frame time
+    0x2..0x3  : mouse x, y
+    0x4..0x9  : GMT time: year, month, day, hour, minute, second
+    0xA..0xF  : Local time: ...
+*/
 </code></pre>
-<h5>cel8.rnd( )</h5>
+<h5>void c8_rnd(void)</h5>
 <p>Returns a 16-bit pseudo random number.</p>
 <p>The random number generator is mapped to adresses <code>0x0040..0x0043</code>. Where the first two bytes represent the seed, and the last two are the high/low values of the ouput.</p>
-<h5>cel8.time( )</h5>
+<p>Calling <code>c8_rnd()</code> will generate a new a random number.</p>
+<h5>void c8_time(void)</h5>
 <p>Returns the value of a timer, in seconds, with an unspecified starting time.</p>
-<p>Multiple calls of <code>time( )</code> during the same frame will always return the same result.</p>
+<p>Multiple calls of <code>c8_time()</code> during the same frame will always return the same result.</p>
 
 <h2>Graphics</h2>
 <p>cel8 has a fixed capacity of 128 8x8 pixel glyphs.</p>
 <p>All drawing operations in cel8 are subject to the current color. The current color is seperated into background and foreground. These are determined, respectively, by the high and low nibbles of the set color.</p>
-<h5>cel8.cls( clr, chr )</h5>
+<h5>void c8_cls(u8 clr, u8 chr)</h5>
 <p>Clears the screen to a specified color and character.</p>
-<h5>cel8.color( clr )</h5>
+<h5>void c8_color(u8 clr)</h5>
 <p>Set the current colour to be used by drawing functions.</p>
-<p>For example, to set the color for the next drawing oepration to (bg: dark_blue, fg: red).</p>
-<pre><code class="language-lua">function cel8.draw()
-  cel8.color(0x18)
-  cel8.put(0, 0, '@')
-end
+<p>For example, to set the color for the next drawing operation to (bg: dark_blue, fg: red).</p>
+<pre><code class="language-c">c8_color(0x18);
+c8_print(0, 0, &quot;@&quot;);
 </code></pre>
-<h5>cel8.fill( x, y, w, h, chr )</h5>
+<h5>void c8_fill(u8 x, u8 y, u8 w, u8 h, u8 chr)</h5>
 <p>Set the characters in the rectangle [<code>x</code>, <code>y</code>, <code>w</code>, <code>h</code>] to <code>chr</code>.</p>
-<h5>cel8.put( x, y, str )</h5>
-<p>Places text at [<code>x</code>, <code>y</code>].</p>
-<h5>cel8.get( x, y )</h5>
+<h5>void c8_put(u8 x, u8 y, char c)</h5>
+<p>Places a glyph at [<code>x</code>, <code>y</code>].</p>
+<h5>void c8_get( x, y )</h5>
 <p>Returns the character at [<code>x</code>, <code>y</code>].</p>
+<h5>void c8_print(u8 x, u8 y, const char *str)</h5>
+<p>Places text at [<code>x</code>, <code>y</code>].</p>
 
-<h2>Bitwise</h2>
-<p>Bitwise operation operates on a bit string at the level of its individual bits.</p>
-<p>There are 9 bitwise functions available in cel8:</p>
-<pre><code class="language-lua">cel8.band( x, y )      -- bitwise and
-cel8.bor( x, y )       -- bitwise or
-cel8.bxor( x, y )      -- bitwise xor
-cel8.bnot( x )         -- bitwise not
-cel8.shl( x, n )       -- arithmetic shift left
-cel8.shr( x, n )       -- arithmetic shift right
-cel8.lshr( x, n )      -- logical shift left
-cel8.rotl( x, n )      -- rotate left
-cel8.rotr( x, n )      -- rotate right
-</code></pre>
 
 </main>
 
