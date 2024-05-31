@@ -62,18 +62,18 @@ static void init(void)
 
 /* load embedded shader stages */
 #if defined(OS_EMSCRIPTEN)
-#include "embed/opengles_vertex.vs.h"
-#include "embed/opengles_fragment.fs.h"
+#include "embed/vertex.opengles.vs.h"
+#include "embed/fragment.opengles.fs.h"
 #else
-#include "embed/vertex.vs.h"
-#include "embed/fragment.fs.h"
+#include "embed/vertex.opengl.vs.h"
+#include "embed/fragment.opengl.fs.h"
 #endif
     sg_shader_desc shd_desc = (sg_shader_desc){
         .vs = {
-            .source = (const char *)&vertex_vs,
+            .source = (const char *)&vertex_vs[0],
         },
         .fs = {
-            .source = (const char *)&fragment_fs,
+            .source = (const char *)&fragment_fs[0],
             .images = {
                 [0] = {.used = true, .image_type = SG_IMAGETYPE_2D},
             },
@@ -160,6 +160,7 @@ static void event(const sapp_event *e)
 
 static void frame(void)
 {
+    c8_frame();
     c8_update();
     c8_draw();
 
