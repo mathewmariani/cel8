@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "build": "ts-node scripts/build.ts"
+    "build": "ts-node scripts/build.ts",
+    "emsdk": "git clone https://github.com/emscripten-core/emsdk && cd emsdk && ./emsdk install latest && ./emsdk activate --embedded latest && cd .."
   },
   "dependencies": {
     "glob": "^10.3.10",

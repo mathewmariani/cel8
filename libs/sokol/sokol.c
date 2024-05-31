@@ -1,5 +1,4 @@
 #define SOKOL_IMPL
-#define SOKOL_GLCORE33
 
 /* headers */
 #include "sokol_app.h"

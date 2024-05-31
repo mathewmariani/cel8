@@ -10,6 +10,9 @@
 build/
 website/
 
+# emscripten
+emsdk/
+
 # dependency directories
 node_modules/
 

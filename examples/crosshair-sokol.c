@@ -53,14 +53,14 @@ static void c8_draw(void)
 
   /* field */
   c8_color(0x05);
-  c8_fill(0, 0, 16, 16, ".");
+  c8_fill(0, 0, 16, 16, 0x53);
 
   /* crosshair */
   c8_color(0x06);
-  c8_fill(0, y, 16, 1, ".");
-  c8_fill(x, 0, 1, 16, ".");
+  c8_fill(0, y, 16, 1, 0x53);
+  c8_fill(x, 0, 1, 16, 0x53);
 
   /* player */
   c8_color(0x08);
-  c8_put(x, y, "@");
+  c8_put(x, y, 0x40);
 }

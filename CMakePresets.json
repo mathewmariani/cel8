@@ -7,35 +7,42 @@
   },
   "configurePresets": [
     {
-      "name": "Debug",
-      "displayName": "Debug",
+      "name": "desktop",
+      "displayName": "Desktop",
       "generator": "Ninja Multi-Config",
-      "binaryDir": "build",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "binaryDir": "build/desktop"
     },
     {
-      "name": "Release",
-      "displayName": "Release",
+      "name": "web",
+      "displayName": "Web",
       "generator": "Ninja Multi-Config",
-      "binaryDir": "build",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+      "binaryDir": "build/web",
+      "toolchainFile": "emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
     }
   ],
   "buildPresets": [
     {
-      "name": "Debug",
-      "displayName": "Build Debug",
-      "configurePreset": "Debug",
+      "name": "desktop-debug",
+      "displayName": "Desktop Debug",
+      "configurePreset": "desktop",
       "configuration": "Debug"
     },
     {
-      "name": "Release",
-      "displayName": "Build Release",
-      "configurePreset": "Release",
+      "name": "desktop-release",
+      "displayName": "Desktop Release",
+      "configurePreset": "desktop",
+      "configuration": "Release"
+    },
+    {
+      "name": "web-debug",
+      "displayName": "Web Debug",
+      "configurePreset": "web",
+      "configuration": "Debug"
+    },
+    {
+      "name": "web-release",
+      "displayName": "Web Release",
+      "configurePreset": "web",
       "configuration": "Release"
     }
   ]
