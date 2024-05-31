@@ -7,7 +7,7 @@ macro(emscripten target)
       -sALLOW_MEMORY_GROWTH=1
       -sUSE_WEBGL2=1
       $<$<CONFIG:Debug>:-g>
-      $<$<CONFIG:Debug>:--shell-file ../extra/shell.html>)
+      $<$<CONFIG:Debug>:--shell-file ../../extra/shell.html>)
   endif()
 endmacro()
 

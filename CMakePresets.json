@@ -7,41 +7,41 @@
   },
   "configurePresets": [
     {
-      "name": "dekstop",
-      "displayName": "Deskop",
+      "name": "desktop",
+      "displayName": "Desktop",
       "generator": "Ninja Multi-Config",
-      "binaryDir": "build"
+      "binaryDir": "build/desktop"
     },
     {
       "name": "web",
       "displayName": "Web",
       "generator": "Ninja Multi-Config",
-      "binaryDir": "build",
+      "binaryDir": "build/web",
       "toolchainFile": "emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
     }
   ],
   "buildPresets": [
     {
-      "name": "debug",
-      "displayName": "Debug",
-      "configurePreset": "dekstop",
+      "name": "desktop-debug",
+      "displayName": "Desktop Debug",
+      "configurePreset": "desktop",
       "configuration": "Debug"
     },
     {
-      "name": "release",
-      "displayName": "Release",
-      "configurePreset": "dekstop",
+      "name": "desktop-release",
+      "displayName": "Desktop Release",
+      "configurePreset": "desktop",
       "configuration": "Release"
     },
     {
-      "name": "Web Debug",
-      "displayName": "Debug",
+      "name": "web-debug",
+      "displayName": "Web Debug",
       "configurePreset": "web",
       "configuration": "Debug"
     },
     {
-      "name": "Web Release",
-      "displayName": "Build Release",
+      "name": "web-release",
+      "displayName": "Web Release",
       "configurePreset": "web",
       "configuration": "Release"
     }
