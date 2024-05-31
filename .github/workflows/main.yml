@@ -3,6 +3,8 @@ name: Build and Deploy
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 permissions:
   contents: write
@@ -21,6 +23,14 @@ jobs:
         uses: ashutoshvarma/setup-ninja@master
         with:
           version: 1.10.0
+
+      - name: Install and Activate Emscripten 🔧
+        run: |
+          git clone https://github.com/emscripten-core/emsdk
+          cd emsdk
+          ./emsdk install latest
+          ./emsdk activate --embedded latest
+          cd ..
 
       - name: Build with Cmake 🔧
         run: |
