@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Desktop debug target",
+            "name": "Desktop",
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:cmake.getLaunchTargetPath}",
@@ -12,27 +12,24 @@
             "environment": [],
             "preLaunchTask": "CMake: build",
             "MIMode": "lldb",
+            "console": "integratedTerminal",
             "windows": {
-                "name": "Desktop debug target",
-                "type": "cppvsdbg",
-                "request": "launch",
-                "program": "${command:cmake.getLaunchTargetPath}",
-                "console": "integratedTerminal",
+                "MIMode": "gdb"
             },
             "osx": {
-                "name": "Desktop debug target",
-                "type": "cppdbg",
-                "request": "launch",
-                "program": "${command:cmake.getLaunchTargetPath}",
-                "MIMode": "lldb",
+                "MIMode": "lldb"
             },
             "linux": {
-                "name": "Desktop debug target",
-                "type": "cppdbg",
-                "request": "launch",
-                "program": "${command:cmake.getLaunchTargetPath}",
-                "MIMode": "gdb",
+                "MIMode": "gdb"
             }
+        },
+        {
+            "name": "Web",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000/build/web/examples/${command:cmake.buildType}/${command:cmake.launchTargetFilename}",
+            "preLaunchTask": "StartServer",
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }

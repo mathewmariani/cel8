@@ -22,7 +22,7 @@ void c8_update(void)
     /* body */
 }
 
-int i = 0;
+float i = 0;
 void c8_draw(void)
 {
     c8_color(0x80);

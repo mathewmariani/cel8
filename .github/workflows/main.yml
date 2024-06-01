@@ -3,6 +3,8 @@ name: Build and Deploy
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 permissions:
   contents: write
@@ -22,10 +24,18 @@ jobs:
         with:
           version: 1.10.0
 
+      - name: Install and Activate Emscripten 🔧
+        run: |
+          git clone https://github.com/emscripten-core/emsdk
+          cd emsdk
+          ./emsdk install latest
+          ./emsdk activate --embedded latest
+          cd ..
+
       - name: Build with Cmake 🔧
         run: |
-          cmake --preset Release -B build
-          cmake --build build --preset Release
+          cmake --preset web
+          cmake --build --preset web-release
 
       - name: Install Packages 📦
         run: npm ci

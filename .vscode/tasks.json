@@ -12,6 +12,18 @@
 			"group": "build",
 			"problemMatcher": [],
 			"detail": "CMake template build task"
+		},
+		{
+			"label": "StartServer",
+			"type": "process",
+			"command": "${input:startServer}"
+		}
+	],
+	"inputs": [
+		{
+			"id": "startServer",
+			"type": "command",
+			"command": "livePreview.runServerLoggingTask"
 		}
 	]
 }

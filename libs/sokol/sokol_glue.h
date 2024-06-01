@@ -103,8 +103,8 @@
 extern "C" {
 #endif
 
-    SOKOL_GLUE_API_DECL sg_environment sglue_environment(void);
-    SOKOL_GLUE_API_DECL sg_swapchain sglue_swapchain(void);
+SOKOL_GLUE_API_DECL sg_environment sglue_environment(void);
+SOKOL_GLUE_API_DECL sg_swapchain sglue_swapchain(void);
 
 #ifdef __cplusplus
 } /* extern "C" */
@@ -128,8 +128,8 @@ extern "C" {
 SOKOL_API_IMPL sg_environment sglue_environment(void) {
     sg_environment env;
     memset(&env, 0, sizeof(env));
-    env.defaults.color_format = (sg_pixel_format)sapp_color_format();
-    env.defaults.depth_format = (sg_pixel_format)sapp_depth_format();
+    env.defaults.color_format = (sg_pixel_format) sapp_color_format();
+    env.defaults.depth_format = (sg_pixel_format) sapp_depth_format();
     env.defaults.sample_count = sapp_sample_count();
     env.metal.device = sapp_metal_get_device();
     env.d3d11.device = sapp_d3d11_get_device();
