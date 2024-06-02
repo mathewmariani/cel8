@@ -219,6 +219,8 @@ static void event(const sapp_event *e)
         default:
             break;
         }
+    default:
+        break;
     }
 }
 
@@ -227,6 +229,9 @@ static void frame(void)
     c8_frame();
     c8_update();
     c8_draw();
+
+    /* FIXME: proof of concept for `c8_btnp()` */
+    c8_input_clear(C8_INPUT_RIGHT | C8_INPUT_LEFT | C8_INPUT_UP | C8_INPUT_DOWN | C8_INPUT_A | C8_INPUT_B | C8_INPUT_START | C8_INPUT_SELECT);
 
     /* query memory */
     const c8_range_t vram = c8_query_vram();

@@ -1,13 +1,8 @@
 #define C8_IMPL
 #include "cel8.h"
 
-/* sokol */
-#include "sokol/sokol_gfx.h"
-#include "sokol/sokol_app.h"
-#include "sokol/sokol_glue.h"
-#if defined(_C8_DEBUG)
-#include "sokol/sokol_log.h"
-#endif
+#define C8_PLATFORM_SOKOL
+#include "cel8-sokol.c"
 
 /* std */
 #include <stdio.h>
