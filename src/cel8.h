@@ -29,7 +29,6 @@
     c8_get( x, y )                      : current environment
     c8_stat( n )                        : system information
     c8_rnd( )                           : pseudo random number
-    c8_time( )                          : time since start
 
 
     MEMORY MAP:
@@ -337,7 +336,6 @@ extern "C"
   C8_API_DECL uint8_t c8_get(int32_t x, int32_t y);
   C8_API_DECL uint16_t c8_stat(int32_t n);
   C8_API_DECL uint16_t c8_rnd(void);
-  C8_API_DECL double c8_time(void);
 
   C8_API_DECL c8_range_t c8_query_memory(void);
   C8_API_DECL c8_range_t c8_query_vram(void);
@@ -418,19 +416,6 @@ extern "C"
 #define C8_ASSERT(c) assert(c)
 #endif
 
-#if defined(OS_WINDOWS)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#elif defined(OS_MACOS)
-#include <unistd.h>
-#include <mach/mach_time.h>
-#endif
-
 #ifndef _C8_PRIVATE
 #if defined(__GNUC__) || defined(__clang__)
 #define _C8_PRIVATE __attribute__((unused)) static
@@ -459,91 +444,14 @@ extern "C"
 static struct
 {
   bool valid;
-
-  /* timer */
-  double curr;
-  double start;
-  double prev;
-  double dt;
   uint8_t flags;
-
   uint8_t input;
-
   uint8_t memory[C8_MEM_SIZE];
-
   uint8_t video_ram[0x0400];
   uint8_t color_ram[0x0400];
   uint8_t main_ram[0x0400];
   uint8_t gfx_rom[0x0400];
 } _c8;
-
-#if defined(OS_WINDOWS)
-_C8_PRIVATE double get_frequency()
-{
-  LARGE_INTEGER li;
-  QueryPerformanceFrequency(&li);
-  return (double)li.QuadPart;
-}
-_C8_PRIVATE double get_time_absolute()
-{
-  LARGE_INTEGER li;
-  QueryPerformanceCounter(&li);
-  return (double)li.QuadPart;
-}
-#elif defined(OS_MACOS)
-_C8_PRIVATE mach_timebase_info_data_t get_timebase_info()
-{
-  mach_timebase_info_data_t info;
-  mach_timebase_info(&info);
-  return info;
-}
-#endif
-
-_C8_PRIVATE double _c8__get_time(double start)
-{
-#if defined(OS_WINDOWS)
-  const double now = get_time_absolute();
-  const double frequency = get_frequency();
-  return (now - start) / frequency;
-#elif defined(OS_MACOS)
-  const mach_timebase_info_data_t timebase = get_timebase_info();
-  const uint64_t mach_now = mach_absolute_time() - start;
-  return ((double)mach_now * 1.0e-9) * (double)timebase.numer / (double)timebase.denom;
-#endif
-  return 0.0f;
-}
-
-_C8_PRIVATE void _c8__sleep(double wait)
-{
-#if defined(OS_WINDOWS)
-  Sleep(wait * 1000);
-#elif defined(OS_EMSCRIPTEN)
-  emscripten_sleep(wait * 1000);
-#else
-  usleep(wait * 1000000);
-#endif
-}
-
-_C8_PRIVATE double _c8__get_step_time()
-{
-  if (_c8.flags & C8_FLAG_FPS30)
-  {
-    return 1.0 / 30.0;
-  }
-  if (_c8.flags & C8_FLAG_FPS60)
-  {
-    return 1.0 / 60.0;
-  }
-  if (_c8.flags & C8_FLAG_FPS144)
-  {
-    return 1.0 / 144.0;
-  }
-  if (_c8.flags & C8_FLAG_FPSINF)
-  {
-    return 0;
-  }
-  return 0;
-}
 
 _C8_PRIVATE void _c8__set_cell(uint32_t offset, uint8_t color, uint8_t glyph)
 {
@@ -580,12 +488,6 @@ void c8_init(const c8_desc_t *desc)
   memcpy(_c8.memory + C8_MEM_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
 
   _c8.flags = desc->flags;
-  /* initialize timer */
-#if defined(OS_WINDOWS)
-  _c8.start = get_time_absolute();
-#elif defined(OS_MACOS)
-  _c8.start = mach_absolute_time();
-#endif
 }
 
 void c8_shutdown(void)
@@ -676,18 +578,6 @@ void c8_input_clear(uint32_t mask)
 
 static void _c8__tick(void)
 {
-  double now = _c8__get_time(_c8.start);
-  double wait = (_c8.prev + _c8__get_step_time()) - now;
-  double prev = _c8.prev;
-  if (wait > 0)
-  {
-    _c8__sleep(wait);
-    _c8.prev += _c8__get_step_time();
-  }
-  else
-  {
-    _c8.prev = now;
-  }
 }
 
 void c8_exec(void)
@@ -912,11 +802,6 @@ uint16_t c8_rnd(void)
   uint8_t reg_2 = c8_peek(C8_MEM_RND_ADDR, 2);
   uint8_t reg_3 = c8_peek(C8_MEM_RND_ADDR, 3);
   return ((uint16_t)reg_2 << 0x8) | reg_3;
-}
-
-double c8_time(void)
-{
-  return _c8.curr;
 }
 
 #define _C8_RANGE(addr, sz) \
