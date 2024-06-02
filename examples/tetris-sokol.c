@@ -17,7 +17,7 @@ enum
   TETRIS_CLEAR_LINE_TICKS = 25,
 };
 
-u8 color_table[] = {
+uint8_t color_table[] = {
     0x90,
     0xC0,
     0xA0,
@@ -28,7 +28,7 @@ u8 color_table[] = {
     0x70,
 };
 
-f32 gravity_table[] = {
+float gravity_table[] = {
     0.01667f,
     0.021017f,
     0.026977f,
@@ -46,7 +46,7 @@ f32 gravity_table[] = {
     2.36f,
 };
 
-u8 tetromino[7][16] = {
+uint8_t tetromino[7][16] = {
     {0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0},
     {0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0},
@@ -56,7 +56,7 @@ u8 tetromino[7][16] = {
     {0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0},
 };
 
-u16 b_tetromino[7] = {
+uint16_t b_tetromino[7] = {
     0b0010001000100010,
     0b0010011000100000,
     0b0000011001100000,
@@ -68,17 +68,17 @@ u16 b_tetromino[7] = {
 
 typedef struct
 {
-  i8 x, y, r;
+  int8_t x, y, r;
 } tetromino_t;
 
 struct
 {
-  u64 ticks;
-  u16 score;
-  u16 score_offset;
-  u8 level;
-  u8 lines;
-  i8 fx_ticks;
+  uint64_t ticks;
+  uint16_t score;
+  uint16_t score_offset;
+  uint8_t level;
+  uint8_t lines;
+  int8_t fx_ticks;
 
   bool should_clear;
   bool gameover;
@@ -87,7 +87,7 @@ struct
 
   int cx, cy, cr;
   int cp, np;
-  i8 grid[16][8];
+  int8_t grid[16][8];
 } state;
 
 static int rotate(int x, int y, int r)
@@ -109,7 +109,7 @@ static int rotate(int x, int y, int r)
 
 static bool does_piece_fit(int i, int r, int px, int py)
 {
-  u8 *t = tetromino[i];
+  uint8_t *t = tetromino[i];
   for (int y = 0; y < 4; y++)
   {
     for (int x = 0; x < 4; x++)
@@ -160,7 +160,7 @@ static void draw_tetromino(int p, int x, int y, int r)
 
 static void lock_piece(void)
 {
-  u8 *t = tetromino[state.cp];
+  uint8_t *t = tetromino[state.cp];
   for (int y = 0; y < 4; y++)
   {
     for (int x = 0; x < 4; x++)
@@ -225,7 +225,7 @@ static void clear_lines(void)
 
 static void move_piece(void)
 {
-  u8 *t = tetromino[state.cp];
+  uint8_t *t = tetromino[state.cp];
   if (does_piece_fit(state.cp, state.cr, state.cx, state.cy + 1))
   {
     state.cy++;

@@ -1,6 +1,6 @@
 ## System
 
-##### void c8_stat(u8 n)
+##### void c8_stat(uint8_t n)
 Gets the system information where `n` can be:
 
 ```c

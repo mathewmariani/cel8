@@ -20,8 +20,8 @@ enum
 
 typedef struct
 {
-  u8 x;
-  u8 y;
+  uint8_t x;
+  uint8_t y;
 } pos_t;
 
 struct
@@ -32,17 +32,17 @@ struct
 struct
 {
   pos_t pos[256];
-  u8 size;
+  uint8_t size;
 } snake;
 
-i8 dx = 0;
-i8 dy = 0;
+int8_t dx = 0;
+int8_t dy = 0;
 
 static struct
 {
-  u16 score;
-  u16 score_offset;
-  i32 timer;
+  uint16_t score;
+  uint16_t score_offset;
+  int32_t timer;
   bool gameover;
   char str_buffer[5];
 } state;
@@ -55,7 +55,7 @@ static inline bool check_overlap(const pos_t a, const pos_t b)
 static inline bool check_overlaps(const pos_t a, const pos_t *b, size_t len)
 {
   bool ret = false;
-  for (i32 i = 0; i < len; i++)
+  for (int32_t i = 0; i < len; i++)
   {
     ret |= check_overlap(a, *(b + i));
   }
@@ -65,7 +65,7 @@ static inline bool check_overlaps(const pos_t a, const pos_t *b, size_t len)
 static inline void place_snake(void)
 {
   snake.size = MIN_SNAKE_SIZE;
-  for (i32 i = 0; i < snake.size; i++)
+  for (int32_t i = 0; i < snake.size; i++)
   {
     snake.pos[i].x = 8;
     snake.pos[i].y = 8;
@@ -229,7 +229,7 @@ void c8_draw(void)
   /* draw the snake */
   c8_color(0x0C);
   c8_put(snake.pos[0].x, snake.pos[0].y, SNAKE_HEAD_SEG);
-  for (i32 i = 1; i < snake.size; i++)
+  for (int32_t i = 1; i < snake.size; i++)
   {
     c8_put(snake.pos[i].x, snake.pos[i].y, SNAKE_BODY_SEG);
   }

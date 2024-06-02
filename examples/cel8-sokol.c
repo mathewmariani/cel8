@@ -27,7 +27,7 @@ static struct
     sg_pass_action pass_action;
     sg_pipeline pip;
     sg_bindings bind;
-    u8 screen[0x4000];
+    uint8_t screen[0x4000];
 } display;
 
 static void init(void)
@@ -38,7 +38,7 @@ static void init(void)
     });
 
     /* a vertex buffer */
-    const f32 vertices[] = {
+    const float vertices[] = {
         /* positions */           /* texture coord */
         -1.0f, 1.0f, 0.0f, 0.0f,  /* top-left */
         1.0f, 1.0f, 1.0f, 0.0f,   /* top-right */
@@ -47,7 +47,7 @@ static void init(void)
     };
 
     /* an index buffer with 2 triangles */
-    const u16 indices[] = {0, 1, 2, 0, 2, 3};
+    const uint16_t indices[] = {0, 1, 2, 0, 2, 3};
 
     sg_buffer vbuf = sg_make_buffer(&(sg_buffer_desc){
         .data = SG_RANGE(vertices),
@@ -90,7 +90,7 @@ static void init(void)
             },
             .uniform_blocks = {
                 [0] = {
-                    .size = sizeof(f32) * 48,
+                    .size = sizeof(float) * 48,
                     .uniforms = {
                         [0] = {
                             .name = "palette",
@@ -226,7 +226,7 @@ static void event(const sapp_event *e)
 
 static void frame(void)
 {
-    c8_frame();
+    c8_exec();
     c8_update();
     c8_draw();
 
@@ -238,36 +238,36 @@ static void frame(void)
     const c8_range_t font = c8_query_font();
 
     /* decode vram */
-    for (i32 i = 0, j = 0; i < sizeof(display.screen); i += 8)
+    for (int32_t i = 0, j = 0; i < sizeof(display.screen); i += 8)
     {
         /* convert from screen to cell */
         j = ((i % 128) / 8) + 16 * (i / 1024);
 
         /* screen buffer */
-        u8 color = *((u8 *)vram.ptr + (j * 2) + 0);
-        u8 glyph = *((u8 *)vram.ptr + (j * 2) + 1);
+        uint8_t color = *((uint8_t *)vram.ptr + (j * 2) + 0);
+        uint8_t glyph = *((uint8_t *)vram.ptr + (j * 2) + 1);
 
         /* convert color */
-        u8 high = ((color >> 4) & 0x0F);
-        u8 low = ((color) & 0x0F);
+        uint8_t high = ((color >> 4) & 0x0F);
+        uint8_t low = ((color) & 0x0F);
 
         /* decode glyph */
-        i32 y = (i / 128) % 8;
-        for (i32 x = 0; x < 8; x++)
+        int32_t y = (i / 128) % 8;
+        for (int32_t x = 0; x < 8; x++)
         {
-            u8 b = *((u8 *)font.ptr + y + glyph * 8) >> x;
-            *((u8 *)display.screen + i + x) = (b & 1) ? low : high;
+            uint8_t b = *((uint8_t *)font.ptr + y + glyph * 8) >> x;
+            *((uint8_t *)display.screen + i + x) = (b & 1) ? low : high;
         }
     }
 
     /* query palette data. */
     const c8_range_t pal = c8_query_pal();
     float palette[48] = {0};
-    for (i32 i = 0; i < 48; i += 3)
+    for (int32_t i = 0; i < 48; i += 3)
     {
-        *(palette + i + 0) = *((u8 *)pal.ptr + i + 0) / 255.0f;
-        *(palette + i + 1) = *((u8 *)pal.ptr + i + 1) / 255.0f;
-        *(palette + i + 2) = *((u8 *)pal.ptr + i + 2) / 255.0f;
+        *(palette + i + 0) = *((uint8_t *)pal.ptr + i + 0) / 255.0f;
+        *(palette + i + 1) = *((uint8_t *)pal.ptr + i + 1) / 255.0f;
+        *(palette + i + 2) = *((uint8_t *)pal.ptr + i + 2) / 255.0f;
     }
 
     /* update gpu resources */
