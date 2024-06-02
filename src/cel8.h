@@ -413,6 +413,11 @@ extern "C"
 #include <string.h> /* memcpy, memset */
 #include <time.h>
 
+#ifndef C8_ASSERT
+#include <assert.h>
+#define C8_ASSERT(c) assert(c)
+#endif
+
 #if defined(OS_WINDOWS)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
