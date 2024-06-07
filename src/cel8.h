@@ -237,15 +237,6 @@ extern "C"
     C8_SCREEN_WIDTH = 128,
     C8_SCREEN_HEIGHT = 128,
 
-    /* flags */
-    C8_FLAG_SCALE2X = (1 << 0),
-    C8_FLAG_SCALE3X = (1 << 1),
-    C8_FLAG_SCALE4X = (1 << 2),
-    C8_FLAG_FPS30 = (1 << 3),
-    C8_FLAG_FPS60 = (1 << 4),
-    C8_FLAG_FPS144 = (1 << 5),
-    C8_FLAG_FPSINF = (1 << 6),
-
     /* input */
     C8_INPUT_UP = (1 << 0),
     C8_INPUT_LEFT = (1 << 1),
@@ -301,7 +292,6 @@ extern "C"
 
   typedef struct
   {
-    uint8_t flags;
     struct
     {
       c8_range_t chars;
@@ -444,13 +434,17 @@ extern "C"
 static struct
 {
   bool valid;
-  uint8_t flags;
   uint8_t input;
-  uint8_t memory[C8_MEM_SIZE];
-  uint8_t video_ram[0x0400];
-  uint8_t color_ram[0x0400];
-  uint8_t main_ram[0x0400];
-  uint8_t gfx_rom[0x0400];
+  struct
+  {
+    uint8_t cmap_ram[C8_MEM_CMAP_SIZE];
+    uint8_t pal_ram[C8_MEM_PAL_SIZE];
+    uint8_t color_ram[C8_MEM_COLOR_SIZE];
+    uint8_t rnd_ram[C8_MEM_RND_SIZE];
+    uint8_t unused_ram[C8_MEM_UNUSED_SIZE];
+    uint8_t font_ram[C8_MEM_FONT_SIZE];
+    uint8_t vram_ram[C8_MEM_VRAM_SIZE];
+  } memory;
 } _c8;
 
 _C8_PRIVATE void _c8__set_cell(uint32_t offset, uint8_t color, uint8_t glyph)
@@ -484,10 +478,8 @@ void c8_init(const c8_desc_t *desc)
   _c8.valid = true;
 
   /* initialize default font */
-  memcpy(_c8.memory + C8_MEM_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
-  memcpy(_c8.memory + C8_MEM_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
-
-  _c8.flags = desc->flags;
+  memcpy((uint8_t *)&_c8.memory + C8_MEM_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
+  memcpy((uint8_t *)&_c8.memory + C8_MEM_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
 }
 
 void c8_shutdown(void)
@@ -588,7 +580,7 @@ void c8_exec(void)
 
 const uint8_t c8_peek(const uint32_t addr, const uint32_t index)
 {
-  return *(_c8.memory + addr + index);
+  return *((uint8_t *)&_c8.memory + addr + index);
 }
 
 const uint16_t c8_peek2(const uint32_t addr, const uint32_t index)
@@ -613,7 +605,7 @@ const uint32_t c8_peek4(const uint32_t addr, const uint32_t index)
 
 void c8_poke(const uint32_t addr, const uint32_t index, const uint8_t value)
 {
-  *(_c8.memory + addr + index) = value;
+  *((uint8_t *)&_c8.memory + addr + index) = value;
 }
 
 void c8_poke2(const uint32_t addr, const uint32_t index, const uint16_t value)
@@ -647,7 +639,7 @@ bool c8_btn(uint32_t mask)
 
 void c8_cls(uint8_t clr, uint8_t chr)
 {
-  memset(_c8.memory + C8_MEM_VRAM_ADDR, ((clr << 4) | chr), C8_MEM_VRAM_SIZE);
+  memset((uint8_t *)&_c8.memory + C8_MEM_VRAM_ADDR, ((clr << 4) | chr), C8_MEM_VRAM_SIZE);
 }
 
 void c8_color(uint8_t color)
@@ -778,10 +770,6 @@ uint16_t c8_stat(int32_t n)
     time_t t = time(NULL);
     return localtime(&t)->tm_sec;
   }
-  case C8_STAT_FLAGS:
-  {
-    return _c8.flags;
-  }
   default:
     return 0;
   }
@@ -805,7 +793,7 @@ uint16_t c8_rnd(void)
 }
 
 #define _C8_RANGE(addr, sz) \
-  (c8_range_t){.ptr = _c8.memory + addr, .size = sz};
+  (c8_range_t){.ptr = (uint8_t *)&_c8.memory + addr, .size = sz};
 
 c8_range_t c8_query_memory(void)
 {

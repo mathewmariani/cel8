@@ -87,7 +87,6 @@ void c8_load(void)
 #include "embed/font.h"
 #include "embed/palette.h"
   c8_init(&(c8_desc_t){
-      .flags = C8_FLAG_FPS30,
       .roms = {
           .chars = (c8_range_t){.ptr = font_h, .size = sizeof(font_h)},
           .palette = (c8_range_t){.ptr = palette_h, .size = sizeof(palette_h)},
