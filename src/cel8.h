@@ -40,7 +40,8 @@
     0x0040                           : random state
     0x0044                           : unused
     0x0050                           : font atlas
-    0x0450                           : screen buffer
+    0x0450                           : graphics
+    0x0650                           : screen
 
 
     MEMORY DUMP:
@@ -426,28 +427,20 @@ extern "C"
 #define STUBBED(x)
 #endif
 
-/* utils */
-#define UNUSED(x) ((void)(x))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define CLAMP(v, a, b) (MIN(MAX(v, a), b))
-#define ABS(n) ((n < 0) ? (-n) : (n))
-#define SWAP_INT(a, b) (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))
-
 static struct
 {
   bool valid;
   uint8_t input;
   struct
   {
-    uint8_t cmap_ram[C8_MEM_CMAP_SIZE];
-    uint8_t pal_ram[C8_MEM_PAL_SIZE];
-    uint8_t color_ram[C8_MEM_COLOR_SIZE];
-    uint8_t rnd_ram[C8_MEM_RND_SIZE];
-    uint8_t unused_ram[C8_MEM_UNUSED_SIZE];
-    uint8_t font_ram[C8_MEM_FONT_SIZE];
-    uint8_t vram_ram[C8_MEM_VRAM_SIZE];
-    uint8_t screen_ram[C8_MEM_SCREEN_SIZE];
+    uint8_t cmap[C8_MEM_CMAP_SIZE];
+    uint8_t pal[C8_MEM_PAL_SIZE];
+    uint8_t color[C8_MEM_COLOR_SIZE];
+    uint8_t rnd[C8_MEM_RND_SIZE];
+    uint8_t unused[C8_MEM_UNUSED_SIZE];
+    uint8_t font[C8_MEM_FONT_SIZE];
+    uint8_t vram[C8_MEM_VRAM_SIZE];
+    uint8_t screen[C8_MEM_SCREEN_SIZE];
   } memory;
 } _c8;
 
@@ -482,8 +475,8 @@ void c8_init(const c8_desc_t *desc)
   _c8.valid = true;
 
   /* initialize default font */
-  memcpy((uint8_t *)&_c8.memory + C8_MEM_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
-  memcpy((uint8_t *)&_c8.memory + C8_MEM_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
+  memcpy((uint8_t *)&_c8.memory.font, desc->roms.chars.ptr, desc->roms.chars.size);
+  memcpy((uint8_t *)&_c8.memory.pal, desc->roms.palette.ptr, desc->roms.palette.size);
 }
 
 void c8_shutdown(void)
@@ -572,17 +565,17 @@ void c8_input_clear(uint32_t mask)
   }
 }
 
-static void _c8__tick(void)
+_C8_PRIVATE void _c8__tick(void)
 {
 }
 
-static void _c8__decode_video(void)
+_C8_PRIVATE void _c8__decode_video(void)
 {
   /* query memory */
   const c8_range_t vram = c8_query_vram();
   const c8_range_t font = c8_query_font();
 
-  for (int32_t i = 0; i < sizeof(_c8.memory.screen_ram); i += 8)
+  for (int32_t i = 0; i < sizeof(_c8.memory.screen); i += 8)
   {
     /* convert from screen to cell */
     int32_t j = ((i % 128) / 8) + 16 * (i / 1024);
@@ -604,7 +597,7 @@ static void _c8__decode_video(void)
     for (int32_t x = 0; x < 8; x++)
     {
       uint8_t b = (*glyph_row >> x) & 1;
-      ((uint8_t *)_c8.memory.screen_ram)[i + x] = b ? low : high;
+      ((uint8_t *)_c8.memory.screen)[i + x] = b ? low : high;
     }
   }
 }
@@ -677,7 +670,7 @@ bool c8_btn(uint32_t mask)
 
 void c8_cls(uint8_t clr, uint8_t chr)
 {
-  memset((uint8_t *)&_c8.memory + C8_MEM_VRAM_ADDR, ((clr << 4) | chr), C8_MEM_VRAM_SIZE);
+  c8_memset((uint8_t *)&_c8.memory.vram, ((clr << 4) | chr), C8_MEM_VRAM_SIZE);
 }
 
 void c8_color(uint8_t color)
@@ -720,7 +713,6 @@ uint8_t c8_get(int32_t x, int32_t y)
 
   /* FIXME: magic numbers (0x20) */
   const uint32_t offset = (x * 2) + 0x20 * y;
-
   return c8_peek(offset, 0);
 }
 

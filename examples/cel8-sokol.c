@@ -102,6 +102,23 @@ static void init(void)
         },
     };
 
+    /* images and samplers */
+    sg_sampler smp = sg_make_sampler(&(sg_sampler_desc){
+        .min_filter = SG_FILTER_NEAREST,
+        .mag_filter = SG_FILTER_NEAREST,
+        .wrap_u = SG_WRAP_REPEAT,
+        .wrap_v = SG_WRAP_REPEAT,
+        .label = "screen-sampler",
+    });
+
+    sg_image img = sg_make_image(&(sg_image_desc){
+        .width = C8_SCREEN_WIDTH,
+        .height = C8_SCREEN_HEIGHT,
+        .pixel_format = SG_PIXELFORMAT_R8,
+        .usage = SG_USAGE_STREAM,
+        .label = "screen-texture",
+    });
+
     /* default pass action */
     display.pass_action = (sg_pass_action){
         .colors[0] = {
@@ -123,29 +140,12 @@ static void init(void)
         .label = "quad-pipeline",
     });
 
-    /* images and samplers */
-    sg_sampler smp = sg_make_sampler(&(sg_sampler_desc){
-        .min_filter = SG_FILTER_NEAREST,
-        .mag_filter = SG_FILTER_NEAREST,
-        .wrap_u = SG_WRAP_REPEAT,
-        .wrap_v = SG_WRAP_REPEAT,
-        .label = "screen-sampler",
-    });
-
-    sg_image screen = sg_make_image(&(sg_image_desc){
-        .width = C8_SCREEN_WIDTH,
-        .height = C8_SCREEN_HEIGHT,
-        .pixel_format = SG_PIXELFORMAT_R8,
-        .usage = SG_USAGE_STREAM,
-        .label = "screen-texture",
-    });
-
     /* bindings */
     display.bind = (sg_bindings){
         .vertex_buffers = {[0] = vbuf},
         .index_buffer = ibuf,
         .fs = {
-            .images = {[0] = screen},
+            .images = {[0] = img},
             .samplers = {[0] = smp},
         },
     };
