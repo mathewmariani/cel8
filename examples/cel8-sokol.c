@@ -27,7 +27,6 @@ static struct
     sg_pass_action pass_action;
     sg_pipeline pip;
     sg_bindings bind;
-    uint8_t screen[0x4000];
 } display;
 
 static void init(void)
@@ -233,33 +232,6 @@ static void frame(void)
     /* FIXME: proof of concept for `c8_btnp()` */
     c8_input_clear(C8_INPUT_RIGHT | C8_INPUT_LEFT | C8_INPUT_UP | C8_INPUT_DOWN | C8_INPUT_A | C8_INPUT_B | C8_INPUT_START | C8_INPUT_SELECT);
 
-    /* query memory */
-    const c8_range_t vram = c8_query_vram();
-    const c8_range_t font = c8_query_font();
-
-    /* decode vram */
-    for (int32_t i = 0, j = 0; i < sizeof(display.screen); i += 8)
-    {
-        /* convert from screen to cell */
-        j = ((i % 128) / 8) + 16 * (i / 1024);
-
-        /* screen buffer */
-        uint8_t color = *((uint8_t *)vram.ptr + (j * 2) + 0);
-        uint8_t glyph = *((uint8_t *)vram.ptr + (j * 2) + 1);
-
-        /* convert color */
-        uint8_t high = ((color >> 4) & 0x0F);
-        uint8_t low = ((color) & 0x0F);
-
-        /* decode glyph */
-        int32_t y = (i / 128) % 8;
-        for (int32_t x = 0; x < 8; x++)
-        {
-            uint8_t b = *((uint8_t *)font.ptr + y + glyph * 8) >> x;
-            *((uint8_t *)display.screen + i + x) = (b & 1) ? low : high;
-        }
-    }
-
     /* query palette data. */
     const c8_range_t pal = c8_query_pal();
     float palette[48] = {0};
@@ -270,9 +242,12 @@ static void frame(void)
         *(palette + i + 2) = *((uint8_t *)pal.ptr + i + 2) / 255.0f;
     }
 
+    /* query screen data. */
+    const c8_range_t screen = c8_query_screen();
+
     /* update gpu resources */
     sg_update_image(display.bind.fs.images[0], &(sg_image_data){
-                                                   .subimage[0][0] = SG_RANGE(display.screen),
+                                                   .subimage[0][0] = {.ptr = screen.ptr, .size = screen.size},
                                                });
 
     /* graphics pipeline */

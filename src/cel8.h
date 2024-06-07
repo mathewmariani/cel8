@@ -262,7 +262,9 @@ extern "C"
     C8_MEM_FONT_SIZE = 0x0400,
     C8_MEM_VRAM_ADDR = 0x0450,
     C8_MEM_VRAM_SIZE = 0x0200,
-    C8_MEM_SIZE = C8_MEM_CMAP_SIZE + C8_MEM_PAL_SIZE + C8_MEM_COLOR_SIZE + C8_MEM_RND_SIZE + C8_MEM_UNUSED_SIZE + C8_MEM_FONT_SIZE + C8_MEM_VRAM_SIZE,
+    C8_MEM_SCREEN_ADDR = 0x0650,
+    C8_MEM_SCREEN_SIZE = 0x4000,
+    C8_MEM_SIZE = C8_MEM_CMAP_SIZE + C8_MEM_PAL_SIZE + C8_MEM_COLOR_SIZE + C8_MEM_RND_SIZE + C8_MEM_UNUSED_SIZE + C8_MEM_FONT_SIZE + C8_MEM_VRAM_SIZE + C8_MEM_SCREEN_SIZE,
 
     /* stat */
     C8_STAT_VERSION_STR = 0x0000,
@@ -329,6 +331,7 @@ extern "C"
 
   C8_API_DECL c8_range_t c8_query_memory(void);
   C8_API_DECL c8_range_t c8_query_vram(void);
+  C8_API_DECL c8_range_t c8_query_screen(void);
   C8_API_DECL c8_range_t c8_query_font(void);
   C8_API_DECL c8_range_t c8_query_color(void);
   C8_API_DECL c8_range_t c8_query_pal(void);
@@ -444,6 +447,7 @@ static struct
     uint8_t unused_ram[C8_MEM_UNUSED_SIZE];
     uint8_t font_ram[C8_MEM_FONT_SIZE];
     uint8_t vram_ram[C8_MEM_VRAM_SIZE];
+    uint8_t screen_ram[C8_MEM_SCREEN_SIZE];
   } memory;
 } _c8;
 
@@ -572,10 +576,44 @@ static void _c8__tick(void)
 {
 }
 
+static void _c8__decode_video(void)
+{
+  /* query memory */
+  const c8_range_t vram = c8_query_vram();
+  const c8_range_t font = c8_query_font();
+
+  for (int32_t i = 0; i < sizeof(_c8.memory.screen_ram); i += 8)
+  {
+    /* convert from screen to cell */
+    int32_t j = ((i % 128) / 8) + 16 * (i / 1024);
+
+    /* screen buffer */
+    uint8_t *vram_ptr = (uint8_t *)vram.ptr;
+    uint8_t color = vram_ptr[j * 2];
+    uint8_t glyph = vram_ptr[j * 2 + 1];
+
+    /* convert color */
+    uint8_t high = (color >> 4) & 0x0F;
+    uint8_t low = color & 0x0F;
+
+    /* decode glyph */
+    uint8_t *font_ptr = (uint8_t *)font.ptr;
+    int32_t y = (i / 128) % 8;
+    uint8_t *glyph_row = font_ptr + (glyph * 8) + y;
+
+    for (int32_t x = 0; x < 8; x++)
+    {
+      uint8_t b = (*glyph_row >> x) & 1;
+      ((uint8_t *)_c8.memory.screen_ram)[i + x] = b ? low : high;
+    }
+  }
+}
+
 void c8_exec(void)
 {
   C8_ASSERT(_c8.valid);
   _c8__tick();
+  _c8__decode_video();
 }
 
 const uint8_t c8_peek(const uint32_t addr, const uint32_t index)
@@ -823,6 +861,11 @@ c8_range_t c8_query_font(void)
 c8_range_t c8_query_vram(void)
 {
   return _C8_RANGE(C8_MEM_VRAM_ADDR, C8_MEM_VRAM_SIZE);
+}
+
+c8_range_t c8_query_screen(void)
+{
+  return _C8_RANGE(C8_MEM_SCREEN_ADDR, C8_MEM_SCREEN_SIZE);
 }
 
 #undef _C8_RANGE
