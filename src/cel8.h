@@ -34,58 +34,17 @@
     MEMORY MAP:
     ===========
 
-    0x0000                           : color mapping
-    0x000F                           : color palette
-    0x003F                           : draw color
-    0x0040                           : random state
-    0x0044                           : unused
-    0x0050                           : font atlas
-    0x0450                           : graphics
+    0x0000                           : font
+    0x0400                           : drawstate
+    0x0440                           : hardware state
+    0x0450                           : vram
     0x0650                           : screen
 
 
     MEMORY DUMP:
     ============
 
-    [0x0000] : color mapping
-    (16 bytes)
-
-    +-------------------------------- color index
-    |
-    00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f
-
-
-    [0x000F] : color palette
-    (16*3 bytes)
-
-    +-------------------------------- r-channel
-    |  +----------------------------- g-channel
-    |  |  +-------------------------- b-channel
-    |  |  |
-    00 00 00 1D 2B 53 7E 25 53 00 87 51 AB 52 36 5F
-    57 4F C2 C3 C7 FF F1 E8 FF 00 4D FF A3 00 FF EC
-    27 00 E4 36 29 AD FF 83 76 9C FF 77 A8 FF CC AA
-
-
-    [0x003F] : draw color
-    [0x0040] : random state
-    [0x0044] : unused
-
-    (16 bytes)
-
-    +-------------------------------- system flags
-    |  +----------------------------- input
-    |  |  +-------------------------- current background
-    |  |  |+------------------------- current foreground
-    |  |  || +----------------------- random state 1
-    |  |  || |  +-------------------- random state 2
-    |  |  || |  |  +----------------- unused
-    |  |  || |  |  |
-    00 01 02 03 04 00 00 00 00 00 00 00 00 00 00 00
-
-
-    [0x0050] : font atlas
-    (128*8 bytes)
+    [0x0000] : font atlas (128*8 bytes)
 
       binary representation of the glyph `!`
 
@@ -166,8 +125,42 @@
     18 18 18 00 18 18 18 00 07 0C 0C 38 0C 0C 07 00
     6E 3B 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 
-    [0x0450] : screen bufffer
-    (16*16*2 bytes)
+
+    [0x0400] : draw state (80 bytes)
+
+    +-------------------------------- color index
+    |
+    00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f
+
+    +-------------------------------- r-channel
+    |  +----------------------------- g-channel
+    |  |  +-------------------------- b-channel
+    |  |  |
+    00 00 00 1D 2B 53 7E 25 53 00 87 51 AB 52 36 5F
+    57 4F C2 C3 C7 FF F1 E8 FF 00 4D FF A3 00 FF EC
+    27 00 E4 36 29 AD FF 83 76 9C FF 77 A8 FF CC AA
+
+    +-------------------------------- current background
+    |+------------------------------- current foreground
+    || +----------------------------- unused
+    || |
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+
+    [0x003F] : hardware state (16 bytes)
+
+    +-------------------------------- input
+    |     +-------------------------- random state 1
+    |     |  +----------------------- random state 2
+    |     |  |  +-------------------- unused
+    |     |  |  |
+    |     |  |  |
+    |     |  |  |
+    |     |  |  |
+    00 01 02 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+
+    [0x0450] : vram (16*16*2 bytes)
 
     +-------------------------------- background
     |+------------------------------- foreground
