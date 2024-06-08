@@ -314,9 +314,9 @@ extern "C"
   C8_API_DECL const uint8_t c8_peek(const uint32_t addr, const uint32_t index);
   C8_API_DECL const uint16_t c8_peek2(const uint32_t addr, const uint32_t index);
   C8_API_DECL const uint32_t c8_peek4(const uint32_t addr, const uint32_t index);
-  C8_API_DECL void c8_poke(const uint32_t addr, const uint32_t index, const uint8_t value);
-  C8_API_DECL void c8_poke2(const uint32_t addr, const uint32_t index, const uint16_t value);
-  C8_API_DECL void c8_poke4(const uint32_t addr, const uint32_t index, const uint32_t value);
+  C8_API_DECL void c8_poke(const uint32_t addr, const uint8_t value);
+  C8_API_DECL void c8_poke2(const uint32_t addr, const uint16_t value);
+  C8_API_DECL void c8_poke4(const uint32_t addr, const uint32_t value);
   C8_API_DECL void c8_memcpy(void *dst, const void *src, size_t len);
   C8_API_DECL void c8_memset(void *dst, int value, size_t len);
 
@@ -433,6 +433,18 @@ static struct
   uint8_t input;
   struct
   {
+    /* layout memory inspired by pico8:
+        - font atlas:
+        - general use: (custom font)
+        - draw state:
+          - palette map
+          - color
+        - harware state:
+          - io
+          - rnd
+        - pins:
+        - screen data:
+    */
     uint8_t cmap[C8_MEM_CMAP_SIZE];
     uint8_t pal[C8_MEM_PAL_SIZE];
     uint8_t color[C8_MEM_COLOR_SIZE];
@@ -446,8 +458,8 @@ static struct
 
 _C8_PRIVATE void _c8__set_cell(uint32_t offset, uint8_t color, uint8_t glyph)
 {
-  c8_poke(C8_MEM_VRAM_ADDR + offset, 0x00, color);
-  c8_poke(C8_MEM_VRAM_ADDR + offset, 0x01, glyph);
+  c8_poke(C8_MEM_VRAM_ADDR + offset + 0, color);
+  c8_poke(C8_MEM_VRAM_ADDR + offset + 1, glyph);
 }
 
 _C8_PRIVATE bool _c8__should_clip(uint8_t x, uint8_t y)
@@ -634,23 +646,40 @@ const uint32_t c8_peek4(const uint32_t addr, const uint32_t index)
   return ((b0 << 24) | (b1 << 16) | (b2 << 8) | (b3 << 0));
 }
 
-void c8_poke(const uint32_t addr, const uint32_t index, const uint8_t value)
+// void c8_poke(const uint32_t addr, const uint32_t index, const uint8_t value)
+// {
+//   *((uint8_t *)&_c8.memory + addr + index) = value;
+// }
+// void c8_poke2(const uint32_t addr, const uint32_t index, const uint16_t value)
+// {
+//   c8_poke(addr, index + 0, (value >> 8) & 0xff);
+//   c8_poke(addr, index + 1, (value >> 0) & 0xff);
+// }
+// void c8_poke4(const uint32_t addr, const uint32_t index, const uint32_t value)
+// {
+//   c8_poke(addr, index + 0, (value >> 24) & 0xff);
+//   c8_poke(addr, index + 1, (value >> 16) & 0xff);
+//   c8_poke(addr, index + 2, (value >> 8) & 0xff);
+//   c8_poke(addr, index + 3, (value >> 0) & 0xff);
+// }
+
+void c8_poke(const uint32_t addr, const uint8_t value)
 {
-  *((uint8_t *)&_c8.memory + addr + index) = value;
+  *((uint8_t *)&_c8.memory + addr) = value;
 }
 
-void c8_poke2(const uint32_t addr, const uint32_t index, const uint16_t value)
+void c8_poke2(const uint32_t addr, const uint16_t value)
 {
-  c8_poke(addr, index + 0, (value >> 8) & 0xff);
-  c8_poke(addr, index + 1, (value >> 0) & 0xff);
+  c8_poke(addr + 0, (value >> 8) & 0xff);
+  c8_poke(addr + 1, (value >> 0) & 0xff);
 }
 
-void c8_poke4(const uint32_t addr, const uint32_t index, const uint32_t value)
+void c8_poke4(const uint32_t addr, const uint32_t value)
 {
-  c8_poke(addr, index + 0, (value >> 24) & 0xff);
-  c8_poke(addr, index + 1, (value >> 16) & 0xff);
-  c8_poke(addr, index + 2, (value >> 8) & 0xff);
-  c8_poke(addr, index + 3, (value >> 0) & 0xff);
+  c8_poke(addr + 0, (value >> 24) & 0xff);
+  c8_poke(addr + 1, (value >> 16) & 0xff);
+  c8_poke(addr + 2, (value >> 8) & 0xff);
+  c8_poke(addr + 3, (value >> 0) & 0xff);
 }
 
 void c8_memcpy(void *dst, const void *src, size_t len)
@@ -675,7 +704,7 @@ void c8_cls(uint8_t clr, uint8_t chr)
 
 void c8_color(uint8_t color)
 {
-  c8_poke(C8_MEM_COLOR_ADDR, 0x00, color);
+  c8_poke(C8_MEM_COLOR_ADDR, color);
 }
 
 void c8_fill(int32_t x, int32_t y, int32_t w, int32_t h, int32_t chr)
@@ -812,9 +841,9 @@ uint16_t c8_rnd(void)
     uint8_t reg_0 = c8_peek(C8_MEM_RND_ADDR, 0);
     uint8_t reg_1 = c8_peek(C8_MEM_RND_ADDR, 1);
 
-    c8_poke(C8_MEM_RND_ADDR, 0, 5 * reg_0 + 1);
-    c8_poke(C8_MEM_RND_ADDR, 1, ((reg_1 & 0x80) == (reg_1 & 0x10)) ? 2 * reg_1 + 1 : 2 * reg_1);
-    c8_poke(C8_MEM_RND_ADDR, 2 + i, (reg_0 ^ reg_1));
+    c8_poke(C8_MEM_RND_ADDR + 0, 5 * reg_0 + 1);
+    c8_poke(C8_MEM_RND_ADDR + 1, ((reg_1 & 0x80) == (reg_1 & 0x10)) ? 2 * reg_1 + 1 : 2 * reg_1);
+    c8_poke(C8_MEM_RND_ADDR + 2 + i, (reg_0 ^ reg_1));
   }
 
   uint8_t reg_2 = c8_peek(C8_MEM_RND_ADDR, 2);

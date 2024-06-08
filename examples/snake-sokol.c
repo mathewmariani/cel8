@@ -103,8 +103,8 @@ void c8_load(void)
   /* 11111111  -- 0xFF */
   /* 11111111  -- 0xFF */
   /* 01111110  -- 0x7E */
-  c8_poke4(C8_MEM_FONT_ADDR + 0x00, 0x00 * 4, 0x7EFFDBFF);
-  c8_poke4(C8_MEM_FONT_ADDR + 0x00, 0x01 * 4, 0xFFFFFF7E);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x00 * 4, 0x7EFFDBFF);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x01 * 4, 0xFFFFFF7E);
 
   /* snake segment */
   /* 01111110  -- 0x7E */
@@ -115,8 +115,8 @@ void c8_load(void)
   /* 11111111  -- 0xFF */
   /* 11111111  -- 0xFF */
   /* 01111110  -- 0x7E */
-  c8_poke4(C8_MEM_FONT_ADDR + 0x08, 0x00 * 4, 0x7EFFFFFF);
-  c8_poke4(C8_MEM_FONT_ADDR + 0x08, 0x01 * 4, 0xFFFFFF7E);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x08 + 0x00 * 4, 0x7EFFFFFF);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x08 + 0x01 * 4, 0xFFFFFF7E);
 
   /* grid pattern */
   /* 00000000  -- 0x00 */
@@ -127,8 +127,8 @@ void c8_load(void)
   /* 00000000  -- 0x00 */
   /* 00000000  -- 0x00 */
   /* 00000000  -- 0x00 */
-  c8_poke4(C8_MEM_FONT_ADDR + 0x10, 0x00 * 4, 0x00000018);
-  c8_poke4(C8_MEM_FONT_ADDR + 0x10, 0x01 * 4, 0x18000000);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x10 * 4, 0x00000018);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x11 * 4, 0x18000000);
 
   place_snake();
   place_apple();

@@ -24,8 +24,8 @@ void c8_load(void)
 void c8_update(void)
 {
     int8_t n = rand() % (0x10 * 0x10);
-    c8_poke(C8_MEM_VRAM_ADDR + (n * 2), 0x00, rand() % 0xff);
-    c8_poke(C8_MEM_VRAM_ADDR + (n * 2), 0x01, rand() % 0x7f);
+    c8_poke(C8_MEM_VRAM_ADDR + (n * 2) + 0, rand() % 0xff);
+    c8_poke(C8_MEM_VRAM_ADDR + (n * 2) + 1, rand() % 0x7f);
 }
 
 void c8_draw(void)

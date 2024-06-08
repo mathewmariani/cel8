@@ -265,10 +265,10 @@ static void reset()
 
   /* create sprites */
   /* FIXME: api needs to adapt. */
-  c8_poke4(C8_MEM_FONT_ADDR + 0x00, 0x00 * 4, 0x00808080);
-  c8_poke4(C8_MEM_FONT_ADDR + 0x00, 0x01 * 4, 0x8080807E);
-  c8_poke4(C8_MEM_FONT_ADDR + 0x08, 0x00 * 4, 0x00000018);
-  c8_poke4(C8_MEM_FONT_ADDR + 0x08, 0x01 * 4, 0x18000000);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x00 + 0x00 * 4, 0x00808080);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x00 + 0x01 * 4, 0x8080807E);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x08 + 0x00 * 4, 0x00000018);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x08 + 0x01 * 4, 0x18000000);
 
   state.ticks = 0;
   state.fx_ticks = 0;
