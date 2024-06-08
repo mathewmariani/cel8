@@ -89,17 +89,17 @@ This memory can be accessed with the functions <code>c8_peek</code>, <code>c8_po
 */
 </code></pre>
 <p>The screen buffer is composed of interleved data; the first two bytes of memory represent the color and the glyph, respectively</p>
-<h5>u8 c8_peek(const u32 addr, const u32 index)</h5>
+<h5>uint8_t c8_peek(const u32 addr, const u32 index)</h5>
 <p>Read <code>n</code> bytes from an address in ram. If <code>n</code> is not specified the <code>peek()</code> will return the first byte.</p>
 <p>For example, to read the first two bytes of video memory:</p>
-<pre><code class="language-c">u8 value = c8_peek(0x0450, 0x00);
+<pre><code class="language-c">uint8_t value = c8_peek(0x0450, 0x00);
 </code></pre>
-<h5>void c8_poke(const u32 addr, const u32 index, const u8 value)</h5>
+<h5>void c8_poke(const u32 addr, const u32 index, const uint8_t value)</h5>
 <p>Write a single bytes to an address in ram.</p>
-<h5>u16 c8_peek2(const u32 addr, const u32 index)</h5>
-<h5>void c8_poke2(const u32 addr, const u32 index, const u8 value)</h5>
+<h5>uint16_t c8_peek2(const u32 addr, const u32 index)</h5>
+<h5>void c8_poke2(const u32 addr, const u32 index, const uint8_t value)</h5>
 <h5>u32 c8_peek4(const u32 addr, const u32 index)</h5>
-<h5>void c8_poke4(const u32 addr, const u32 index, const u16 value)</h5>
+<h5>void c8_poke4(const u32 addr, const u32 index, const uint16_t value)</h5>
 <p>16-bit and 32-bit variations of <code>c8_peek</code> and <code>c8_poke</code> are also offered.</p>
 <h5>void c8_memcpy(void *dst, const void *src, size_t len)</h5>
 <p>Copies the values of <code>len</code> bytes from the location pointed to by <code>src</code> directly to the memory block pointed to by <code>dst</code>.</p>
@@ -107,7 +107,7 @@ This memory can be accessed with the functions <code>c8_peek</code>, <code>c8_po
 <p>Sets the first <code>len</code> bytes of the block of memory pointed by <code>dst</code> to the specified <code>value</code>.</p>
 
 <h2>System</h2>
-<h5>void c8_stat(u8 n)</h5>
+<h5>void c8_stat(uint8_t n)</h5>
 <p>Gets the system information where <code>n</code> can be:</p>
 <pre><code class="language-c">/*
     0x0       : version string
@@ -128,21 +128,21 @@ This memory can be accessed with the functions <code>c8_peek</code>, <code>c8_po
 <h2>Graphics</h2>
 <p>cel8 has a fixed capacity of 128 8x8 pixel glyphs.</p>
 <p>All drawing operations in cel8 are subject to the current color. The current color is seperated into background and foreground. These are determined, respectively, by the high and low nibbles of the set color.</p>
-<h5>void c8_cls(u8 clr, u8 chr)</h5>
+<h5>void c8_cls(uint8_t clr, uint8_t chr)</h5>
 <p>Clears the screen to a specified color and character.</p>
-<h5>void c8_color(u8 clr)</h5>
+<h5>void c8_color(uint8_t clr)</h5>
 <p>Set the current colour to be used by drawing functions.</p>
 <p>For example, to set the color for the next drawing operation to (bg: dark_blue, fg: red).</p>
 <pre><code class="language-c">c8_color(0x18);
 c8_print(0, 0, &quot;@&quot;);
 </code></pre>
-<h5>void c8_fill(u8 x, u8 y, u8 w, u8 h, u8 chr)</h5>
+<h5>void c8_fill(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t chr)</h5>
 <p>Set the characters in the rectangle [<code>x</code>, <code>y</code>, <code>w</code>, <code>h</code>] to <code>chr</code>.</p>
-<h5>void c8_put(u8 x, u8 y, char c)</h5>
+<h5>void c8_put(uint8_t x, uint8_t y, char c)</h5>
 <p>Places a glyph at [<code>x</code>, <code>y</code>].</p>
 <h5>void c8_get( x, y )</h5>
 <p>Returns the character at [<code>x</code>, <code>y</code>].</p>
-<h5>void c8_print(u8 x, u8 y, const char *str)</h5>
+<h5>void c8_print(uint8_t x, uint8_t y, const char *str)</h5>
 <p>Places text at [<code>x</code>, <code>y</code>].</p>
 
 
