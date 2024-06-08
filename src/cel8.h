@@ -441,10 +441,32 @@ static struct
   } memory;
 } _c8;
 
-_C8_PRIVATE void _c8__set_cell(uint32_t offset, uint8_t color, uint8_t glyph)
+_C8_PRIVATE void _c8__set_cell(uint32_t x, uint32_t y, uint8_t color, uint8_t glyph)
 {
-  c8_poke(C8_MEM_VRAM_ADDR + offset + 0, color);
-  c8_poke(C8_MEM_VRAM_ADDR + offset + 1, glyph);
+  /* query memory */
+  const c8_range_t font = c8_query_font();
+
+  /* convert color */
+  uint8_t high = (color >> 4) & 0x0F;
+  uint8_t low = color & 0x0F;
+
+  /* calculate the base offset for the cell position */
+  int base_offset = (y * 128 * 8) + (x * 8);
+
+  /* get the pointer to the font memory */
+  uint8_t *font_ptr = (uint8_t *)font.ptr;
+
+  for (int32_t j = 0; j < 8; j++)
+  {
+    /* decode glyph row */
+    uint8_t glyph_row = font_ptr[glyph * 8 + j];
+
+    for (int32_t i = 0; i < 8; i++)
+    {
+      uint8_t b = (glyph_row >> i) & 1;
+      ((uint8_t *)&_c8.memory + C8_MEM_SCREEN_ADDR)[base_offset + j * 128 + i] = b ? low : high;
+    }
+  }
 }
 
 _C8_PRIVATE bool _c8__should_clip(uint8_t x, uint8_t y)
@@ -452,7 +474,7 @@ _C8_PRIVATE bool _c8__should_clip(uint8_t x, uint8_t y)
   return (x < 0 || x >= 0x10 || y < 0 || y >= 0x10);
 }
 
-_C8_PRIVATE void _c8__put_char(uint32_t x, uint32_t y, uint8_t c)
+_C8_PRIVATE void _c8__put_glyph(uint32_t x, uint32_t y, uint8_t glyph)
 {
   if (_c8__should_clip(x, y))
   {
@@ -462,7 +484,7 @@ _C8_PRIVATE void _c8__put_char(uint32_t x, uint32_t y, uint8_t c)
   /* FIXME: magic number */
   const uint8_t color = c8_peek(C8_MEM_COLOR_ADDR, 0);
   const uint32_t offset = (x * 2) + 0x20 * y;
-  _c8__set_cell(offset, color, c);
+  _c8__set_cell(x, y, color, glyph);
 }
 
 /* memory */
@@ -502,44 +524,10 @@ _C8_PRIVATE void _c8__tick(void)
 {
 }
 
-_C8_PRIVATE void _c8__decode_video(void)
-{
-  /* query memory */
-  const c8_range_t vram = c8_query_vram();
-  const c8_range_t font = c8_query_font();
-
-  for (int32_t i = 0; i < C8_MEM_SCREEN_SIZE; i += 8)
-  {
-    /* convert from screen to cell */
-    int32_t j = ((i % 128) / 8) + 16 * (i / 1024);
-
-    /* screen buffer */
-    uint8_t *vram_ptr = (uint8_t *)vram.ptr;
-    uint8_t color = vram_ptr[j * 2];
-    uint8_t glyph = vram_ptr[j * 2 + 1];
-
-    /* convert color */
-    uint8_t high = (color >> 4) & 0x0F;
-    uint8_t low = color & 0x0F;
-
-    /* decode glyph */
-    uint8_t *font_ptr = (uint8_t *)font.ptr;
-    int32_t y = (i / 128) % 8;
-    uint8_t *glyph_row = font_ptr + (glyph * 8) + y;
-
-    for (int32_t x = 0; x < 8; x++)
-    {
-      uint8_t b = (*glyph_row >> x) & 1;
-      ((uint8_t *)&_c8.memory + C8_MEM_SCREEN_ADDR)[i + x] = b ? low : high;
-    }
-  }
-}
-
 void c8_exec(void)
 {
   C8_ASSERT(_c8.valid);
   _c8__tick();
-  _c8__decode_video();
 }
 
 const uint8_t c8_peek(const uint32_t addr, const uint32_t index)
@@ -617,7 +605,7 @@ void c8_fill(int32_t x, int32_t y, int32_t w, int32_t h, int32_t chr)
   {
     for (int32_t j = x; j < (x + w); j++)
     {
-      _c8__put_char(j, i, chr);
+      _c8__put_glyph(j, i, chr);
     }
   }
 }
@@ -627,13 +615,13 @@ void c8_print(int32_t x, int32_t y, const char *str)
   int32_t i = 0;
   while (*str)
   {
-    _c8__put_char(x + (i++), y, *(str++));
+    _c8__put_glyph(x + (i++), y, *(str++));
   }
 }
 
 void c8_put(int32_t x, int32_t y, uint8_t c)
 {
-  _c8__put_char(x, y, c);
+  _c8__put_glyph(x, y, c);
 }
 
 uint8_t c8_get(int32_t x, int32_t y)
