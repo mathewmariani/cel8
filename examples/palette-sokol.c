@@ -22,9 +22,9 @@ void c8_load(void)
 
   /* program */
   int i = 0;
-  for (i32 y = 0; y <= 3; y++)
+  for (int32_t y = 0; y <= 3; y++)
   {
-    for (i32 x = 0; x <= 3; x++)
+    for (int32_t x = 0; x <= 3; x++)
     {
       c8_color(i << 4);
       c8_put(x, y, 0x00);
@@ -33,9 +33,9 @@ void c8_load(void)
   }
 
   i = 0;
-  for (i32 y = 0; y <= 3; y++)
+  for (int32_t y = 0; y <= 3; y++)
   {
-    for (i32 x = 0; x <= 3; x++)
+    for (int32_t x = 0; x <= 3; x++)
     {
       c8_color(i << 4);
       c8_put(x, y, 0x00);

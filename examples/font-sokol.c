@@ -27,8 +27,8 @@ void c8_load(void)
         for (int x = 0; x < 16; x++)
         {
             i = x + 16 * y;
-            c8_poke(0x0450 + (i * 2), 0x00, rand() % 0xff);
-            c8_poke(0x0450 + (i * 2), 0x01, i);
+            c8_poke(0x0450 + (i * 2) + 0, rand() % 0xff);
+            c8_poke(0x0450 + (i * 2) + 1, i);
         }
     }
 }

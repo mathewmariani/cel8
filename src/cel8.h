@@ -29,63 +29,22 @@
     c8_get( x, y )                      : current environment
     c8_stat( n )                        : system information
     c8_rnd( )                           : pseudo random number
-    c8_time( )                          : time since start
 
 
     MEMORY MAP:
     ===========
 
-    0x0000                           : color mapping
-    0x000F                           : color palette
-    0x003F                           : draw color
-    0x0040                           : random state
-    0x0044                           : unused
-    0x0050                           : font atlas
-    0x0450                           : screen buffer
+    0x0000                           : font
+    0x0400                           : drawstate
+    0x0440                           : hardware state
+    0x0450                           : vram
+    0x0650                           : screen
 
 
     MEMORY DUMP:
     ============
 
-    [0x0000] : color mapping
-    (16 bytes)
-
-    +-------------------------------- color index
-    |
-    00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f
-
-
-    [0x000F] : color palette
-    (16*3 bytes)
-
-    +-------------------------------- r-channel
-    |  +----------------------------- g-channel
-    |  |  +-------------------------- b-channel
-    |  |  |
-    00 00 00 1D 2B 53 7E 25 53 00 87 51 AB 52 36 5F
-    57 4F C2 C3 C7 FF F1 E8 FF 00 4D FF A3 00 FF EC
-    27 00 E4 36 29 AD FF 83 76 9C FF 77 A8 FF CC AA
-
-
-    [0x003F] : draw color
-    [0x0040] : random state
-    [0x0044] : unused
-
-    (16 bytes)
-
-    +-------------------------------- system flags
-    |  +----------------------------- input
-    |  |  +-------------------------- current background
-    |  |  |+------------------------- current foreground
-    |  |  || +----------------------- random state 1
-    |  |  || |  +-------------------- random state 2
-    |  |  || |  |  +----------------- unused
-    |  |  || |  |  |
-    00 01 02 03 04 00 00 00 00 00 00 00 00 00 00 00
-
-
-    [0x0050] : font atlas
-    (128*8 bytes)
+    [0x0000] : font atlas (128*8 bytes)
 
       binary representation of the glyph `!`
 
@@ -166,8 +125,42 @@
     18 18 18 00 18 18 18 00 07 0C 0C 38 0C 0C 07 00
     6E 3B 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 
-    [0x0450] : screen bufffer
-    (16*16*2 bytes)
+
+    [0x0400] : draw state (80 bytes)
+
+    +-------------------------------- color index
+    |
+    00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f
+
+    +-------------------------------- r-channel
+    |  +----------------------------- g-channel
+    |  |  +-------------------------- b-channel
+    |  |  |
+    00 00 00 1D 2B 53 7E 25 53 00 87 51 AB 52 36 5F
+    57 4F C2 C3 C7 FF F1 E8 FF 00 4D FF A3 00 FF EC
+    27 00 E4 36 29 AD FF 83 76 9C FF 77 A8 FF CC AA
+
+    +-------------------------------- current background
+    |+------------------------------- current foreground
+    || +----------------------------- unused
+    || |
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+
+    [0x003F] : hardware state (16 bytes)
+
+    +-------------------------------- input
+    |     +-------------------------- random state 1
+    |     |  +----------------------- random state 2
+    |     |  |  +-------------------- unused
+    |     |  |  |
+    |     |  |  |
+    |     |  |  |
+    |     |  |  |
+    00 01 02 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+
+    [0x0450] : vram (16*16*2 bytes)
 
     +-------------------------------- background
     |+------------------------------- foreground
@@ -227,20 +220,6 @@ extern "C"
 #endif
 #endif
 
-  /* floating point types */
-  typedef float f32;
-  typedef double f64;
-
-  /* integer types */
-  typedef int8_t i8;
-  typedef uint8_t u8;
-  typedef int16_t i16;
-  typedef uint16_t u16;
-  typedef int32_t i32;
-  typedef uint32_t u32;
-  typedef int64_t i64;
-  typedef uint64_t u64;
-
   /* compile time constants */
   enum
   {
@@ -252,15 +231,6 @@ extern "C"
     C8_SCREEN_WIDTH = 128,
     C8_SCREEN_HEIGHT = 128,
 
-    /* flags */
-    C8_FLAG_SCALE2X = (1 << 0),
-    C8_FLAG_SCALE3X = (1 << 1),
-    C8_FLAG_SCALE4X = (1 << 2),
-    C8_FLAG_FPS30 = (1 << 3),
-    C8_FLAG_FPS60 = (1 << 4),
-    C8_FLAG_FPS144 = (1 << 5),
-    C8_FLAG_FPSINF = (1 << 6),
-
     /* input */
     C8_INPUT_UP = (1 << 0),
     C8_INPUT_LEFT = (1 << 1),
@@ -271,22 +241,32 @@ extern "C"
     C8_INPUT_START = (1 << 6),
     C8_INPUT_SELECT = (1 << 7),
 
-    /* memory mapping */
-    C8_MEM_CMAP_ADDR = 0x0000,
-    C8_MEM_CMAP_SIZE = 0x000F,
-    C8_MEM_PAL_ADDR = 0x000F,
-    C8_MEM_PAL_SIZE = 0x0030,
-    C8_MEM_COLOR_ADDR = 0x003F,
-    C8_MEM_COLOR_SIZE = 0x0001,
-    C8_MEM_RND_ADDR = 0x0040,
-    C8_MEM_RND_SIZE = 0x0004,
-    C8_MEM_UNUSED_ADDR = 0x0044,
-    C8_MEM_UNUSED_SIZE = 0x000C,
-    C8_MEM_FONT_ADDR = 0x0050,
+    /* memory addresses */
+    C8_MEM_FONT_ADDR = 0x0000,
     C8_MEM_FONT_SIZE = 0x0400,
+    C8_MEM_DRAWSTATE_ADDR = 0x0400,
+    C8_MEM_DRAWSTATE_SIZE = 0x0040,
+    C8_MEM_HARDWARE_ADDR = 0x0440,
+    C8_MEM_HARDWARE_SIZE = 0x0010,
     C8_MEM_VRAM_ADDR = 0x0450,
     C8_MEM_VRAM_SIZE = 0x0200,
-    C8_MEM_SIZE = C8_MEM_CMAP_SIZE + C8_MEM_PAL_SIZE + C8_MEM_COLOR_SIZE + C8_MEM_RND_SIZE + C8_MEM_UNUSED_SIZE + C8_MEM_FONT_SIZE + C8_MEM_VRAM_SIZE,
+    C8_MEM_SCREEN_ADDR = 0x0650,
+    C8_MEM_SCREEN_SIZE = 0x4000,
+    C8_MEM_SIZE = C8_MEM_FONT_SIZE + C8_MEM_DRAWSTATE_SIZE + C8_MEM_VRAM_SIZE + C8_MEM_SCREEN_SIZE,
+
+    /* drawstate specific */
+    C8_MEM_CMAP_ADDR = C8_MEM_DRAWSTATE_ADDR + 0x0000,
+    C8_MEM_CMAP_SIZE = 0x000F,
+    C8_MEM_PAL_ADDR = C8_MEM_DRAWSTATE_ADDR + 0x000F,
+    C8_MEM_PAL_SIZE = 0x0030,
+    C8_MEM_COLOR_ADDR = C8_MEM_DRAWSTATE_ADDR + 0x003F,
+    C8_MEM_COLOR_SIZE = 0x0001,
+
+    /* hardware specific */
+    C8_MEM_IO_ADDR = C8_MEM_HARDWARE_ADDR + 0x0000,
+    C8_MEM_IO_SIZE = 0x0002,
+    C8_MEM_RND_ADDR = C8_MEM_HARDWARE_ADDR + 0x0002,
+    C8_MEM_RND_SIZE = 0x0004,
 
     /* stat */
     C8_STAT_VERSION_STR = 0x0000,
@@ -316,7 +296,6 @@ extern "C"
 
   typedef struct
   {
-    u8 flags;
     struct
     {
       c8_range_t chars;
@@ -324,36 +303,37 @@ extern "C"
     } roms;
   } c8_desc_t;
 
-  /* cel8 api */
+  /* main chip functionality */
   C8_API_DECL void c8_init(const c8_desc_t *desc);
+  C8_API_DECL void c8_shutdown();
   C8_API_DECL void c8_reset(void);
-  C8_API_DECL void c8_frame(void);
+  C8_API_DECL void c8_exec(void);
+  C8_API_DECL void c8_input_set(uint32_t mask);
+  C8_API_DECL void c8_input_clear(uint32_t mask);
 
-  C8_API_DECL void c8_input_set(u32 mask);
-  C8_API_DECL void c8_input_clear(u32 mask);
-
-  C8_API_DECL const u8 c8_peek(const u32 addr, const u32 index);
-  C8_API_DECL const u16 c8_peek2(const u32 addr, const u32 index);
-  C8_API_DECL const u32 c8_peek4(const u32 addr, const u32 index);
-  C8_API_DECL void c8_poke(const u32 addr, const u32 index, const u8 value);
-  C8_API_DECL void c8_poke2(const u32 addr, const u32 index, const u16 value);
-  C8_API_DECL void c8_poke4(const u32 addr, const u32 index, const u32 value);
+  /* cel8 api */
+  C8_API_DECL const uint8_t c8_peek(const uint32_t addr, const uint32_t index);
+  C8_API_DECL const uint16_t c8_peek2(const uint32_t addr, const uint32_t index);
+  C8_API_DECL const uint32_t c8_peek4(const uint32_t addr, const uint32_t index);
+  C8_API_DECL void c8_poke(const uint32_t addr, const uint8_t value);
+  C8_API_DECL void c8_poke2(const uint32_t addr, const uint16_t value);
+  C8_API_DECL void c8_poke4(const uint32_t addr, const uint32_t value);
   C8_API_DECL void c8_memcpy(void *dst, const void *src, size_t len);
   C8_API_DECL void c8_memset(void *dst, int value, size_t len);
 
-  C8_API_DECL bool c8_btn(u32 mask);
-  C8_API_DECL void c8_cls(u8 clr, u8 chr);
-  C8_API_DECL void c8_color(u8 color);
-  C8_API_DECL void c8_fill(i32 x, i32 y, i32 w, i32 h, i32 chr);
-  C8_API_DECL void c8_print(i32 x, i32 y, const char *str);
-  C8_API_DECL void c8_put(i32 x, i32 y, u8 c);
-  C8_API_DECL u8 c8_get(i32 x, i32 y);
-  C8_API_DECL u16 c8_stat(i32 n);
-  C8_API_DECL u16 c8_rnd(void);
-  C8_API_DECL f64 c8_time(void);
+  C8_API_DECL bool c8_btn(uint32_t mask);
+  C8_API_DECL void c8_cls(uint8_t clr, uint8_t chr);
+  C8_API_DECL void c8_color(uint8_t color);
+  C8_API_DECL void c8_fill(int32_t x, int32_t y, int32_t w, int32_t h, int32_t chr);
+  C8_API_DECL void c8_print(int32_t x, int32_t y, const char *str);
+  C8_API_DECL void c8_put(int32_t x, int32_t y, uint8_t c);
+  C8_API_DECL uint8_t c8_get(int32_t x, int32_t y);
+  C8_API_DECL uint16_t c8_stat(int32_t n);
+  C8_API_DECL uint16_t c8_rnd(void);
 
   C8_API_DECL c8_range_t c8_query_memory(void);
   C8_API_DECL c8_range_t c8_query_vram(void);
+  C8_API_DECL c8_range_t c8_query_screen(void);
   C8_API_DECL c8_range_t c8_query_font(void);
   C8_API_DECL c8_range_t c8_query_color(void);
   C8_API_DECL c8_range_t c8_query_pal(void);
@@ -426,17 +406,9 @@ extern "C"
 #include <string.h> /* memcpy, memset */
 #include <time.h>
 
-#if defined(OS_WINDOWS)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#elif defined(OS_MACOS)
-#include <unistd.h>
-#include <mach/mach_time.h>
+#ifndef C8_ASSERT
+#include <assert.h>
+#define C8_ASSERT(c) assert(c)
 #endif
 
 #ifndef _C8_PRIVATE
@@ -456,109 +428,31 @@ extern "C"
 #define STUBBED(x)
 #endif
 
-/* utils */
-#define UNUSED(x) ((void)(x))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define CLAMP(v, a, b) (MIN(MAX(v, a), b))
-#define ABS(n) ((n < 0) ? (-n) : (n))
-#define SWAP_INT(a, b) (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))
-
 static struct
 {
-  /* timer */
-  f64 curr;
-  f64 start;
-  f64 prev;
-  f64 dt;
-  u8 flags;
-
-  u8 input;
-
-  u8 memory[C8_MEM_SIZE];
-  u8 screen[0x4000];
+  bool valid;
+  struct
+  {
+    uint8_t font[C8_MEM_FONT_SIZE];
+    uint8_t drawstate[C8_MEM_DRAWSTATE_SIZE];
+    uint8_t hardware[C8_MEM_DRAWSTATE_SIZE];
+    uint8_t vram[C8_MEM_VRAM_SIZE];
+    uint8_t screen[C8_MEM_SCREEN_SIZE];
+  } memory;
 } _c8;
 
-#if defined(OS_WINDOWS)
-_C8_PRIVATE f64 get_frequency()
+_C8_PRIVATE void _c8__set_cell(uint32_t offset, uint8_t color, uint8_t glyph)
 {
-  LARGE_INTEGER li;
-  QueryPerformanceFrequency(&li);
-  return (f64)li.QuadPart;
-}
-_C8_PRIVATE f64 get_time_absolute()
-{
-  LARGE_INTEGER li;
-  QueryPerformanceCounter(&li);
-  return (f64)li.QuadPart;
-}
-#elif defined(OS_MACOS)
-_C8_PRIVATE mach_timebase_info_data_t get_timebase_info()
-{
-  mach_timebase_info_data_t info;
-  mach_timebase_info(&info);
-  return info;
-}
-#endif
-
-_C8_PRIVATE f64 _c8__get_time(f64 start)
-{
-#if defined(OS_WINDOWS)
-  const f64 now = get_time_absolute();
-  const f64 frequency = get_frequency();
-  return (now - start) / frequency;
-#elif defined(OS_MACOS)
-  const mach_timebase_info_data_t timebase = get_timebase_info();
-  const u64 mach_now = mach_absolute_time() - start;
-  return ((f64)mach_now * 1.0e-9) * (f64)timebase.numer / (f64)timebase.denom;
-#endif
-  return 0.0f;
+  c8_poke(C8_MEM_VRAM_ADDR + offset + 0, color);
+  c8_poke(C8_MEM_VRAM_ADDR + offset + 1, glyph);
 }
 
-_C8_PRIVATE void _c8__sleep(f64 wait)
-{
-#if defined(OS_WINDOWS)
-  Sleep(wait * 1000);
-#elif defined(OS_EMSCRIPTEN)
-  emscripten_sleep(wait * 1000);
-#else
-  usleep(wait * 1000000);
-#endif
-}
-
-_C8_PRIVATE f64 _c8__get_step_time()
-{
-  if (_c8.flags & C8_FLAG_FPS30)
-  {
-    return 1.0 / 30.0;
-  }
-  if (_c8.flags & C8_FLAG_FPS60)
-  {
-    return 1.0 / 60.0;
-  }
-  if (_c8.flags & C8_FLAG_FPS144)
-  {
-    return 1.0 / 144.0;
-  }
-  if (_c8.flags & C8_FLAG_FPSINF)
-  {
-    return 0;
-  }
-  return 0;
-}
-
-_C8_PRIVATE void _c8__set_cell(u32 offset, u8 color, u8 glyph)
-{
-  c8_poke(C8_MEM_VRAM_ADDR + offset, 0x00, color);
-  c8_poke(C8_MEM_VRAM_ADDR + offset, 0x01, glyph);
-}
-
-_C8_PRIVATE bool _c8__should_clip(u8 x, u8 y)
+_C8_PRIVATE bool _c8__should_clip(uint8_t x, uint8_t y)
 {
   return (x < 0 || x >= 0x10 || y < 0 || y >= 0x10);
 }
 
-_C8_PRIVATE void _c8__put_char(u32 x, u32 y, u8 c)
+_C8_PRIVATE void _c8__put_char(uint32_t x, uint32_t y, uint8_t c)
 {
   if (_c8__should_clip(x, y))
   {
@@ -566,8 +460,8 @@ _C8_PRIVATE void _c8__put_char(u32 x, u32 y, u8 c)
   }
 
   /* FIXME: magic number */
-  const u8 color = c8_peek(C8_MEM_COLOR_ADDR, 0);
-  const u32 offset = (x * 2) + 0x20 * y;
+  const uint8_t color = c8_peek(C8_MEM_COLOR_ADDR, 0);
+  const uint32_t offset = (x * 2) + 0x20 * y;
   _c8__set_cell(offset, color, c);
 }
 
@@ -575,154 +469,121 @@ _C8_PRIVATE void _c8__put_char(u32 x, u32 y, u8 c)
 
 void c8_init(const c8_desc_t *desc)
 {
-  /* initialize default font */
-  memcpy(_c8.memory + C8_MEM_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
-  memcpy(_c8.memory + C8_MEM_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
+  _c8.valid = true;
 
-  _c8.flags = desc->flags;
-  /* initialize timer */
-#if defined(OS_WINDOWS)
-  _c8.start = get_time_absolute();
-#elif defined(OS_MACOS)
-  _c8.start = mach_absolute_time();
-#endif
+  /* initialize default font and palette */
+  memcpy((uint8_t *)&_c8.memory + C8_MEM_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
+  memcpy((uint8_t *)&_c8.memory + C8_MEM_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
+}
+
+void c8_shutdown(void)
+{
+  C8_ASSERT(_c8.valid);
 }
 
 void c8_reset(void)
 {
-  /* body */
+  C8_ASSERT(_c8.valid);
 }
 
-void c8_input_set(u32 mask)
+void c8_input_set(uint32_t mask)
 {
-  if (mask & C8_INPUT_UP)
-  {
-    _c8.input |= C8_INPUT_UP;
-  }
-  if (mask & C8_INPUT_LEFT)
-  {
-    _c8.input |= C8_INPUT_LEFT;
-  }
-  if (mask & C8_INPUT_RIGHT)
-  {
-    _c8.input |= C8_INPUT_RIGHT;
-  }
-  if (mask & C8_INPUT_DOWN)
-  {
-    _c8.input |= C8_INPUT_DOWN;
-  }
-  if (mask & C8_INPUT_A)
-  {
-    _c8.input |= C8_INPUT_A;
-  }
-  if (mask & C8_INPUT_B)
-  {
-    _c8.input |= C8_INPUT_B;
-  }
-  if (mask & C8_INPUT_START)
-  {
-    _c8.input |= C8_INPUT_START;
-  }
-  if (mask & C8_INPUT_SELECT)
-  {
-    _c8.input |= C8_INPUT_SELECT;
-  }
+  C8_ASSERT(_c8.valid);
+  _c8.memory.hardware[0] |= mask;
 }
 
-void c8_input_clear(u32 mask)
+void c8_input_clear(uint32_t mask)
 {
-  if (mask & C8_INPUT_UP)
+  C8_ASSERT(_c8.valid);
+  _c8.memory.hardware[0] &= ~mask;
+}
+
+_C8_PRIVATE void _c8__tick(void)
+{
+}
+
+_C8_PRIVATE void _c8__decode_video(void)
+{
+  /* query memory */
+  const c8_range_t vram = c8_query_vram();
+  const c8_range_t font = c8_query_font();
+
+  for (int32_t i = 0; i < C8_MEM_SCREEN_SIZE; i += 8)
   {
-    _c8.input &= ~C8_INPUT_UP;
-  }
-  if (mask & C8_INPUT_LEFT)
-  {
-    _c8.input &= ~C8_INPUT_LEFT;
-  }
-  if (mask & C8_INPUT_RIGHT)
-  {
-    _c8.input &= ~C8_INPUT_RIGHT;
-  }
-  if (mask & C8_INPUT_DOWN)
-  {
-    _c8.input &= ~C8_INPUT_DOWN;
-  }
-  if (mask & C8_INPUT_A)
-  {
-    _c8.input &= ~C8_INPUT_A;
-  }
-  if (mask & C8_INPUT_B)
-  {
-    _c8.input &= ~C8_INPUT_B;
-  }
-  if (mask & C8_INPUT_START)
-  {
-    _c8.input &= ~C8_INPUT_START;
-  }
-  if (mask & C8_INPUT_SELECT)
-  {
-    _c8.input &= ~C8_INPUT_SELECT;
+    /* convert from screen to cell */
+    int32_t j = ((i % 128) / 8) + 16 * (i / 1024);
+
+    /* screen buffer */
+    uint8_t *vram_ptr = (uint8_t *)vram.ptr;
+    uint8_t color = vram_ptr[j * 2];
+    uint8_t glyph = vram_ptr[j * 2 + 1];
+
+    /* convert color */
+    uint8_t high = (color >> 4) & 0x0F;
+    uint8_t low = color & 0x0F;
+
+    /* decode glyph */
+    uint8_t *font_ptr = (uint8_t *)font.ptr;
+    int32_t y = (i / 128) % 8;
+    uint8_t *glyph_row = font_ptr + (glyph * 8) + y;
+
+    for (int32_t x = 0; x < 8; x++)
+    {
+      uint8_t b = (*glyph_row >> x) & 1;
+      ((uint8_t *)&_c8.memory + C8_MEM_SCREEN_ADDR)[i + x] = b ? low : high;
+    }
   }
 }
 
-void c8_frame(void)
+void c8_exec(void)
 {
-  f64 now = _c8__get_time(_c8.start);
-  f64 wait = (_c8.prev + _c8__get_step_time()) - now;
-  f64 prev = _c8.prev;
-  if (wait > 0)
-  {
-    _c8__sleep(wait);
-    _c8.prev += _c8__get_step_time();
-  }
-  else
-  {
-    _c8.prev = now;
-  }
+  C8_ASSERT(_c8.valid);
+  _c8__tick();
+  _c8__decode_video();
 }
 
-const u8 c8_peek(const u32 addr, const u32 index)
+const uint8_t c8_peek(const uint32_t addr, const uint32_t index)
 {
-  return *(_c8.memory + addr + index);
+  return *((uint8_t *)&_c8.memory + addr + index);
 }
 
-const u16 c8_peek2(const u32 addr, const u32 index)
+const uint16_t c8_peek2(const uint32_t addr, const uint32_t index)
 {
-  const u8 b0 = c8_peek(addr, index + 0);
-  const u8 b1 = c8_peek(addr, index + 1);
+  const uint8_t b0 = c8_peek(addr, index + 0);
+  const uint8_t b1 = c8_peek(addr, index + 1);
 
   /* combine 16-bit value */
   return ((b0 << 8) | (b1 << 0));
 }
 
-const u32 c8_peek4(const u32 addr, const u32 index)
+const uint32_t c8_peek4(const uint32_t addr, const uint32_t index)
 {
-  const u8 b0 = c8_peek(addr, index + 0);
-  const u8 b1 = c8_peek(addr, index + 1);
-  const u8 b2 = c8_peek(addr, index + 2);
-  const u8 b3 = c8_peek(addr, index + 3);
+  const uint8_t b0 = c8_peek(addr, index + 0);
+  const uint8_t b1 = c8_peek(addr, index + 1);
+  const uint8_t b2 = c8_peek(addr, index + 2);
+  const uint8_t b3 = c8_peek(addr, index + 3);
 
   /* combine 32-bit value */
   return ((b0 << 24) | (b1 << 16) | (b2 << 8) | (b3 << 0));
 }
 
-void c8_poke(const u32 addr, const u32 index, const u8 value)
+void c8_poke(const uint32_t addr, const uint8_t value)
 {
-  *(_c8.memory + addr + index) = value;
+  *((uint8_t *)&_c8.memory + addr) = value;
 }
 
-void c8_poke2(const u32 addr, const u32 index, const u16 value)
+void c8_poke2(const uint32_t addr, const uint16_t value)
 {
-  c8_poke(addr, index + 0, (value >> 8) & 0xff);
-  c8_poke(addr, index + 1, (value >> 0) & 0xff);
+  c8_poke(addr + 0, (value >> 8) & 0xff);
+  c8_poke(addr + 1, (value >> 0) & 0xff);
 }
 
-void c8_poke4(const u32 addr, const u32 index, const u32 value)
+void c8_poke4(const uint32_t addr, const uint32_t value)
 {
-  c8_poke(addr, index + 0, (value >> 24) & 0xff);
-  c8_poke(addr, index + 1, (value >> 16) & 0xff);
-  c8_poke(addr, index + 2, (value >> 8) & 0xff);
-  c8_poke(addr, index + 3, (value >> 0) & 0xff);
+  c8_poke(addr + 0, (value >> 24) & 0xff);
+  c8_poke(addr + 1, (value >> 16) & 0xff);
+  c8_poke(addr + 2, (value >> 8) & 0xff);
+  c8_poke(addr + 3, (value >> 0) & 0xff);
 }
 
 void c8_memcpy(void *dst, const void *src, size_t len)
@@ -735,47 +596,47 @@ void c8_memset(void *dst, int value, size_t len)
   memset(dst, value, len);
 }
 
-bool c8_btn(u32 mask)
+bool c8_btn(uint32_t mask)
 {
-  return (_c8.input & mask) == mask;
+  return (_c8.memory.hardware[0] & mask) == mask;
 }
 
-void c8_cls(u8 clr, u8 chr)
+void c8_cls(uint8_t clr, uint8_t chr)
 {
-  memset(_c8.memory + C8_MEM_VRAM_ADDR, ((clr << 4) | chr), C8_MEM_VRAM_SIZE);
+  c8_memset((uint8_t *)&_c8.memory + C8_MEM_VRAM_ADDR, ((clr << 4) | chr), C8_MEM_VRAM_SIZE);
 }
 
-void c8_color(u8 color)
+void c8_color(uint8_t color)
 {
-  c8_poke(C8_MEM_COLOR_ADDR, 0x00, color);
+  c8_poke(C8_MEM_COLOR_ADDR, color);
 }
 
-void c8_fill(i32 x, i32 y, i32 w, i32 h, i32 chr)
+void c8_fill(int32_t x, int32_t y, int32_t w, int32_t h, int32_t chr)
 {
-  for (i32 i = y; i < (y + h); i++)
+  for (int32_t i = y; i < (y + h); i++)
   {
-    for (i32 j = x; j < (x + w); j++)
+    for (int32_t j = x; j < (x + w); j++)
     {
       _c8__put_char(j, i, chr);
     }
   }
 }
 
-void c8_print(i32 x, i32 y, const char *str)
+void c8_print(int32_t x, int32_t y, const char *str)
 {
-  i32 i = 0;
+  int32_t i = 0;
   while (*str)
   {
     _c8__put_char(x + (i++), y, *(str++));
   }
 }
 
-void c8_put(i32 x, i32 y, u8 c)
+void c8_put(int32_t x, int32_t y, uint8_t c)
 {
   _c8__put_char(x, y, c);
 }
 
-u8 c8_get(i32 x, i32 y)
+uint8_t c8_get(int32_t x, int32_t y)
 {
   /* boundary check */
   if (_c8__should_clip(x, y))
@@ -784,12 +645,11 @@ u8 c8_get(i32 x, i32 y)
   }
 
   /* FIXME: magic numbers (0x20) */
-  const u32 offset = (x * 2) + 0x20 * y;
-
+  const uint32_t offset = (x * 2) + 0x20 * y;
   return c8_peek(offset, 0);
 }
 
-u16 c8_stat(i32 n)
+uint16_t c8_stat(int32_t n)
 {
   switch (n)
   {
@@ -873,39 +733,30 @@ u16 c8_stat(i32 n)
     time_t t = time(NULL);
     return localtime(&t)->tm_sec;
   }
-  case C8_STAT_FLAGS:
-  {
-    return _c8.flags;
-  }
   default:
     return 0;
   }
 }
 
-u16 c8_rnd(void)
+uint16_t c8_rnd(void)
 {
-  for (i32 i = 1; i >= 0; --i)
+  for (int32_t i = 1; i >= 0; --i)
   {
-    u8 reg_0 = c8_peek(C8_MEM_RND_ADDR, 0);
-    u8 reg_1 = c8_peek(C8_MEM_RND_ADDR, 1);
+    uint8_t reg_0 = c8_peek(C8_MEM_RND_ADDR, 0);
+    uint8_t reg_1 = c8_peek(C8_MEM_RND_ADDR, 1);
 
-    c8_poke(C8_MEM_RND_ADDR, 0, 5 * reg_0 + 1);
-    c8_poke(C8_MEM_RND_ADDR, 1, ((reg_1 & 0x80) == (reg_1 & 0x10)) ? 2 * reg_1 + 1 : 2 * reg_1);
-    c8_poke(C8_MEM_RND_ADDR, 2 + i, (reg_0 ^ reg_1));
+    c8_poke(C8_MEM_RND_ADDR + 0, 5 * reg_0 + 1);
+    c8_poke(C8_MEM_RND_ADDR + 1, ((reg_1 & 0x80) == (reg_1 & 0x10)) ? 2 * reg_1 + 1 : 2 * reg_1);
+    c8_poke(C8_MEM_RND_ADDR + 2 + i, (reg_0 ^ reg_1));
   }
 
-  u8 reg_2 = c8_peek(C8_MEM_RND_ADDR, 2);
-  u8 reg_3 = c8_peek(C8_MEM_RND_ADDR, 3);
-  return ((u16)reg_2 << 0x8) | reg_3;
-}
-
-f64 c8_time(void)
-{
-  return _c8.curr;
+  uint8_t reg_2 = c8_peek(C8_MEM_RND_ADDR, 2);
+  uint8_t reg_3 = c8_peek(C8_MEM_RND_ADDR, 3);
+  return ((uint16_t)reg_2 << 0x8) | reg_3;
 }
 
 #define _C8_RANGE(addr, sz) \
-  (c8_range_t){.ptr = _c8.memory + addr, .size = sz};
+  (c8_range_t){.ptr = (uint8_t *)&_c8.memory + addr, .size = sz};
 
 c8_range_t c8_query_memory(void)
 {
@@ -935,6 +786,11 @@ c8_range_t c8_query_font(void)
 c8_range_t c8_query_vram(void)
 {
   return _C8_RANGE(C8_MEM_VRAM_ADDR, C8_MEM_VRAM_SIZE);
+}
+
+c8_range_t c8_query_screen(void)
+{
+  return _C8_RANGE(C8_MEM_SCREEN_ADDR, C8_MEM_SCREEN_SIZE);
 }
 
 #undef _C8_RANGE

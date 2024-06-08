@@ -20,8 +20,8 @@ enum
 
 typedef struct
 {
-  u8 x;
-  u8 y;
+  uint8_t x;
+  uint8_t y;
 } pos_t;
 
 struct
@@ -32,17 +32,17 @@ struct
 struct
 {
   pos_t pos[256];
-  u8 size;
+  uint8_t size;
 } snake;
 
-i8 dx = 0;
-i8 dy = 0;
+int8_t dx = 0;
+int8_t dy = 0;
 
 static struct
 {
-  u16 score;
-  u16 score_offset;
-  i32 timer;
+  uint16_t score;
+  uint16_t score_offset;
+  int32_t timer;
   bool gameover;
   char str_buffer[5];
 } state;
@@ -55,7 +55,7 @@ static inline bool check_overlap(const pos_t a, const pos_t b)
 static inline bool check_overlaps(const pos_t a, const pos_t *b, size_t len)
 {
   bool ret = false;
-  for (i32 i = 0; i < len; i++)
+  for (int32_t i = 0; i < len; i++)
   {
     ret |= check_overlap(a, *(b + i));
   }
@@ -65,7 +65,7 @@ static inline bool check_overlaps(const pos_t a, const pos_t *b, size_t len)
 static inline void place_snake(void)
 {
   snake.size = MIN_SNAKE_SIZE;
-  for (i32 i = 0; i < snake.size; i++)
+  for (int32_t i = 0; i < snake.size; i++)
   {
     snake.pos[i].x = 8;
     snake.pos[i].y = 8;
@@ -87,7 +87,6 @@ void c8_load(void)
 #include "embed/font.h"
 #include "embed/palette.h"
   c8_init(&(c8_desc_t){
-      .flags = C8_FLAG_FPS30,
       .roms = {
           .chars = (c8_range_t){.ptr = font_h, .size = sizeof(font_h)},
           .palette = (c8_range_t){.ptr = palette_h, .size = sizeof(palette_h)},
@@ -104,8 +103,8 @@ void c8_load(void)
   /* 11111111  -- 0xFF */
   /* 11111111  -- 0xFF */
   /* 01111110  -- 0x7E */
-  c8_poke4(C8_MEM_FONT_ADDR + 0x00, 0x00 * 4, 0x7EFFDBFF);
-  c8_poke4(C8_MEM_FONT_ADDR + 0x00, 0x01 * 4, 0xFFFFFF7E);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x00 * 4, 0x7EFFDBFF);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x01 * 4, 0xFFFFFF7E);
 
   /* snake segment */
   /* 01111110  -- 0x7E */
@@ -116,8 +115,8 @@ void c8_load(void)
   /* 11111111  -- 0xFF */
   /* 11111111  -- 0xFF */
   /* 01111110  -- 0x7E */
-  c8_poke4(C8_MEM_FONT_ADDR + 0x08, 0x00 * 4, 0x7EFFFFFF);
-  c8_poke4(C8_MEM_FONT_ADDR + 0x08, 0x01 * 4, 0xFFFFFF7E);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x08 + 0x00 * 4, 0x7EFFFFFF);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x08 + 0x01 * 4, 0xFFFFFF7E);
 
   /* grid pattern */
   /* 00000000  -- 0x00 */
@@ -128,8 +127,8 @@ void c8_load(void)
   /* 00000000  -- 0x00 */
   /* 00000000  -- 0x00 */
   /* 00000000  -- 0x00 */
-  c8_poke4(C8_MEM_FONT_ADDR + 0x10, 0x00 * 4, 0x00000018);
-  c8_poke4(C8_MEM_FONT_ADDR + 0x10, 0x01 * 4, 0x18000000);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x10 * 4, 0x00000018);
+  c8_poke4(C8_MEM_FONT_ADDR + 0x11 * 4, 0x18000000);
 
   place_snake();
   place_apple();
@@ -229,7 +228,7 @@ void c8_draw(void)
   /* draw the snake */
   c8_color(0x0C);
   c8_put(snake.pos[0].x, snake.pos[0].y, SNAKE_HEAD_SEG);
-  for (i32 i = 1; i < snake.size; i++)
+  for (int32_t i = 1; i < snake.size; i++)
   {
     c8_put(snake.pos[i].x, snake.pos[i].y, SNAKE_BODY_SEG);
   }

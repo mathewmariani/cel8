@@ -30,24 +30,24 @@ void c8_load(void)
     const uint32_t font_size = 0x0008;
 
     /* poke */
-    c8_poke(font_addr + font_size * 0, 0x00, 0x7E);
-    c8_poke(font_addr + font_size * 0, 0x01, 0xDB);
-    c8_poke(font_addr + font_size * 0, 0x02, 0xDB);
-    c8_poke(font_addr + font_size * 0, 0x03, 0xDB);
-    c8_poke(font_addr + font_size * 0, 0x04, 0xFF);
-    c8_poke(font_addr + font_size * 0, 0x05, 0xBD);
-    c8_poke(font_addr + font_size * 0, 0x06, 0xC3);
-    c8_poke(font_addr + font_size * 0, 0x07, 0x7E);
+    c8_poke(font_addr + font_size * 0 + 0x00, 0x7E);
+    c8_poke(font_addr + font_size * 0 + 0x01, 0xDB);
+    c8_poke(font_addr + font_size * 0 + 0x02, 0xDB);
+    c8_poke(font_addr + font_size * 0 + 0x03, 0xDB);
+    c8_poke(font_addr + font_size * 0 + 0x04, 0xFF);
+    c8_poke(font_addr + font_size * 0 + 0x05, 0xBD);
+    c8_poke(font_addr + font_size * 0 + 0x06, 0xC3);
+    c8_poke(font_addr + font_size * 0 + 0x07, 0x7E);
 
     /* poke */
-    c8_poke2(font_addr + font_size * 1, 0x00 * 2, 0x7EDB);
-    c8_poke2(font_addr + font_size * 1, 0x01 * 2, 0xDBDB);
-    c8_poke2(font_addr + font_size * 1, 0x02 * 2, 0xFFBD);
-    c8_poke2(font_addr + font_size * 1, 0x03 * 2, 0xC37E);
+    c8_poke2(font_addr + font_size * 1 + 0x00 * 2, 0x7EDB);
+    c8_poke2(font_addr + font_size * 1 + 0x01 * 2, 0xDBDB);
+    c8_poke2(font_addr + font_size * 1 + 0x02 * 2, 0xFFBD);
+    c8_poke2(font_addr + font_size * 1 + 0x03 * 2, 0xC37E);
 
     /* poke */
-    c8_poke4(font_addr + font_size * 2, 0x00 * 4, 0x7EDBDBDB);
-    c8_poke4(font_addr + font_size * 2, 0x01 * 4, 0xFFBDC37E);
+    c8_poke4(font_addr + font_size * 2 + 0x00 * 4, 0x7EDBDBDB);
+    c8_poke4(font_addr + font_size * 2 + 0x01 * 4, 0xFFBDC37E);
 }
 
 static void c8_update(void)
