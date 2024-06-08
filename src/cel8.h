@@ -438,7 +438,6 @@ extern "C"
 static struct
 {
   bool valid;
-  uint8_t input;
   struct
   {
     uint8_t font[C8_MEM_FONT_SIZE];
@@ -497,77 +496,13 @@ void c8_reset(void)
 void c8_input_set(uint32_t mask)
 {
   C8_ASSERT(_c8.valid);
-
-  if (mask & C8_INPUT_UP)
-  {
-    _c8.input |= C8_INPUT_UP;
-  }
-  if (mask & C8_INPUT_LEFT)
-  {
-    _c8.input |= C8_INPUT_LEFT;
-  }
-  if (mask & C8_INPUT_RIGHT)
-  {
-    _c8.input |= C8_INPUT_RIGHT;
-  }
-  if (mask & C8_INPUT_DOWN)
-  {
-    _c8.input |= C8_INPUT_DOWN;
-  }
-  if (mask & C8_INPUT_A)
-  {
-    _c8.input |= C8_INPUT_A;
-  }
-  if (mask & C8_INPUT_B)
-  {
-    _c8.input |= C8_INPUT_B;
-  }
-  if (mask & C8_INPUT_START)
-  {
-    _c8.input |= C8_INPUT_START;
-  }
-  if (mask & C8_INPUT_SELECT)
-  {
-    _c8.input |= C8_INPUT_SELECT;
-  }
+  _c8.memory.hardware[0] |= mask;
 }
 
 void c8_input_clear(uint32_t mask)
 {
   C8_ASSERT(_c8.valid);
-
-  if (mask & C8_INPUT_UP)
-  {
-    _c8.input &= ~C8_INPUT_UP;
-  }
-  if (mask & C8_INPUT_LEFT)
-  {
-    _c8.input &= ~C8_INPUT_LEFT;
-  }
-  if (mask & C8_INPUT_RIGHT)
-  {
-    _c8.input &= ~C8_INPUT_RIGHT;
-  }
-  if (mask & C8_INPUT_DOWN)
-  {
-    _c8.input &= ~C8_INPUT_DOWN;
-  }
-  if (mask & C8_INPUT_A)
-  {
-    _c8.input &= ~C8_INPUT_A;
-  }
-  if (mask & C8_INPUT_B)
-  {
-    _c8.input &= ~C8_INPUT_B;
-  }
-  if (mask & C8_INPUT_START)
-  {
-    _c8.input &= ~C8_INPUT_START;
-  }
-  if (mask & C8_INPUT_SELECT)
-  {
-    _c8.input &= ~C8_INPUT_SELECT;
-  }
+  _c8.memory.hardware[0] &= ~mask;
 }
 
 _C8_PRIVATE void _c8__tick(void)
@@ -670,7 +605,7 @@ void c8_memset(void *dst, int value, size_t len)
 
 bool c8_btn(uint32_t mask)
 {
-  return (_c8.input & mask) == mask;
+  return (_c8.memory.hardware[0] & mask) == mask;
 }
 
 void c8_cls(uint8_t clr, uint8_t chr)
