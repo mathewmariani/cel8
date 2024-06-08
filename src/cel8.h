@@ -248,19 +248,19 @@ extern "C"
     C8_INPUT_START = (1 << 6),
     C8_INPUT_SELECT = (1 << 7),
 
-    /* memory mapping */
-    C8_MEM_CMAP_ADDR = 0x0000,
-    C8_MEM_CMAP_SIZE = 0x000F,
-    C8_MEM_PAL_ADDR = 0x000F,
-    C8_MEM_PAL_SIZE = 0x0030,
-    C8_MEM_COLOR_ADDR = 0x003F,
-    C8_MEM_COLOR_SIZE = 0x0001,
-    C8_MEM_RND_ADDR = 0x0040,
-    C8_MEM_RND_SIZE = 0x0004,
-    C8_MEM_UNUSED_ADDR = 0x0044,
-    C8_MEM_UNUSED_SIZE = 0x000C,
-    C8_MEM_FONT_ADDR = 0x0050,
+    /* memory addresses */
+    C8_MEM_FONT_ADDR = 0x0000,
     C8_MEM_FONT_SIZE = 0x0400,
+    C8_MEM_CMAP_ADDR = 0x0400,
+    C8_MEM_CMAP_SIZE = 0x040F,
+    C8_MEM_PAL_ADDR = 0x040F,
+    C8_MEM_PAL_SIZE = 0x0030,
+    C8_MEM_COLOR_ADDR = 0x043F,
+    C8_MEM_COLOR_SIZE = 0x0001,
+    C8_MEM_RND_ADDR = 0x0440,
+    C8_MEM_RND_SIZE = 0x0004,
+    C8_MEM_UNUSED_ADDR = 0x0444,
+    C8_MEM_UNUSED_SIZE = 0x000C,
     C8_MEM_VRAM_ADDR = 0x0450,
     C8_MEM_VRAM_SIZE = 0x0200,
     C8_MEM_SCREEN_ADDR = 0x0650,
@@ -437,6 +437,7 @@ static struct
         - font atlas:
         - general use: (custom font)
         - draw state:
+          -
           - palette map
           - color
         - harware state:
@@ -445,12 +446,13 @@ static struct
         - pins:
         - screen data:
     */
+
+    uint8_t font[C8_MEM_FONT_SIZE];
     uint8_t cmap[C8_MEM_CMAP_SIZE];
     uint8_t pal[C8_MEM_PAL_SIZE];
     uint8_t color[C8_MEM_COLOR_SIZE];
     uint8_t rnd[C8_MEM_RND_SIZE];
     uint8_t unused[C8_MEM_UNUSED_SIZE];
-    uint8_t font[C8_MEM_FONT_SIZE];
     uint8_t vram[C8_MEM_VRAM_SIZE];
     uint8_t screen[C8_MEM_SCREEN_SIZE];
   } memory;
@@ -486,9 +488,9 @@ void c8_init(const c8_desc_t *desc)
 {
   _c8.valid = true;
 
-  /* initialize default font */
-  memcpy((uint8_t *)&_c8.memory.font, desc->roms.chars.ptr, desc->roms.chars.size);
-  memcpy((uint8_t *)&_c8.memory.pal, desc->roms.palette.ptr, desc->roms.palette.size);
+  /* initialize default font and palette */
+  memcpy((uint8_t *)&_c8.memory + C8_MEM_FONT_ADDR, desc->roms.chars.ptr, desc->roms.chars.size);
+  memcpy((uint8_t *)&_c8.memory + C8_MEM_PAL_ADDR, desc->roms.palette.ptr, desc->roms.palette.size);
 }
 
 void c8_shutdown(void)
@@ -587,7 +589,7 @@ _C8_PRIVATE void _c8__decode_video(void)
   const c8_range_t vram = c8_query_vram();
   const c8_range_t font = c8_query_font();
 
-  for (int32_t i = 0; i < sizeof(_c8.memory.screen); i += 8)
+  for (int32_t i = 0; i < C8_MEM_SCREEN_SIZE; i += 8)
   {
     /* convert from screen to cell */
     int32_t j = ((i % 128) / 8) + 16 * (i / 1024);
@@ -609,7 +611,7 @@ _C8_PRIVATE void _c8__decode_video(void)
     for (int32_t x = 0; x < 8; x++)
     {
       uint8_t b = (*glyph_row >> x) & 1;
-      ((uint8_t *)_c8.memory.screen)[i + x] = b ? low : high;
+      ((uint8_t *)&_c8.memory + C8_MEM_SCREEN_ADDR)[i + x] = b ? low : high;
     }
   }
 }
@@ -645,23 +647,6 @@ const uint32_t c8_peek4(const uint32_t addr, const uint32_t index)
   /* combine 32-bit value */
   return ((b0 << 24) | (b1 << 16) | (b2 << 8) | (b3 << 0));
 }
-
-// void c8_poke(const uint32_t addr, const uint32_t index, const uint8_t value)
-// {
-//   *((uint8_t *)&_c8.memory + addr + index) = value;
-// }
-// void c8_poke2(const uint32_t addr, const uint32_t index, const uint16_t value)
-// {
-//   c8_poke(addr, index + 0, (value >> 8) & 0xff);
-//   c8_poke(addr, index + 1, (value >> 0) & 0xff);
-// }
-// void c8_poke4(const uint32_t addr, const uint32_t index, const uint32_t value)
-// {
-//   c8_poke(addr, index + 0, (value >> 24) & 0xff);
-//   c8_poke(addr, index + 1, (value >> 16) & 0xff);
-//   c8_poke(addr, index + 2, (value >> 8) & 0xff);
-//   c8_poke(addr, index + 3, (value >> 0) & 0xff);
-// }
 
 void c8_poke(const uint32_t addr, const uint8_t value)
 {
@@ -699,7 +684,7 @@ bool c8_btn(uint32_t mask)
 
 void c8_cls(uint8_t clr, uint8_t chr)
 {
-  c8_memset((uint8_t *)&_c8.memory.vram, ((clr << 4) | chr), C8_MEM_VRAM_SIZE);
+  c8_memset((uint8_t *)&_c8.memory + C8_MEM_VRAM_ADDR, ((clr << 4) | chr), C8_MEM_VRAM_SIZE);
 }
 
 void c8_color(uint8_t color)
