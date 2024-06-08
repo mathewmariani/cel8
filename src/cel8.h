@@ -251,21 +251,29 @@ extern "C"
     /* memory addresses */
     C8_MEM_FONT_ADDR = 0x0000,
     C8_MEM_FONT_SIZE = 0x0400,
-    C8_MEM_CMAP_ADDR = 0x0400,
-    C8_MEM_CMAP_SIZE = 0x040F,
-    C8_MEM_PAL_ADDR = 0x040F,
-    C8_MEM_PAL_SIZE = 0x0030,
-    C8_MEM_COLOR_ADDR = 0x043F,
-    C8_MEM_COLOR_SIZE = 0x0001,
-    C8_MEM_RND_ADDR = 0x0440,
-    C8_MEM_RND_SIZE = 0x0004,
-    C8_MEM_UNUSED_ADDR = 0x0444,
-    C8_MEM_UNUSED_SIZE = 0x000C,
+    C8_MEM_DRAWSTATE_ADDR = 0x0400,
+    C8_MEM_DRAWSTATE_SIZE = 0x0040,
+    C8_MEM_HARDWARE_ADDR = 0x0440,
+    C8_MEM_HARDWARE_SIZE = 0x0010,
     C8_MEM_VRAM_ADDR = 0x0450,
     C8_MEM_VRAM_SIZE = 0x0200,
     C8_MEM_SCREEN_ADDR = 0x0650,
     C8_MEM_SCREEN_SIZE = 0x4000,
-    C8_MEM_SIZE = C8_MEM_CMAP_SIZE + C8_MEM_PAL_SIZE + C8_MEM_COLOR_SIZE + C8_MEM_RND_SIZE + C8_MEM_UNUSED_SIZE + C8_MEM_FONT_SIZE + C8_MEM_VRAM_SIZE + C8_MEM_SCREEN_SIZE,
+    C8_MEM_SIZE = C8_MEM_FONT_SIZE + C8_MEM_DRAWSTATE_SIZE + C8_MEM_VRAM_SIZE + C8_MEM_SCREEN_SIZE,
+
+    /* drawstate specific */
+    C8_MEM_CMAP_ADDR = C8_MEM_DRAWSTATE_ADDR + 0x0000,
+    C8_MEM_CMAP_SIZE = 0x000F,
+    C8_MEM_PAL_ADDR = C8_MEM_DRAWSTATE_ADDR + 0x000F,
+    C8_MEM_PAL_SIZE = 0x0030,
+    C8_MEM_COLOR_ADDR = C8_MEM_DRAWSTATE_ADDR + 0x003F,
+    C8_MEM_COLOR_SIZE = 0x0001,
+
+    /* hardware specific */
+    C8_MEM_IO_ADDR = C8_MEM_HARDWARE_ADDR + 0x0000,
+    C8_MEM_IO_SIZE = 0x0002,
+    C8_MEM_RND_ADDR = C8_MEM_HARDWARE_ADDR + 0x0002,
+    C8_MEM_RND_SIZE = 0x0004,
 
     /* stat */
     C8_STAT_VERSION_STR = 0x0000,
@@ -433,26 +441,9 @@ static struct
   uint8_t input;
   struct
   {
-    /* layout memory inspired by pico8:
-        - font atlas:
-        - general use: (custom font)
-        - draw state:
-          -
-          - palette map
-          - color
-        - harware state:
-          - io
-          - rnd
-        - pins:
-        - screen data:
-    */
-
     uint8_t font[C8_MEM_FONT_SIZE];
-    uint8_t cmap[C8_MEM_CMAP_SIZE];
-    uint8_t pal[C8_MEM_PAL_SIZE];
-    uint8_t color[C8_MEM_COLOR_SIZE];
-    uint8_t rnd[C8_MEM_RND_SIZE];
-    uint8_t unused[C8_MEM_UNUSED_SIZE];
+    uint8_t drawstate[C8_MEM_DRAWSTATE_SIZE];
+    uint8_t hardware[C8_MEM_DRAWSTATE_SIZE];
     uint8_t vram[C8_MEM_VRAM_SIZE];
     uint8_t screen[C8_MEM_SCREEN_SIZE];
   } memory;
