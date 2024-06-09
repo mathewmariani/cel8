@@ -37,8 +37,7 @@
     0x0000                           : font
     0x0400                           : drawstate
     0x0440                           : hardware state
-    0x0450                           : vram
-    0x0650                           : screen
+    0x0450                           : screen
 
 
     MEMORY DUMP:
@@ -160,44 +159,16 @@
     00 01 02 00 00 00 00 00 00 00 00 00 00 00 00 00
 
 
-    [0x0450] : vram (16*16*2 bytes)
+    [0x0450] : screen (64*128 bytes)
 
-    +-------------------------------- background
-    |+------------------------------- foreground
-    || +----------------------------- char glyph
-    || |
-    27 4b 92 70 2f 18 6a 21 d3 5b 63 2a 09 34 3e 07
-    af 27 d0 41 1a 1d 7f 63 62 4e 58 60 ce 51 a8 58
-    e1 59 80 26 62 5e f7 0b 69 1b 23 33 04 1f 86 35
-    cf 5d 61 75 47 14 99 43 ab 52 4f 5c 7b 12 1e 57
-    fc 49 54 60 40 28 dc 06 7e 2f 49 49 07 0a 65 4b
-    6e 67 c7 7c a2 67 55 42 7d 04 ff 03 9d 62 ed 71
-    fe 33 d4 14 12 22 03 21 c0 41 59 0e fc 62 e1 60
-    89 4c 4c 5b ec 20 4d 0c 83 08 4b 66 95 5d 8c 78
-    48 00 8e 76 32 27 02 35 94 04 35 2b 2b 5c da 79
-    e6 3d 41 4f 99 14 ca 69 1d 47 aa 65 7a 29 80 44
-    8d 00 94 22 a8 73 40 76 28 3a f5 7e 14 19 c8 46
-    d4 27 65 0d c8 7e ca 3d f7 7e fb 0a 9c 6c 28 66
-    82 80 8b 24 00 01 53 3b bc 07 d5 14 c7 5a 98 4e
-    08 0b b6 53 66 08 f0 60 2c 37 f1 0a 9a 35 32 4b
-    cc 7d c9 2f a5 49 f0 40 24 44 e8 60 17 34 cd 7f
-    94 35 16 6a 45 78 7d 43 02 0a 13 75 a0 00 a4 75
-    e1 75 13 38 13 7a a3 7b f0 69 86 10 35 38 25 51
-    4a 19 c5 1b e2 7d 5c 31 52 3d ce 43 45 35 7c 02
-    cc 5c a6 40 24 45 da 3f 23 19 2f 00 66 6a b0 3a
-    80 0d f6 2d 52 58 17 71 73 02 cc 80 cc 08 53 2a
-    24 20 3f 19 72 07 a0 2f b4 5c 6b 33 a9 6a 0e 1c
-    12 3a 6d 4e 7f 6a a0 29 d1 66 3e 5f b5 23 0e 80
-    f7 41 81 4b 1f 0a ff 54 c4 07 98 1c 89 70 7e 5e
-    4c 50 26 6b 0d 2a f0 37 61 51 54 10 a0 24 bf 66
-    16 73 eb 60 d5 52 78 54 2a 15 a0 5b d8 6b b7 18
-    6d 32 b7 6f 4f 17 ff 70 02 19 34 4a 8b 31 13 1e
-    db 79 7a 1a d8 0e 89 74 a7 2b cd 0e b5 1b f3 2e
-    db 08 50 57 3d 46 ba 68 f2 6f dc 3a 44 66 72 55
-    6e 36 7b 66 d4 25 85 70 29 2b 7d 1d 4b 43 27 1e
-    26 2b de 63 a6 56 dc 77 1d 5f c4 07 37 0c 75 0a
-    26 4f 8d 28 0e 19 6e 0a ce 52 16 54 86 01 30 3f
-    ed 46 73 27 34 29 b7 73 ff 10 d2 58 23 0f 2a 32
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 */
 
 #include <stddef.h> /* size_t */
@@ -248,11 +219,9 @@ extern "C"
     C8_MEM_DRAWSTATE_SIZE = 0x0040,
     C8_MEM_HARDWARE_ADDR = 0x0440,
     C8_MEM_HARDWARE_SIZE = 0x0010,
-    C8_MEM_VRAM_ADDR = 0x0450,
-    C8_MEM_VRAM_SIZE = 0x0200,
-    C8_MEM_SCREEN_ADDR = 0x0650,
+    C8_MEM_SCREEN_ADDR = 0x0450,
     C8_MEM_SCREEN_SIZE = 0x4000,
-    C8_MEM_SIZE = C8_MEM_FONT_SIZE + C8_MEM_DRAWSTATE_SIZE + C8_MEM_VRAM_SIZE + C8_MEM_SCREEN_SIZE,
+    C8_MEM_SIZE = C8_MEM_FONT_SIZE + C8_MEM_DRAWSTATE_SIZE + C8_MEM_HARDWARE_SIZE + C8_MEM_SCREEN_SIZE,
 
     /* drawstate specific */
     C8_MEM_CMAP_ADDR = C8_MEM_DRAWSTATE_ADDR + 0x0000,
@@ -332,7 +301,6 @@ extern "C"
   C8_API_DECL uint16_t c8_rnd(void);
 
   C8_API_DECL c8_range_t c8_query_memory(void);
-  C8_API_DECL c8_range_t c8_query_vram(void);
   C8_API_DECL c8_range_t c8_query_screen(void);
   C8_API_DECL c8_range_t c8_query_font(void);
   C8_API_DECL c8_range_t c8_query_color(void);
@@ -436,7 +404,6 @@ static struct
     uint8_t font[C8_MEM_FONT_SIZE];
     uint8_t drawstate[C8_MEM_DRAWSTATE_SIZE];
     uint8_t hardware[C8_MEM_DRAWSTATE_SIZE];
-    uint8_t vram[C8_MEM_VRAM_SIZE];
     uint8_t screen[C8_MEM_SCREEN_SIZE];
   } memory;
 } _c8;
@@ -591,7 +558,7 @@ bool c8_btn(uint32_t mask)
 
 void c8_cls(uint8_t clr, uint8_t chr)
 {
-  c8_memset((uint8_t *)&_c8.memory + C8_MEM_VRAM_ADDR, ((clr << 4) | chr), C8_MEM_VRAM_SIZE);
+  c8_memset((uint8_t *)&_c8.memory + C8_MEM_SCREEN_ADDR, 0x00, C8_MEM_SCREEN_SIZE);
 }
 
 void c8_color(uint8_t color)
@@ -769,11 +736,6 @@ c8_range_t c8_query_rnd(void)
 c8_range_t c8_query_font(void)
 {
   return _C8_RANGE(C8_MEM_FONT_ADDR, C8_MEM_FONT_SIZE);
-}
-
-c8_range_t c8_query_vram(void)
-{
-  return _C8_RANGE(C8_MEM_VRAM_ADDR, C8_MEM_VRAM_SIZE);
 }
 
 c8_range_t c8_query_screen(void)
