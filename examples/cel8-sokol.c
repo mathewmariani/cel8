@@ -18,9 +18,7 @@ static void c8_draw(void);
 #include "sokol/sokol_gfx.h"
 #include "sokol/sokol_app.h"
 #include "sokol/sokol_glue.h"
-#if defined(_C8_DEBUG)
 #include "sokol/sokol_log.h"
-#endif
 
 static struct
 {
@@ -34,6 +32,7 @@ static void init(void)
     /* setup sokol-gfx */
     sg_setup(&(sg_desc){
         .environment = sglue_environment(),
+        .logger.func = slog_func,
     });
 
     /* default pass action */
@@ -251,8 +250,10 @@ static void frame(void)
     /* FIXME: proof of concept for `c8_btnp()` */
     c8_input_clear(C8_INPUT_RIGHT | C8_INPUT_LEFT | C8_INPUT_UP | C8_INPUT_DOWN | C8_INPUT_A | C8_INPUT_B | C8_INPUT_START | C8_INPUT_SELECT);
 
-    /* query palette data. */
+    /* query memory */
+    const c8_range_t screen = c8_query_screen();
     const c8_range_t pal = c8_query_pal();
+
     float palette[48] = {0};
     for (int32_t i = 0; i < 48; i += 3)
     {
@@ -260,9 +261,6 @@ static void frame(void)
         *(palette + i + 1) = *((uint8_t *)pal.ptr + i + 1) / 255.0f;
         *(palette + i + 2) = *((uint8_t *)pal.ptr + i + 2) / 255.0f;
     }
-
-    /* query screen data. */
-    const c8_range_t screen = c8_query_screen();
 
     /* update gpu resources */
     sg_update_image(display.bind.images[0],
@@ -296,10 +294,7 @@ sapp_desc sokol_main(int argc, char *argv[])
         .width = C8_WINDOW_WIDTH,
         .height = C8_WINDOW_HEIGHT,
         .window_title = "cel8",
-#if defined(_C8_DEBUG)
-        .win32_console_create = true,
         .logger.func = slog_func,
-#endif
     };
 }
 
