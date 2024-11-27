@@ -8,7 +8,7 @@ project(cel8)
 set(THIRDPARTY_DIR libs)
 
 # macros
-include("cmake/sokol.cmake")
+include("extra/cmake/sokol.cmake")
 
 include_directories(src)
 include_directories(${THIRDPARTY_DIR})

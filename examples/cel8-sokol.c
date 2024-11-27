@@ -24,7 +24,7 @@ static void c8_draw(void);
 
 static struct
 {
-    sg_pass_action pass_action;
+    sg_pass pass;
     sg_pipeline pip;
     sg_bindings bind;
 } display;
@@ -36,118 +36,137 @@ static void init(void)
         .environment = sglue_environment(),
     });
 
+    /* default pass action */
+    display.pass = (sg_pass){
+        .action = (sg_pass_action){
+            .colors[0] = {
+                .load_action = SG_LOADACTION_CLEAR,
+                .clear_value = {0.0f, 0.0f, 0.0f, 1.0f},
+            },
+        },
+        .swapchain = sglue_swapchain(),
+    };
+
+    const char *display_vs_src = 0;
+    const char *display_fs_src = 0;
+    switch (sg_query_backend())
+    {
+    case SG_BACKEND_GLCORE:
+        display_vs_src =
+            "#version 410\n"
+            "layout(location=0) in vec2 pos;\n"
+            "out vec2 uv;\n"
+            "void main() {\n"
+            "  gl_Position = vec4((pos.xy - 0.5) * 2.0, 0.0, 1.0);\n"
+            "  uv = vec2(pos.x, 1.0 - pos.y);\n"
+            "}\n";
+        display_fs_src =
+            "#version 410\n"
+            "uniform vec3[16] palette;\n"
+            "uniform sampler2D tex;\n"
+            "in vec2 uv;\n"
+            "out vec4 frag_color;\n"
+            "vec4 getColor(int idx) { return vec4(palette[idx], 1.0); }\n"
+            "void main() {\n"
+            "  frag_color = getColor(int(texture(tex, uv).r * 255.0 + 0.5));\n"
+            "}\n";
+        break;
+    case SG_BACKEND_GLES3:
+        display_vs_src =
+            "#version 300 es\n"
+            "attribute vec2 pos;\n"
+            "varying vec2 uv;\n"
+            "void main() {\n"
+            "  gl_Position = vec4((pos.xy - 0.5) * 2.0, 0.0, 1.0);\n"
+            "  uv = vec2(pos.x, 1.0 - pos.y);\n"
+            "}\n";
+        display_fs_src =
+            "#version 300 es\n"
+            "precision mediump float;\n"
+            "uniform vec3[16] palette;\n"
+            "uniform sampler2D tex;\n"
+            "varying vec2 uv;\n"
+            "out vec4 frag_color;\n"
+            "vec4 getColor(int idx) { return vec4(palette[idx], 1.0); }\n"
+            "void main() {\n"
+            "  frag_color = getColor(int(texture(tex, uv).r * 255.0 + 0.5));\n"
+            "}\n";
+        break;
+    default:
+        break;
+    }
+
+    /* a pipeline state object */
+    display.pip = sg_make_pipeline(&(sg_pipeline_desc){
+        .layout = {
+            .attrs = {
+                [0].format = SG_VERTEXFORMAT_FLOAT2,
+            },
+        },
+        .shader = sg_make_shader(&(sg_shader_desc){
+            .vertex_func.source = display_vs_src,
+            .fragment_func.source = display_fs_src,
+            .images[0] = {.stage = SG_SHADERSTAGE_FRAGMENT, .image_type = SG_IMAGETYPE_2D},
+            .samplers[0] = {.stage = SG_SHADERSTAGE_FRAGMENT, .sampler_type = SG_SAMPLERTYPE_FILTERING},
+            .image_sampler_pairs[0] = {
+                .stage = SG_SHADERSTAGE_FRAGMENT,
+                .glsl_name = "tex",
+                .image_slot = 0,
+                .sampler_slot = 0,
+            },
+            .uniform_blocks[0] = {
+                .stage = SG_SHADERSTAGE_FRAGMENT,
+                .layout = SG_UNIFORMLAYOUT_NATIVE,
+                .size = sizeof(float) * 48,
+                .glsl_uniforms = {
+                    [0] = {
+                        .glsl_name = "palette",
+                        .type = SG_UNIFORMTYPE_FLOAT3,
+                        .array_count = 16,
+                    },
+                },
+            },
+        }),
+        .index_type = SG_INDEXTYPE_UINT16,
+        .label = "quad-pipeline",
+    });
+
     /* a vertex buffer */
     const float vertices[] = {
-        /* positions */           /* texture coord */
-        -1.0f, 1.0f, 0.0f, 0.0f,  /* top-left */
-        1.0f, 1.0f, 1.0f, 0.0f,   /* top-right */
-        1.0f, -1.0f, 1.0f, 1.0f,  /* bottom-right */
-        -1.0f, -1.0f, 0.0f, 1.0f, /* bottom-left */
+        -1.0f, 1.0f,  /* top-left */
+        1.0f, 1.0f,   /* top-right */
+        1.0f, -1.0f,  /* bottom-right */
+        -1.0f, -1.0f, /* bottom-left */
     };
 
     /* an index buffer with 2 triangles */
     const uint16_t indices[] = {0, 1, 2, 0, 2, 3};
 
-    sg_buffer vbuf = sg_make_buffer(&(sg_buffer_desc){
-        .data = SG_RANGE(vertices),
-        .label = "quad-vertices",
-    });
-
-    sg_buffer ibuf = sg_make_buffer(&(sg_buffer_desc){
-        .type = SG_BUFFERTYPE_INDEXBUFFER,
-        .data = SG_RANGE(indices),
-        .label = "quad-indices",
-    });
-
-/* load embedded shader stages */
-#if defined(OS_EMSCRIPTEN)
-#include "embed/vertex.opengles.vs.h"
-#include "embed/fragment.opengles.fs.h"
-#else
-#include "embed/vertex.opengl.vs.h"
-#include "embed/fragment.opengl.fs.h"
-#endif
-    sg_shader_desc shd_desc = (sg_shader_desc){
-        .vs = {
-            .source = (const char *)&vertex_vs[0],
-        },
-        .fs = {
-            .source = (const char *)&fragment_fs[0],
-            .images = {
-                [0] = {.used = true, .image_type = SG_IMAGETYPE_2D},
-            },
-            .samplers = {
-                [0] = {.used = true, .sampler_type = SG_SAMPLERTYPE_FILTERING},
-            },
-            .image_sampler_pairs = {
-                [0] = {
-                    .used = true,
-                    .glsl_name = "screen",
-                    .image_slot = 0,
-                    .sampler_slot = 0,
-                },
-            },
-            .uniform_blocks = {
-                [0] = {
-                    .size = sizeof(float) * 48,
-                    .uniforms = {
-                        [0] = {
-                            .name = "palette",
-                            .type = SG_UNIFORMTYPE_FLOAT3,
-                            .array_count = 16,
-                        },
-                    },
-                },
-            },
-        },
-    };
-
-    /* images and samplers */
-    sg_sampler smp = sg_make_sampler(&(sg_sampler_desc){
-        .min_filter = SG_FILTER_NEAREST,
-        .mag_filter = SG_FILTER_NEAREST,
-        .wrap_u = SG_WRAP_REPEAT,
-        .wrap_v = SG_WRAP_REPEAT,
-        .label = "screen-sampler",
-    });
-
-    sg_image img = sg_make_image(&(sg_image_desc){
-        .width = C8_SCREEN_WIDTH,
-        .height = C8_SCREEN_HEIGHT,
-        .pixel_format = SG_PIXELFORMAT_R8,
-        .usage = SG_USAGE_STREAM,
-        .label = "screen-texture",
-    });
-
-    /* default pass action */
-    display.pass_action = (sg_pass_action){
-        .colors[0] = {
-            .load_action = SG_LOADACTION_CLEAR,
-            .clear_value = {0.0f, 0.0f, 0.0f, 1.0f},
-        },
-    };
-
-    /* a pipeline state object */
-    display.pip = sg_make_pipeline(&(sg_pipeline_desc){
-        .shader = sg_make_shader(&shd_desc),
-        .index_type = SG_INDEXTYPE_UINT16,
-        .layout = {
-            .attrs = {
-                [0].format = SG_VERTEXFORMAT_FLOAT2,
-                [1].format = SG_VERTEXFORMAT_FLOAT2,
-            },
-        },
-        .label = "quad-pipeline",
-    });
-
     /* bindings */
     display.bind = (sg_bindings){
-        .vertex_buffers = {[0] = vbuf},
-        .index_buffer = ibuf,
-        .fs = {
-            .images = {[0] = img},
-            .samplers = {[0] = smp},
-        },
+        .vertex_buffers[0] = sg_make_buffer(&(sg_buffer_desc){
+            .data = SG_RANGE(vertices),
+            .label = "quad-vertices",
+        }),
+        .index_buffer = sg_make_buffer(&(sg_buffer_desc){
+            .type = SG_BUFFERTYPE_INDEXBUFFER,
+            .data = SG_RANGE(indices),
+            .label = "quad-indices",
+        }),
+        .images[0] = sg_make_image(&(sg_image_desc){
+            .width = C8_SCREEN_WIDTH,
+            .height = C8_SCREEN_HEIGHT,
+            .pixel_format = SG_PIXELFORMAT_R8,
+            .usage = SG_USAGE_STREAM,
+            .label = "screen-texture",
+        }),
+        .samplers[0] = sg_make_sampler(&(sg_sampler_desc){
+            .min_filter = SG_FILTER_NEAREST,
+            .mag_filter = SG_FILTER_NEAREST,
+            .wrap_u = SG_WRAP_REPEAT,
+            .wrap_v = SG_WRAP_REPEAT,
+            .label = "screen-sampler",
+        }),
     };
 
     c8_load();
@@ -246,15 +265,16 @@ static void frame(void)
     const c8_range_t screen = c8_query_screen();
 
     /* update gpu resources */
-    sg_update_image(display.bind.fs.images[0], &(sg_image_data){
-                                                   .subimage[0][0] = {.ptr = screen.ptr, .size = screen.size},
-                                               });
+    sg_update_image(display.bind.images[0],
+                    &(sg_image_data){
+                        .subimage[0][0] = {.ptr = screen.ptr, .size = screen.size},
+                    });
 
     /* graphics pipeline */
-    sg_begin_pass(&(sg_pass){.action = display.pass_action, .swapchain = sglue_swapchain()});
+    sg_begin_pass(&display.pass);
     sg_apply_pipeline(display.pip);
     sg_apply_bindings(&display.bind);
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, 0, SG_RANGE_REF(palette));
+    sg_apply_uniforms(0, SG_RANGE_REF(palette));
     sg_draw(0, 6, 1);
     sg_end_pass();
     sg_commit();

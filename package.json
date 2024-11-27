@@ -1,7 +1,8 @@
 {
   "scripts": {
     "build": "ts-node docs/build.ts",
-    "emsdk": "git clone https://github.com/emscripten-core/emsdk && cd emsdk && ./emsdk install latest && ./emsdk activate --embedded latest && cd .."
+    "emsdk": "git clone https://github.com/emscripten-core/emsdk && cd emsdk && ./emsdk install latest && ./emsdk activate --embedded latest && cd ..",
+    "libs:sokol": "./libs/sokol/update.sh"
   },
   "dependencies": {
     "glob": "^10.3.10",
