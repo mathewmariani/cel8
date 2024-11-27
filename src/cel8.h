@@ -419,6 +419,10 @@ extern "C"
 #endif
 #endif
 
+#if defined(_C8_SIMD)
+#include <emmintrin.h>
+#endif
+
 /* stubbed */
 #if defined(_C8_DEBUG)
 #include <stdio.h>
@@ -441,18 +445,12 @@ static struct
   } memory;
 } _c8;
 
-_C8_PRIVATE void _c8__set_cell(uint32_t offset, uint8_t color, uint8_t glyph)
-{
-  c8_poke(C8_MEM_VRAM_ADDR + offset + 0, color);
-  c8_poke(C8_MEM_VRAM_ADDR + offset + 1, glyph);
-}
-
-_C8_PRIVATE bool _c8__should_clip(uint8_t x, uint8_t y)
+_C8_PRIVATE inline bool _c8__should_clip(uint8_t x, uint8_t y)
 {
   return (x < 0 || x >= 0x10 || y < 0 || y >= 0x10);
 }
 
-_C8_PRIVATE void _c8__put_char(uint32_t x, uint32_t y, uint8_t c)
+_C8_PRIVATE inline void _c8__put_char(uint32_t x, uint32_t y, uint8_t glyph)
 {
   if (_c8__should_clip(x, y))
   {
@@ -460,9 +458,10 @@ _C8_PRIVATE void _c8__put_char(uint32_t x, uint32_t y, uint8_t c)
   }
 
   /* FIXME: magic number */
-  const uint8_t color = c8_peek(C8_MEM_COLOR_ADDR, 0);
   const uint32_t offset = (x * 2) + 0x20 * y;
-  _c8__set_cell(offset, color, c);
+  const uint8_t color = c8_peek(C8_MEM_COLOR_ADDR, 0);
+  c8_poke(C8_MEM_VRAM_ADDR + offset + 0, color);
+  c8_poke(C8_MEM_VRAM_ADDR + offset + 1, glyph);
 }
 
 /* memory */
@@ -498,15 +497,16 @@ void c8_input_clear(uint32_t mask)
   _c8.memory.hardware[0] &= ~mask;
 }
 
-_C8_PRIVATE void _c8__tick(void)
-{
-}
-
 _C8_PRIVATE void _c8__decode_video(void)
 {
   /* query memory */
   const c8_range_t vram = c8_query_vram();
   const c8_range_t font = c8_query_font();
+  const c8_range_t screen = c8_query_screen();
+
+  uint8_t *vram_ptr = (uint8_t *)vram.ptr;
+  uint8_t *font_ptr = (uint8_t *)font.ptr;
+  uint8_t *screen_ptr = (uint8_t *)screen.ptr;
 
   for (int32_t i = 0; i < C8_MEM_SCREEN_SIZE; i += 8)
   {
@@ -514,31 +514,42 @@ _C8_PRIVATE void _c8__decode_video(void)
     int32_t j = ((i % 128) / 8) + 16 * (i / 1024);
 
     /* screen buffer */
-    uint8_t *vram_ptr = (uint8_t *)vram.ptr;
-    uint8_t color = vram_ptr[j * 2];
-    uint8_t glyph = vram_ptr[j * 2 + 1];
+    uint8_t color = *(vram_ptr + (j * 2));
+    uint8_t glyph = *(vram_ptr + (j * 2 + 1));
 
     /* convert color */
     uint8_t high = (color >> 4) & 0x0F;
     uint8_t low = color & 0x0F;
 
     /* decode glyph */
-    uint8_t *font_ptr = (uint8_t *)font.ptr;
     int32_t y = (i / 128) % 8;
     uint8_t *glyph_row = font_ptr + (glyph * 8) + y;
 
+#if defined(_C8_SIMD)
+    __m128i glyph_bits = _mm_setr_epi8(
+        (glyph_row & 0x80) >> 7, (glyph_row & 0x40) >> 6,
+        (glyph_row & 0x20) >> 5, (glyph_row & 0x10) >> 4,
+        (glyph_row & 0x08) >> 3, (glyph_row & 0x04) >> 2,
+        (glyph_row & 0x02) >> 1, (glyph_row & 0x01) >> 0,
+        0, 0, 0, 0, 0, 0, 0, 0);
+
+    __m128i result = _mm_or_si128(
+        _mm_and_si128(glyph_bits, _mm_set1_epi8(low)),
+        _mm_andnot_si128(glyph_bits, _mm_set1_epi8(high)));
+
+    _mm_storel_epi64((__m128i *)(screen_ptr + i), result);
+#else
     for (int32_t x = 0; x < 8; x++)
     {
-      uint8_t b = (*glyph_row >> x) & 1;
-      ((uint8_t *)&_c8.memory + C8_MEM_SCREEN_ADDR)[i + x] = b ? low : high;
+      *(screen_ptr + (i + x)) = ((*glyph_row >> x) & 1) ? low : high;
     }
+#endif
   }
 }
 
 void c8_exec(void)
 {
   C8_ASSERT(_c8.valid);
-  _c8__tick();
   _c8__decode_video();
 }
 
