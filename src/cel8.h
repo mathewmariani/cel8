@@ -346,34 +346,6 @@ extern "C"
 
 #ifdef C8_IMPL
 
-/* platform */
-#if defined(WIN32) || defined(_WIN32)
-#define OS_WINDOWS 1
-#endif
-#if defined(__APPLE__)
-#include <TargetConditionals.h>
-#if defined(TARGET_OS_MAC)
-#define OS_MACOS 1
-#elif defined(TARGET_OS_IPHONE)
-#define OS_IOS 1
-#endif
-#endif
-#if defined(__linux__)
-#define OS_LINUX 1
-#endif
-#if defined(__FreeBSD__)
-#define OS_FREEBSD 1
-#endif
-#if defined(__EMSCRIPTEN__)
-#include <emscripten.h>
-#define OS_EMSCRIPTEN 1
-#endif
-
-/* check platform */
-#if !defined(OS_WINDOWS) && !defined(OS_MACOS) && !defined(OS_IOS) && !defined(OS_LINUX) && !defined(OS_FREEBSD) && !defined(OS_EMSCRIPTEN)
-#error Could not detect target platform
-#endif
-
 /* debug */
 #if defined(_DEBUG)
 #define _C8_DEBUG 1
