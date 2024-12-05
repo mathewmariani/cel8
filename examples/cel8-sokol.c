@@ -99,9 +99,7 @@ static void init(void)
     /* a pipeline state object */
     display.pip = sg_make_pipeline(&(sg_pipeline_desc){
         .layout = {
-            .attrs = {
-                [0].format = SG_VERTEXFORMAT_FLOAT2,
-            },
+            .attrs[0].format = SG_VERTEXFORMAT_FLOAT2,
         },
         .shader = sg_make_shader(&(sg_shader_desc){
             .vertex_func.source = display_vs_src,
@@ -118,17 +116,14 @@ static void init(void)
                 .stage = SG_SHADERSTAGE_FRAGMENT,
                 .layout = SG_UNIFORMLAYOUT_NATIVE,
                 .size = sizeof(float) * 48,
-                .glsl_uniforms = {
-                    [0] = {
-                        .glsl_name = "palette",
-                        .type = SG_UNIFORMTYPE_FLOAT3,
-                        .array_count = 16,
-                    },
+                .glsl_uniforms[0] = {
+                    .glsl_name = "palette",
+                    .type = SG_UNIFORMTYPE_FLOAT3,
+                    .array_count = 16,
                 },
             },
         }),
         .index_type = SG_INDEXTYPE_UINT16,
-        .label = "quad-pipeline",
     });
 
     /* a vertex buffer */
@@ -146,100 +141,57 @@ static void init(void)
     display.bind = (sg_bindings){
         .vertex_buffers[0] = sg_make_buffer(&(sg_buffer_desc){
             .data = SG_RANGE(vertices),
-            .label = "quad-vertices",
         }),
         .index_buffer = sg_make_buffer(&(sg_buffer_desc){
             .type = SG_BUFFERTYPE_INDEXBUFFER,
             .data = SG_RANGE(indices),
-            .label = "quad-indices",
         }),
         .images[0] = sg_make_image(&(sg_image_desc){
             .width = C8_SCREEN_WIDTH,
             .height = C8_SCREEN_HEIGHT,
             .pixel_format = SG_PIXELFORMAT_R8,
             .usage = SG_USAGE_STREAM,
-            .label = "screen-texture",
         }),
         .samplers[0] = sg_make_sampler(&(sg_sampler_desc){
             .min_filter = SG_FILTER_NEAREST,
             .mag_filter = SG_FILTER_NEAREST,
             .wrap_u = SG_WRAP_REPEAT,
             .wrap_v = SG_WRAP_REPEAT,
-            .label = "screen-sampler",
         }),
     };
 
     c8_load();
 }
 
+static uint32_t _c8__translate_key(const sapp_keycode code)
+{
+    // clang-format off
+    switch (code)
+    {
+    case SAPP_KEYCODE_RIGHT: return C8_INPUT_RIGHT;
+    case SAPP_KEYCODE_LEFT: return C8_INPUT_LEFT;
+    case SAPP_KEYCODE_UP: return C8_INPUT_UP;
+    case SAPP_KEYCODE_DOWN: return C8_INPUT_DOWN;
+    case SAPP_KEYCODE_Z: return C8_INPUT_A;
+    case SAPP_KEYCODE_X: return C8_INPUT_B;
+    case SAPP_KEYCODE_E: return C8_INPUT_START;
+    case SAPP_KEYCODE_R: return C8_INPUT_SELECT;
+    default: break;
+    }
+    return C8_INPUT_INVALID;
+    // clang-format on
+}
+
 static void event(const sapp_event *e)
 {
+    // clang-format off
     switch (e->type)
     {
-    case SAPP_EVENTTYPE_KEY_DOWN:
-        switch (e->key_code)
-        {
-        case SAPP_KEYCODE_RIGHT:
-            c8_input_set(C8_INPUT_RIGHT);
-            break;
-        case SAPP_KEYCODE_LEFT:
-            c8_input_set(C8_INPUT_LEFT);
-            break;
-        case SAPP_KEYCODE_UP:
-            c8_input_set(C8_INPUT_UP);
-            break;
-        case SAPP_KEYCODE_DOWN:
-            c8_input_set(C8_INPUT_DOWN);
-            break;
-        case SAPP_KEYCODE_Z:
-            c8_input_set(C8_INPUT_A);
-            break;
-        case SAPP_KEYCODE_X:
-            c8_input_set(C8_INPUT_B);
-            break;
-        case SAPP_KEYCODE_E:
-            c8_input_set(C8_INPUT_START);
-            break;
-        case SAPP_KEYCODE_R:
-            c8_input_set(C8_INPUT_SELECT);
-            break;
-        default:
-            break;
-        }
-        break;
-    case SAPP_EVENTTYPE_KEY_UP:
-        switch (e->key_code)
-        {
-        case SAPP_KEYCODE_RIGHT:
-            c8_input_clear(C8_INPUT_RIGHT);
-            break;
-        case SAPP_KEYCODE_LEFT:
-            c8_input_clear(C8_INPUT_LEFT);
-            break;
-        case SAPP_KEYCODE_UP:
-            c8_input_clear(C8_INPUT_UP);
-            break;
-        case SAPP_KEYCODE_DOWN:
-            c8_input_clear(C8_INPUT_DOWN);
-            break;
-        case SAPP_KEYCODE_Z:
-            c8_input_clear(C8_INPUT_A);
-            break;
-        case SAPP_KEYCODE_X:
-            c8_input_clear(C8_INPUT_B);
-            break;
-        case SAPP_KEYCODE_E:
-            c8_input_clear(C8_INPUT_START);
-            break;
-        case SAPP_KEYCODE_R:
-            c8_input_clear(C8_INPUT_SELECT);
-            break;
-        default:
-            break;
-        }
-    default:
-        break;
+    case SAPP_EVENTTYPE_KEY_DOWN: c8_input_set(_c8__translate_key(e->key_code)); break;
+    case SAPP_EVENTTYPE_KEY_UP: c8_input_clear(_c8__translate_key(e->key_code)); break;
+    default: break;
     }
+    // clang-format on
 }
 
 static void frame(void)
@@ -253,12 +205,10 @@ static void frame(void)
 
     /* query palette data. */
     const c8_range_t pal = c8_query_pal();
-    float palette[48] = {0};
-    for (int32_t i = 0; i < 48; i += 3)
+    float palette[48];
+    for (int32_t i = 0; i < 48; ++i)
     {
-        *(palette + i + 0) = *((uint8_t *)pal.ptr + i + 0) / 255.0f;
-        *(palette + i + 1) = *((uint8_t *)pal.ptr + i + 1) / 255.0f;
-        *(palette + i + 2) = *((uint8_t *)pal.ptr + i + 2) / 255.0f;
+        palette[i] = ((uint8_t *)pal.ptr)[i] / 255.0f;
     }
 
     /* query screen data. */

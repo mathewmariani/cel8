@@ -232,6 +232,7 @@ extern "C"
     C8_SCREEN_HEIGHT = 128,
 
     /* input */
+    C8_INPUT_INVALID = (0 << 0),
     C8_INPUT_UP = (1 << 0),
     C8_INPUT_LEFT = (1 << 1),
     C8_INPUT_RIGHT = (1 << 2),
